@@ -9,13 +9,15 @@ import { Input } from "@/components/ui/input";
 import { TemplatePageHeader, TemplatePageStack } from "@/components/templates/layout-primitives";
 import { getIndustryPageHints } from "@/lib/industry-page-hints";
 import type { EnabledIndustryKey } from "@/lib/industry-profiles";
-import { withIndustryQuery } from "@/lib/industry-selection";
+import { withDemoQuery } from "@/lib/demo-query";
+import { useDemoRole } from "@/components/demo-role-context";
 
 type Props = {
   industry: EnabledIndustryKey;
 };
 
 export function KnowledgePageClient({ industry }: Props) {
+  const { role } = useDemoRole();
   const hints = getIndustryPageHints(industry).knowledge;
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<
@@ -39,13 +41,13 @@ export function KnowledgePageClient({ industry }: Props) {
 
       <div className="flex flex-wrap gap-2">
         <Button variant="secondary" size="sm" asChild>
-          <Link href={withIndustryQuery("/messages", industry)} className="gap-1.5">
+          <Link href={withDemoQuery("/messages", industry, role)} className="gap-1.5">
             <MessageSquare className="size-3.5" />
             メッセージ翻訳
           </Link>
         </Button>
         <Button variant="secondary" size="sm" asChild>
-          <Link href={withIndustryQuery("/matching", industry)}>マッチング理由</Link>
+          <Link href={withDemoQuery("/matching", industry, role)}>マッチング理由</Link>
         </Button>
       </div>
 

@@ -10,7 +10,8 @@ import { getIndustryPageHints } from "@/lib/industry-page-hints";
 import { getIndustryProfile } from "@/lib/industry-profiles";
 import {
   getIndustryFromSearchParams,
-  withIndustryQuery,
+  getRoleFromSearchParams,
+  withDemoQuery,
 } from "@/lib/industry-selection";
 
 type PageProps = {
@@ -20,14 +21,18 @@ type PageProps = {
 export default async function OperationsPage({ searchParams }: PageProps) {
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const industry = getIndustryFromSearchParams(resolvedSearchParams);
+  const role = getRoleFromSearchParams(resolvedSearchParams);
   const profile = getIndustryProfile(industry);
   const hints = getIndustryPageHints(industry).operations;
+  const opsDesc = hints.pageIntentJa
+    ? `${hints.pageIntentJa} ${profile.operationsDescription}`
+    : profile.operationsDescription;
 
   return (
     <TemplatePageStack>
       <TemplatePageHeader
         title={profile.labels.operations}
-        description={profile.operationsDescription}
+        description={opsDesc}
       />
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -75,7 +80,7 @@ export default async function OperationsPage({ searchParams }: PageProps) {
       </Card>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Link href={withIndustryQuery("/documents", industry)} className="block">
+        <Link href={withDemoQuery("/documents", industry, role)} className="block">
           <Card className="h-full min-h-[100px] transition-all hover:border-primary/30 hover:shadow-md">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
@@ -88,7 +93,7 @@ export default async function OperationsPage({ searchParams }: PageProps) {
             </CardContent>
           </Card>
         </Link>
-        <Link href={withIndustryQuery("/revenue", industry)} className="block">
+        <Link href={withDemoQuery("/revenue", industry, role)} className="block">
           <Card className="h-full min-h-[100px] transition-all hover:border-primary/30 hover:shadow-md">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">

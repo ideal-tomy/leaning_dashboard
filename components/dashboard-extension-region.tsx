@@ -4,21 +4,23 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardMobileCardSlim } from "@/components/dashboard-mobile-card-slim";
 import { resolveDashboardExtensionSlots } from "@/lib/dashboard-extension-slots";
 import type { EnabledIndustryKey } from "@/lib/industry-profiles";
-import { withIndustryQuery } from "@/lib/industry-selection";
+import type { DemoRole } from "@/lib/demo-role";
+import { withDemoQuery } from "@/lib/demo-query";
 
 type Props = {
   industry: EnabledIndustryKey;
+  role: DemoRole;
 };
 
 /** ダッシュボード下段：拡張枠スロット（テンプレ設定＋業種オーバーライド） */
-export function DashboardExtensionRegion({ industry }: Props) {
+export function DashboardExtensionRegion({ industry, role }: Props) {
   const slots = resolveDashboardExtensionSlots(industry);
   if (slots.length === 0) return null;
 
   return (
     <div className="col-span-full grid min-w-0 grid-cols-2 gap-1.5 md:grid-cols-4 md:gap-4 xl:gap-6">
       {slots.map((slot) => {
-        const href = withIndustryQuery(slot.path, industry);
+        const href = withDemoQuery(slot.path, industry, role);
         const Icon = slot.iconComponent;
         return (
           <div

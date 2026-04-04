@@ -32,6 +32,11 @@
     sans-serif;
 }
 
+/* タブ切替などで上側のブロック高が変わるとき、ブラウザが「下を基準に」scrollTop を補正するのを抑止 */
+html {
+  overflow-anchor: none;
+}
+
 body {
   background: var(--surface);
   color: var(--foreground);

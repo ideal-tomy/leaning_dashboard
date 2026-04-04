@@ -1,4 +1,9 @@
-import type { Candidate, CandidatePipelineStatus, ClientCompany } from "@data/types";
+import type {
+  Candidate,
+  CandidateClientMatchScore,
+  CandidatePipelineStatus,
+  ClientCompany,
+} from "@data/types";
 import * as staffing from "@/lib/demo-data.staffing";
 import * as realEstate from "@/lib/demo-data.real-estate";
 import * as professional from "@/lib/demo-data.professional";
@@ -11,6 +16,7 @@ import type { EnabledIndustryKey } from "@/lib/industry-profiles";
 
 type DemoDataModule = {
   clients: ClientCompany[];
+  /** 一覧・書類ページ等で使用 */
   candidates: Candidate[];
   getClientById: (id: string) => ClientCompany | undefined;
   getCandidateById: (id: string) => Candidate | undefined;
@@ -23,10 +29,10 @@ type DemoDataModule = {
   scoreCandidateForClient: (
     candidate: Candidate,
     client: ClientCompany
-  ) => { pct: number; reason: string };
+  ) => CandidateClientMatchScore;
   getMatchesForClient: (
     clientId: string
-  ) => { candidate: Candidate; pct: number; reason: string }[];
+  ) => (CandidateClientMatchScore & { candidate: Candidate })[];
 };
 
 const registry: Record<EnabledIndustryKey, DemoDataModule> = {

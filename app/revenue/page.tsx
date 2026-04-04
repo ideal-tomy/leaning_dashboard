@@ -24,11 +24,13 @@ import {
   TemplateTwoColumnGrid,
 } from "@/components/templates/layout-primitives";
 import { getCacDemo, getBreakevenSeries, getReferralRecoveryDemo, getRefundRiskDemo, getRevenueSummaryKpis, getRevenueTrendForChart } from "@/lib/revenue-demo";
+import { getIndustryPageHints } from "@/lib/industry-page-hints";
 import { getIndustryProfile } from "@/lib/industry-profiles";
 import { getIndustryAccentHex } from "@/lib/industry-theme";
 import {
   getIndustryFromSearchParams,
-  withIndustryQuery,
+  getRoleFromSearchParams,
+  withDemoQuery,
 } from "@/lib/industry-selection";
 
 function formatManYen(n: number) {
@@ -46,6 +48,7 @@ type PageProps = {
 export default async function RevenuePage({ searchParams }: PageProps) {
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const industry = getIndustryFromSearchParams(resolvedSearchParams);
+  const role = getRoleFromSearchParams(resolvedSearchParams);
   const accentHex = getIndustryAccentHex(industry);
   const profile = getIndustryProfile(industry);
   const trend = getRevenueTrendForChart(industry);
@@ -59,11 +62,18 @@ export default async function RevenuePage({ searchParams }: PageProps) {
     (recovery.collectedManYen / recovery.billedManYen) * 100
   );
 
+  const revenueBaseDesc =
+    "月次売上・紹介料回収・返金リスク・CAC・損益分岐のデモダッシュボード（数値はダミー／クライアント加重は実データ連動）";
+  const revenueIntent = getIndustryPageHints(industry).revenue?.pageIntentJa;
+  const revenueHeaderDesc = revenueIntent
+    ? `${revenueIntent} ${revenueBaseDesc}`
+    : revenueBaseDesc;
+
   return (
     <TemplatePageStack>
       <TemplatePageHeader
         title={profile.labels.revenue}
-        description="月次売上・紹介料回収・返金リスク・CAC・損益分岐のデモダッシュボード（数値はダミー／クライアント加重は実データ連動）"
+        description={revenueHeaderDesc}
       />
 
       <TemplateKpiGrid>
@@ -238,7 +248,7 @@ export default async function RevenuePage({ searchParams }: PageProps) {
                   <tr key={r.candidateId} className="border-b border-border/80">
                     <td className="py-2.5 pr-3 align-top">
                       <Link
-                        href={withIndustryQuery(`/candidates/${r.candidateId}`, industry)}
+                        href={withDemoQuery(`/candidates/${r.candidateId}`, industry, role)}
                         className="font-medium text-primary underline-offset-2 hover:underline"
                       >
                         {r.displayName}
@@ -279,7 +289,7 @@ export default async function RevenuePage({ searchParams }: PageProps) {
             <p className="mt-3 text-xs text-muted">
               詳細は{" "}
               <Link
-                href={withIndustryQuery("/candidates", industry)}
+                href={withDemoQuery("/candidates", industry, role)}
                 className="text-primary underline"
               >
                 {profile.labels.candidate}

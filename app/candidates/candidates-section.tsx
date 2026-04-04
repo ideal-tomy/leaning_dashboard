@@ -18,7 +18,9 @@ import { useMobile } from "@/hooks/use-mobile";
 import { getIndustryDemoData } from "@/lib/demo-data-selector";
 import { getIndustryPageHints } from "@/lib/industry-page-hints";
 import { getIndustryProfile } from "@/lib/industry-profiles";
-import { getIndustryFromSearchParams, withIndustryQuery } from "@/lib/industry-selection";
+import { getIndustryFromSearchParams } from "@/lib/industry-selection";
+import { withDemoQuery } from "@/lib/demo-query";
+import { useDemoRole } from "@/components/demo-role-context";
 import { cn } from "@/lib/utils";
 
 const jlptOptions: JlptLevel[] = ["N5", "N4", "N3", "N2", "N1"];
@@ -35,11 +37,14 @@ function statusBadgeVariant(
 export function CandidatesSection() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { role } = useDemoRole();
   const view = searchParams.get("view");
+  const followupLearning = searchParams.get("followup") === "learning";
   const industry = getIndustryFromSearchParams(searchParams);
   const pageHints = getIndustryPageHints(industry);
-  const resolvedDefaultTab =
-    view === "pipeline"
+  const resolvedDefaultTab = followupLearning
+    ? "list"
+    : view === "pipeline"
       ? "pipeline"
       : view === "list"
         ? "list"
@@ -61,7 +66,7 @@ export function CandidatesSection() {
   const pipeline = data.getPipelineCounts();
 
   const t = q.trim().toLowerCase();
-  const filtered = candidates.filter((c) => {
+  const searchFiltered = candidates.filter((c) => {
     const jlptOk = jlpt === "all" || c.jlpt === jlpt;
     if (!jlptOk) return false;
     if (!t) return true;
@@ -76,12 +81,42 @@ export function CandidatesSection() {
     return hay.includes(t);
   });
 
+  const FOLLOWUP_JP_THRESHOLD = 55;
+  const FOLLOWUP_FALLBACK_N = 6;
+
+  function learningFollowupOrdered(list: Candidate[]): Candidate[] {
+    const withLd = list.filter((c) => c.learningDemo);
+    const low = withLd
+      .filter(
+        (c) =>
+          (c.learningDemo?.online.jpCourseProgressPct ?? 100) <=
+          FOLLOWUP_JP_THRESHOLD
+      )
+      .sort(
+        (a, b) =>
+          (a.learningDemo?.online.jpCourseProgressPct ?? 0) -
+          (b.learningDemo?.online.jpCourseProgressPct ?? 0)
+      );
+    if (low.length > 0) return low;
+    return [...withLd]
+      .sort(
+        (a, b) =>
+          (a.learningDemo?.online.jpCourseProgressPct ?? 0) -
+          (b.learningDemo?.online.jpCourseProgressPct ?? 0)
+      )
+      .slice(0, FOLLOWUP_FALLBACK_N);
+  }
+
+  const filtered = followupLearning
+    ? learningFollowupOrdered(searchFiltered)
+    : searchFiltered;
+
   function openCandidate(c: Candidate) {
     if (isMobile) {
       setPreview(c);
       setSheetOpen(true);
     } else {
-      router.push(withIndustryQuery(`/candidates/${c.id}`, industry));
+      router.push(withDemoQuery(`/candidates/${c.id}`, industry, role));
     }
   }
 
@@ -140,7 +175,7 @@ export function CandidatesSection() {
         </div>
         <Separator />
         <Button asChild className="w-full">
-          <Link href={withIndustryQuery(`/candidates/${preview.id}`, industry)}>
+          <Link href={withDemoQuery(`/candidates/${preview.id}`, industry, role)}>
             詳しく見る
           </Link>
         </Button>
@@ -148,12 +183,30 @@ export function CandidatesSection() {
     );
   }
 
+  const headerDescription = [
+    pageHints.candidates.pageIntentJa,
+    `${candidates.length} 件のデモデータ。${pageHints.candidates.pageSubtitle} スマホはタップでクイック表示。`,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     <div className="space-y-6">
       <TemplatePageHeader
         title={profile.labels.candidate}
-        description={`${candidates.length} 件のデモデータ。${pageHints.candidates.pageSubtitle} スマホはタップでクイック表示。`}
+        description={headerDescription}
       />
+
+      {followupLearning && (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-950 dark:border-amber-400/35 dark:bg-amber-500/15 dark:text-amber-100">
+          <span>学習フォロー優先表示中（デモ）</span>
+          <Button variant="ghost" size="sm" className="h-8 shrink-0" asChild>
+            <Link href={withDemoQuery("/candidates", industry, role)}>
+              通常表示に戻す
+            </Link>
+          </Button>
+        </div>
+      )}
 
       <Tabs
         value={tab}

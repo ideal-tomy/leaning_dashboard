@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import {
   ClipboardList,
@@ -7,6 +9,9 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useIndustry } from "@/components/industry-context";
+import { useDemoRole } from "@/components/demo-role-context";
+import { withDemoQuery } from "@/lib/demo-query";
 
 const links = [
   { href: "/messages", label: "メッセージ", icon: MessageSquare, desc: "シンハラ語デモ" },
@@ -17,6 +22,9 @@ const links = [
 ] as const;
 
 export default function MorePage() {
+  const { industry } = useIndustry();
+  const { role } = useDemoRole();
+
   return (
     <div className="space-y-6">
       <div>
@@ -25,7 +33,7 @@ export default function MorePage() {
       </div>
       <div className="grid gap-3">
         {links.map(({ href, label, icon: Icon, desc }) => (
-          <Link key={href} href={href}>
+          <Link key={href} href={withDemoQuery(href, industry, role)}>
             <Card className="transition-all hover:border-primary/30">
               <CardHeader className="flex flex-row items-center gap-3 space-y-0 pb-2">
                 <Icon className="size-5 text-primary" />

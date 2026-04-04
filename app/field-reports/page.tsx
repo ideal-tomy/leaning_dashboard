@@ -8,7 +8,8 @@ import {
 import { getIndustryProfile } from "@/lib/industry-profiles";
 import {
   getIndustryFromSearchParams,
-  withIndustryQuery,
+  getRoleFromSearchParams,
+  withDemoQuery,
 } from "@/lib/industry-selection";
 
 type PageProps = {
@@ -39,6 +40,7 @@ const demoRows = [
 export default async function FieldReportsPage({ searchParams }: PageProps) {
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const industry = getIndustryFromSearchParams(resolvedSearchParams);
+  const role = getRoleFromSearchParams(resolvedSearchParams);
   const profile = getIndustryProfile(industry);
 
   return (
@@ -90,7 +92,7 @@ export default async function FieldReportsPage({ searchParams }: PageProps) {
       <p className="text-xs text-muted">
         本番ではカメラアップロード・自動ファイル名・保存先ルール・サムネ一覧をここに集約する想定です。OCR や安全書類とは
         <Link
-          href={withIndustryQuery("/documents", industry)}
+          href={withDemoQuery("/documents", industry, role)}
           className="mx-1 text-primary underline"
         >
           書類管理
@@ -100,7 +102,7 @@ export default async function FieldReportsPage({ searchParams }: PageProps) {
 
       <p className="text-xs text-muted">
         <Link
-          href={withIndustryQuery("/operations", industry)}
+          href={withDemoQuery("/operations", industry, role)}
           className="text-primary underline"
         >
           {profile.labels.operations}

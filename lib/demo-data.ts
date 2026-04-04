@@ -1,9 +1,12 @@
 import type {
   Candidate,
+  CandidateClientMatchScore,
   CandidatePipelineStatus,
   ClientCompany,
   DemoDataBundle,
 } from "@data/types";
+import { learningDemoForStaffingCandidate } from "@/lib/demo-learning-factory";
+import { learningComplianceForMatch } from "@/lib/learning-compliance";
 
 function avatar(seed: string) {
   return `https://api.dicebear.com/7.x/notionists/svg?seed=${encodeURIComponent(seed)}`;
@@ -46,6 +49,11 @@ export const clients: ClientCompany[] = [
       contactPersonJa: "人事 佐藤",
     },
     matchingHintTags: ["規律", "軍・警察", "体力", "食品"],
+    learningRequirementsDemo: {
+      minCertifiedJlpt: "N4",
+      ethicsPassRequired: true,
+      standardLabelJa: "食品製造 職場倫理・衛生（支援機関共通・デモ）",
+    },
   },
   {
     id: "client-edo-suisan",
@@ -71,6 +79,11 @@ export const clients: ClientCompany[] = [
       contactPersonJa: "工場長 鈴木",
     },
     matchingHintTags: ["漁業", "体力", "夜勤", "低温"],
+    learningRequirementsDemo: {
+      minCertifiedJlpt: "N4",
+      ethicsPassRequired: true,
+      standardLabelJa: "水産加工 衛生・安全 対面確認（デモ）",
+    },
   },
   {
     id: "client-fresh-bread",
@@ -96,6 +109,11 @@ export const clients: ClientCompany[] = [
       contactPersonJa: "製造部 高橋",
     },
     matchingHintTags: ["細かい作業", "チーム", "衛生", "製造"],
+    learningRequirementsDemo: {
+      minCertifiedJlpt: "N4",
+      ethicsPassRequired: true,
+      standardLabelJa: "製パン チーム作業・時間管理 倫理確認（デモ）",
+    },
   },
   {
     id: "client-kanto-veg",
@@ -121,6 +139,11 @@ export const clients: ClientCompany[] = [
       contactPersonJa: "現場 伊藤",
     },
     matchingHintTags: ["農業", "忍耐", "スピード"],
+    learningRequirementsDemo: {
+      minCertifiedJlpt: "N5",
+      ethicsPassRequired: false,
+      standardLabelJa: "単純作業向け 最低限コミュニケーション（デモ）",
+    },
   },
   {
     id: "client-johoku-meat",
@@ -146,6 +169,11 @@ export const clients: ClientCompany[] = [
       contactPersonJa: "部長 渡辺",
     },
     matchingHintTags: ["力仕事", "男性", "経験者"],
+    learningRequirementsDemo: {
+      minCertifiedJlpt: "N3",
+      ethicsPassRequired: true,
+      standardLabelJa: "刃物・冷温 安全衛生 対面必須（デモ）",
+    },
   },
   {
     id: "client-yamato-bento",
@@ -171,6 +199,11 @@ export const clients: ClientCompany[] = [
       contactPersonJa: "教育担当 中村",
     },
     matchingHintTags: ["初心者", "若手", "衛生", "チーム"],
+    learningRequirementsDemo: {
+      minCertifiedJlpt: "N5",
+      ethicsPassRequired: true,
+      standardLabelJa: "弁当盛付 衛生マニュアル 対面確認（デモ）",
+    },
   },
   {
     id: "client-irodori",
@@ -196,6 +229,11 @@ export const clients: ClientCompany[] = [
       contactPersonJa: "製造課 小林",
     },
     matchingHintTags: ["PC", "IT", "若手", "学習"],
+    learningRequirementsDemo: {
+      minCertifiedJlpt: "N4",
+      ethicsPassRequired: false,
+      standardLabelJa: "ライン操作説明の理解度（対面 N4 相当・デモ）",
+    },
   },
   {
     id: "client-sanriku-chiba",
@@ -221,6 +259,11 @@ export const clients: ClientCompany[] = [
       contactPersonJa: "支店長 吉田",
     },
     matchingHintTags: ["既婚", "送金", "残業", "体力"],
+    learningRequirementsDemo: {
+      minCertifiedJlpt: "N4",
+      ethicsPassRequired: true,
+      standardLabelJa: "缶詰ライン 残業下での安全・衛生（デモ）",
+    },
   },
 ];
 
@@ -232,12 +275,18 @@ const baseContact = {
 function cand(
   partial: Omit<Candidate, "contact" | "registeredAt"> & {
     contact?: Partial<Candidate["contact"]>;
+    learningDemo?: Candidate["learningDemo"];
   }
 ): Candidate {
-  return {
+  const base: Candidate = {
     ...partial,
     contact: { ...baseContact, ...partial.contact },
     registeredAt: "2025-06-01",
+  };
+  return {
+    ...base,
+    learningDemo:
+      partial.learningDemo ?? learningDemoForStaffingCandidate(base.id, base.jlpt),
   };
 }
 
@@ -307,6 +356,178 @@ export const candidates: Candidate[] = [
       monthlySalaryJpy: 185000,
     },
     photoUrl: avatar("cand-nuwan-kumara"),
+    detailDemo: {
+      healthSummaryJa:
+        "学習・対面認定は良好。COE 提出と入国前フォロー、定期面談の確定が次の焦点です。",
+      workerAppSyncNoteJa:
+        "ワーカーアプリの学習・期限表示と同期したイメージ（デモ）。",
+      followReasons: [
+        {
+          code: "coe",
+          labelJa: "COE 提出待ち（先方確認中）",
+          variant: "warning",
+        },
+      ],
+      milestones: [
+        {
+          id: "bd",
+          labelJa: "誕生日（連絡・祝意）",
+          dateIso: "2026-04-15",
+          severity: "info",
+        },
+        {
+          id: "monthly_iv",
+          labelJa: "定期面談（月次）",
+          dateIso: "2026-04-18",
+          severity: "warning",
+        },
+        {
+          id: "entry",
+          labelJa: "入国・入社予定（想定）",
+          dateIso: "2026-05-12",
+          severity: "info",
+        },
+      ],
+      contactFreshness: {
+        channelLabelJa: "LINE（デモ）",
+        lastReplyAt: "2026-04-02",
+        unread: false,
+      },
+      cultureNote: {
+        nameSinhala: "නුවන් කුමාර",
+        noteJa:
+          "軍隊経歴のため口調が硬め。敬語トレーニングに意欲的。長時間拘束の現場適性あり。",
+      },
+      internalTasks: [
+        {
+          titleJa: "丸福へ入国予定の共有（メール草案）",
+          assigneeJa: "佐藤",
+          dueIso: "2026-04-05",
+        },
+        {
+          titleJa: "4月定期面談の日程確定",
+          assigneeJa: "佐藤",
+          dueIso: "2026-04-08",
+        },
+      ],
+      interviewLogs: [
+        {
+          monthLabelJa: "2026年3月",
+          summaryJa: "体調良好。日本語学習への意欲高。家族送金の不安なし。",
+          tags: ["体調", "学習", "良好"],
+          bodyJa:
+            "オンライン学習の進捗を本人と確認。製造ライン用語の自主学習を継続中。工場イメージ説明に前向き。次回は入国スケジュールのたたき台を共有予定。",
+        },
+        {
+          monthLabelJa: "2026年2月",
+          summaryJa: "対面日本語・倫理試験を終了。生活面の質問のみ。",
+          tags: ["認定試験", "倫理"],
+          bodyJa:
+            "試験後フィードバックで敬語の細部を指摘。本人はメモ取りし改善を約束。",
+        },
+      ],
+      activityEvents: [
+        {
+          at: "2026-04-02T15:30:00",
+          kind: "learning",
+          titleJa: "eラーニング：製造ライン会話ユニットを学習",
+          detailJa: "所要 28 分（デモ）",
+        },
+        {
+          at: "2026-04-01T10:00:00",
+          kind: "document",
+          titleJa: "パスポートコピー（鮮明版）を再アップロード",
+        },
+        {
+          at: "2026-03-28T14:00:00",
+          kind: "interview",
+          titleJa: "月次面談（オンライン）実施",
+          detailJa: "要約は「履歴」タブを参照",
+        },
+        {
+          at: "2026-03-18T11:00:00",
+          kind: "status",
+          titleJa: "倫理・対面確認：基準クリア",
+        },
+        {
+          at: "2026-03-15T09:30:00",
+          kind: "status",
+          titleJa: "日本語対面認定：N4 相当",
+        },
+        {
+          at: "2026-03-10T16:00:00",
+          kind: "document",
+          titleJa: "在留資格申請書類ドラフトを支援機関で確認",
+        },
+        {
+          at: "2026-03-01T13:00:00",
+          kind: "other",
+          titleJa: "配属内定：丸福惣菜（仮）",
+        },
+      ],
+      docChecklist: [
+        {
+          labelJa: "パスポート写し",
+          status: "verified",
+        },
+        {
+          labelJa: "履歴書・職務経歴（翻訳）",
+          status: "verified",
+        },
+        {
+          labelJa: "COE 申請パック（提出待ち）",
+          status: "pending",
+          dueIso: "2026-04-14",
+        },
+        {
+          labelJa: "受入企業との雇用条件書（案）",
+          status: "submitted",
+          dueIso: "2026-04-20",
+        },
+      ],
+      storedDocuments: [
+        {
+          id: "doc-nuwan-passport",
+          labelJa: "パスポート写し（全ページ）",
+          categoryJa: "身分・旅券",
+          updatedAt: "2026-04-01",
+          status: "final",
+          storageUrl:
+            "https://vault.haken-dash.example.jp/candidates/cand-nuwan-kumara/passport-20260401.pdf",
+          fileName: "passport_nuwan_kumara_20260401.pdf",
+        },
+        {
+          id: "doc-nuwan-coe-pack",
+          labelJa: "COE 申請パック（ドラフト）",
+          categoryJa: "在留・認定",
+          updatedAt: "2026-03-28",
+          status: "draft",
+          storageUrl:
+            "https://vault.haken-dash.example.jp/candidates/cand-nuwan-kumara/coe-draft-v3.zip",
+          fileName: "coe_pack_draft_v3.zip",
+        },
+        {
+          id: "doc-nuwan-resume",
+          labelJa: "履歴書・職務経歴（日英）",
+          categoryJa: "人事",
+          updatedAt: "2026-03-20",
+          status: "final",
+          storageUrl:
+            "https://vault.haken-dash.example.jp/candidates/cand-nuwan-kumara/resume_signed.pdf",
+          fileName: "resume_signed.pdf",
+        },
+        {
+          id: "doc-nuwan-medical",
+          labelJa: "健康診断書（指定フォーム）",
+          categoryJa: "健康",
+          updatedAt: "2026-03-12",
+          status: "final",
+          storageUrl:
+            "https://vault.haken-dash.example.jp/candidates/cand-nuwan-kumara/medical_202603.pdf",
+          fileName: "medical_check_202603.pdf",
+        },
+      ],
+    },
   }),
   cand({
     id: "cand-ishani-perera",
@@ -332,6 +553,23 @@ export const candidates: Candidate[] = [
     passportExpiry: "2032-11-20",
     coeStatusJa: "書類収集中",
     photoUrl: avatar("cand-ishani-perera"),
+    detailDemo: {
+      followReasons: [
+        {
+          code: "interview",
+          labelJa: "工場との二次面接・調整中",
+          variant: "secondary",
+        },
+      ],
+      milestones: [
+        {
+          id: "factory_iv",
+          labelJa: "オンライン面接（受入企業）",
+          dateIso: "2026-04-12",
+          severity: "info",
+        },
+      ],
+    },
   }),
   cand({
     id: "cand-dilshan-silva",
@@ -357,6 +595,81 @@ export const candidates: Candidate[] = [
     passportExpiry: "2031-01-15",
     coeStatusJa: "講習修了後に申請予定",
     photoUrl: avatar("cand-dilshan-silva"),
+    detailDemo: {
+      healthSummaryJa:
+        "学習へのログインが空いており、倫理の対面日程も未確定です。フォロー優先度が高い状態です。",
+      followReasons: [
+        {
+          code: "study_idle",
+          labelJa: "学習ログインから24日経過",
+          variant: "danger",
+        },
+        {
+          code: "ethics_iv",
+          labelJa: "倫理・対面の日程未確定",
+          variant: "warning",
+        },
+      ],
+      milestones: [
+        {
+          id: "ethics_exam",
+          labelJa: "倫理・対面確認（要予約）",
+          dateIso: "2026-04-25",
+          severity: "warning",
+        },
+      ],
+      activityEvents: [
+        {
+          at: "2026-03-10T18:20:00",
+          kind: "learning",
+          titleJa: "eラーニング最終ログイン",
+          detailJa: "N5 基礎コース第4章まで（以降未着手）",
+        },
+        {
+          at: "2026-03-12T10:00:00",
+          kind: "other",
+          titleJa: "講習担当より学習再開リマインド（メール）",
+        },
+        {
+          at: "2026-03-18T15:30:00",
+          kind: "interview",
+          titleJa: "オンライン面談：学習状況ヒアリング",
+          detailJa: "本人は再開意欲あり。端末トラブルで一時停止と説明。",
+        },
+        {
+          at: "2026-03-25T09:00:00",
+          kind: "status",
+          titleJa: "倫理・対面：日程候補の送付待ち",
+        },
+        {
+          at: "2026-04-01T08:00:00",
+          kind: "document",
+          titleJa: "講習出席証明のスキャンを受領",
+        },
+      ],
+      storedDocuments: [
+        {
+          id: "doc-dilshan-passport",
+          labelJa: "パスポート写し",
+          categoryJa: "身分・旅券",
+          updatedAt: "2026-02-01",
+          status: "final",
+          storageUrl:
+            "https://vault.haken-dash.example.jp/candidates/cand-dilshan-silva/passport.pdf",
+          fileName: "passport_dilshan.pdf",
+        },
+        {
+          id: "doc-dilshan-enroll",
+          labelJa: "講習受講登録票",
+          categoryJa: "講習",
+          updatedAt: "2026-03-01",
+          status: "final",
+          storageUrl:
+            "https://vault.haken-dash.example.jp/candidates/cand-dilshan-silva/training_enroll.pdf",
+          fileName: "training_enrollment.pdf",
+        },
+      ],
+    },
   }),
   cand({
     id: "cand-thilini-jayawardena",
@@ -382,6 +695,42 @@ export const candidates: Candidate[] = [
     passportExpiry: "2029-08-30",
     coeStatusJa: "変更申請なし（国内）",
     photoUrl: avatar("cand-thilini-jayawardena"),
+    detailDemo: {
+      dispatchHistory: [
+        {
+          id: "dh-thilini-1",
+          clientNameJa: "株式会社サンプル飲食（デモ）",
+          startDate: "2023-04-01",
+          endDate: "2025-03-31",
+          jobTitleJa: "調理補助・ホール",
+          durationDisplayJa: "24ヶ月",
+          kind: "completed",
+          evaluationNoteJa: "日本語N2取得。衛生・時間遵守◎（デモ評価）",
+        },
+        {
+          id: "dh-thilini-2",
+          clientNameJa: "フードサービスA（アルバイト）",
+          startDate: "2022-06-01",
+          endDate: "2023-03-31",
+          jobTitleJa: "キッチンスタッフ",
+          durationDisplayJa: "10ヶ月",
+          kind: "completed",
+          evaluationNoteJa: "初の日本就労。基礎日本語習得段階。",
+        },
+      ],
+      storedDocuments: [
+        {
+          id: "doc-thilini-1",
+          labelJa: "在留カード写し（表面・裏面）",
+          categoryJa: "在留",
+          updatedAt: "2026-03-15",
+          status: "final",
+          storageUrl:
+            "https://vault.haken-dash.example.jp/candidates/cand-thilini-jayawardena/zairyu.pdf",
+          fileName: "zairyu_card.pdf",
+        },
+      ],
+    },
   }),
   cand({
     id: "cand-kasun-rajapaksa",
@@ -407,6 +756,25 @@ export const candidates: Candidate[] = [
     passportExpiry: "2033-03-12",
     coeStatusJa: "入管審査中",
     photoUrl: avatar("cand-kasun-rajapaksa"),
+    detailDemo: {
+      followReasons: [
+        {
+          code: "visa",
+          labelJa: "入管審査結果待ち",
+          variant: "secondary",
+        },
+      ],
+      milestones: [
+        {
+          id: "visa_result",
+          labelJa: "在留認定・ビザ発給（想定）",
+          dateIso: "2026-04-28",
+          severity: "info",
+        },
+      ],
+      workerAppSyncNoteJa:
+        "配属確定後はワーカーアプリの期限・学習と同期するイメージ（デモ）。",
+    },
   }),
   cand({
     id: "cand-sanduni-fernando",
@@ -533,6 +901,132 @@ export const candidates: Candidate[] = [
     coeStatusJa: "在留申請ストップ（出生証明の追加提出必要）",
     documentAlertJa: "出生証明の翻訳が不備。再提出待ち。",
     photoUrl: avatar("cand-dhammika-appuhamy"),
+    detailDemo: {
+      healthSummaryJa:
+        "在留申請が書類不備で停止中。出生証明の翻訳修正がクリティカルパスです。",
+      followReasons: [
+        {
+          code: "doc_block",
+          labelJa: "出生証明翻訳の不備で申請ストップ",
+          variant: "danger",
+        },
+      ],
+      milestones: [
+        {
+          id: "dhammika_reupload",
+          labelJa: "修正翻訳の再アップロード期限（目安）",
+          dateIso: "2026-04-10",
+          severity: "danger",
+        },
+      ],
+      activityEvents: [
+        {
+          at: "2026-04-01T11:00:00",
+          kind: "document",
+          titleJa: "入管から補正通知（出生証明翻訳）",
+          detailJa: "翻訳者資格・逐語性の記載不足（デモ）",
+        },
+        {
+          at: "2026-03-22T14:00:00",
+          kind: "document",
+          titleJa: "在留申請書類一式を提出",
+        },
+        {
+          at: "2026-03-05T10:00:00",
+          kind: "learning",
+          titleJa: "eラーニング：衛生入門を完了",
+        },
+      ],
+      docChecklist: [
+        {
+          labelJa: "出生証明（原本）",
+          status: "verified",
+        },
+        {
+          labelJa: "出生証明（翻訳）",
+          status: "issue",
+          dueIso: "2026-04-10",
+        },
+        {
+          labelJa: "翻訳者署名・資格証憑",
+          status: "pending",
+          dueIso: "2026-04-10",
+        },
+        {
+          labelJa: "申請書類の再提出パック",
+          status: "pending",
+          dueIso: "2026-04-12",
+        },
+      ],
+      storedDocuments: [
+        {
+          id: "doc-dhammika-birth-si",
+          labelJa: "出生証明（シンハラ語原本）",
+          categoryJa: "身分",
+          updatedAt: "2026-02-20",
+          status: "final",
+          storageUrl:
+            "https://vault.haken-dash.example.jp/candidates/cand-dhammika-appuhamy/birth_cert_orig.pdf",
+          fileName: "birth_certificate_lk.pdf",
+        },
+        {
+          id: "doc-dhammika-birth-ja-bad",
+          labelJa: "出生証明（日本語訳・要修正版）",
+          categoryJa: "身分",
+          updatedAt: "2026-03-10",
+          status: "draft",
+          storageUrl:
+            "https://vault.haken-dash.example.jp/candidates/cand-dhammika-appuhamy/birth_cert_ja_v1.pdf",
+          fileName: "birth_cert_translation_v1_ISSUE.pdf",
+        },
+      ],
+      documentResolution: {
+        issueTitleJa: "出生証明の翻訳が不備です",
+        issueDetailJa:
+          "入管からの指摘：翻訳が逐語訳であること、翻訳者の氏名・資格の明記が不足しています。修正後、支援機関が再提出します（デモフロー）。",
+        completionCriteriaJa:
+          "修正版PDFをVaultに格納し、チェックリスト「出生証明（翻訳）」を確認済に更新したら完了（デモ）。",
+        steps: [
+          {
+            order: 1,
+            titleJa: "不備内容の確認",
+            detailJa:
+              "補正通知と既存の翻訳PDFを突き合わせます。対象は birth_cert_translation_v1_ISSUE.pdf です。",
+            actionHintJa: "書類タブの保管庫から該当ファイルを開く",
+          },
+          {
+            order: 2,
+            titleJa: "認定翻訳者／支援機関のテンプレに沿って再翻訳",
+            detailJa:
+              "翻訳者資格、逐語訳である旨、原文明記をテンプレに沿って記載します。",
+            actionHintJa: "テンプレは社内Wiki（デモ）を参照",
+            linkPath: "/documents",
+          },
+          {
+            order: 3,
+            titleJa: "本人へ読み合わせと同意署名",
+            detailJa:
+              "オンライン面談で訳文の意味を本人に説明し、同意署名を取得します。",
+            actionHintJa: "面談ログに要約を残す",
+          },
+          {
+            order: 4,
+            titleJa: "Vaultへ修正版をアップロード",
+            detailJa:
+              "ファイル名例: birth_cert_translation_v2.pdf。バージョン管理ルールに従います。",
+            actionHintJa: "アップロード後、担当者へSlack通知（デモ）",
+          },
+          {
+            order: 5,
+            titleJa: "支援機関から入管へ再提出",
+            detailJa:
+              "チェックリストを更新し、提出履歴に記録します。",
+            actionHintJa: "書類ハブの期限一覧で他の期限も確認",
+            linkPath: "/documents",
+          },
+        ],
+      },
+    },
   }),
   cand({
     id: "cand-harsha-abeyratne",
@@ -865,11 +1359,11 @@ export function monthlyRevenueTrend(): { month: string; amountManYen: number }[]
   ];
 }
 
-/** 簡易マッチング: タグ重複スコア + AIスコア */
+/** 簡易マッチング: タグ重複スコア + AIスコア + 学習要件照合（デモ） */
 export function scoreCandidateForClient(
   candidate: Candidate,
   client: ClientCompany
-): { pct: number; reason: string } {
+): CandidateClientMatchScore {
   const tagHits = candidate.skillTags.filter((t) =>
     client.matchingHintTags.some(
       (h) =>
@@ -879,8 +1373,16 @@ export function scoreCandidateForClient(
   ).length;
   const base = 55 + tagHits * 8 + Math.min(20, Math.floor((candidate.aiScore - 60) / 2));
   const pct = Math.min(97, Math.max(52, base));
-  const reason = `${client.tradeNameJa}が重視する「${client.matchingHintTags.slice(0, 2).join("・")}」と、${candidate.displayName}のスキルタグ（${candidate.skillTags.slice(0, 3).join("・")}）が整合しています。日本語${candidate.jlpt}で現場指示の理解度も十分見込めます。`;
-  return { pct, reason };
+  let reason = `${client.tradeNameJa}が重視する「${client.matchingHintTags.slice(0, 2).join("・")}」と、${candidate.displayName}のスキルタグ（${candidate.skillTags.slice(0, 3).join("・")}）が整合しています。日本語${candidate.jlpt}で現場指示の理解度も十分見込めます。`;
+
+  const learn = learningComplianceForMatch(candidate, client);
+  let learningCompliance: CandidateClientMatchScore["learningCompliance"];
+  if (learn) {
+    learningCompliance = { status: learn.status, labelJa: learn.labelJa };
+    reason = `${reason} ${learn.detailJa}`;
+  }
+
+  return { pct, reason, learningCompliance };
 }
 
 export function getMatchesForClient(clientId: string) {

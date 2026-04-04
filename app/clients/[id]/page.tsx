@@ -14,8 +14,10 @@ import { getIndustryPageHints, quickLinkHref } from "@/lib/industry-page-hints";
 import { getIndustryProfile } from "@/lib/industry-profiles";
 import {
   getIndustryFromSearchParams,
-  withIndustryQuery,
+  getRoleFromSearchParams,
+  withDemoQuery,
 } from "@/lib/industry-selection";
+import { LearningComplianceBadge } from "@/components/learning-compliance-badge";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -26,6 +28,7 @@ export default async function ClientDetailPage({ params, searchParams }: Props) 
   const { id } = await params;
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const industry = getIndustryFromSearchParams(resolvedSearchParams);
+  const role = getRoleFromSearchParams(resolvedSearchParams);
   const profile = getIndustryProfile(industry);
   const data = getIndustryDemoData(industry);
   const client = data.getClientById(id);
@@ -37,7 +40,7 @@ export default async function ClientDetailPage({ params, searchParams }: Props) 
   return (
     <TemplatePageStack>
       <Button variant="ghost" size="sm" asChild className="-ml-2 gap-1 self-start">
-        <Link href={withIndustryQuery("/clients", industry)}>
+        <Link href={withDemoQuery("/clients", industry, role)}>
           <ArrowLeft className="size-4" />
           {profile.labels.client}一覧
         </Link>
@@ -54,7 +57,7 @@ export default async function ClientDetailPage({ params, searchParams }: Props) 
         <span className="w-full text-xs font-medium text-muted">次の操作</span>
         {quickLinks.map((q) => (
           <Button key={q.path} variant="secondary" size="sm" asChild>
-            <Link href={quickLinkHref(q.path, industry)}>{q.label}</Link>
+            <Link href={quickLinkHref(q.path, industry, role)}>{q.label}</Link>
           </Button>
         ))}
       </div>
@@ -119,6 +122,35 @@ export default async function ClientDetailPage({ params, searchParams }: Props) 
         </Card>
       </div>
 
+      {client.learningRequirementsDemo ? (
+        <Card className="border-emerald-600/20 bg-emerald-600/[0.04]">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">教育・認定要件（対面ベース・デモ）</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            <p>
+              <span className="text-muted">日本語（対面認定）: </span>
+              <span className="font-semibold">
+                {client.learningRequirementsDemo.minCertifiedJlpt} 以上
+              </span>
+            </p>
+            <p>
+              <span className="text-muted">職場倫理（対面）: </span>
+              <span className="font-semibold">
+                {client.learningRequirementsDemo.ethicsPassRequired
+                  ? "対面確認の合格が必須"
+                  : "必須なし（デモ）"}
+              </span>
+            </p>
+            {client.learningRequirementsDemo.standardLabelJa ? (
+              <p className="text-xs text-muted">
+                基準メモ: {client.learningRequirementsDemo.standardLabelJa}
+              </p>
+            ) : null}
+          </CardContent>
+        </Card>
+      ) : null}
+
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-base">
@@ -132,20 +164,28 @@ export default async function ClientDetailPage({ params, searchParams }: Props) 
             AI推奨ターゲット: {client.aiTargetProfileJa}
           </p>
           <ul className="space-y-4">
-            {matches.map(({ candidate, pct, reason }, i) => (
+            {matches.map(({ candidate, pct, reason, learningCompliance }, i) => (
               <li
                 key={candidate.id}
                 className="rounded-lg border border-border bg-surface/50 p-4"
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <Link
-                    href={withIndustryQuery(`/candidates/${candidate.id}`, industry)}
+                    href={withDemoQuery(`/candidates/${candidate.id}`, industry, role)}
                     className="font-semibold text-primary hover:underline"
                   >
                     {i + 1}. {candidate.displayName}
                   </Link>
-                  <span className="text-lg font-bold tabular-nums text-primary">
-                    {pct}%
+                  <span className="flex flex-wrap items-center gap-2">
+                    {learningCompliance ? (
+                      <LearningComplianceBadge
+                        status={learningCompliance.status}
+                        labelJa={learningCompliance.labelJa}
+                      />
+                    ) : null}
+                    <span className="text-lg font-bold tabular-nums text-primary">
+                      {pct}%
+                    </span>
                   </span>
                 </div>
                 <p className="mt-2 text-sm leading-relaxed text-muted">{reason}</p>

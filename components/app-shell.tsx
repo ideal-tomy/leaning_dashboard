@@ -3,7 +3,15 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useRef, useState } from "react";
-import { MessageSquare } from "lucide-react";
+import {
+  Bell,
+  BookOpen,
+  Headphones,
+  Home,
+  MessageSquare,
+  TrendingUp,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { appTemplateConfig } from "@/lib/app-template-config";
@@ -12,16 +20,27 @@ import { DemoFab } from "@/components/demo-fab";
 import { templateNavIcons } from "@/components/template-nav-icons";
 import { getIndustryProfile } from "@/lib/industry-profiles";
 import { useIndustry } from "@/components/industry-context";
+import { useDemoRole } from "@/components/demo-role-context";
 import { IndustrySecretModal } from "@/components/industry-secret-modal";
-import { withIndustryQuery } from "@/lib/industry-selection";
+import { withDemoQuery } from "@/lib/demo-query";
+import { demoRoleLabelJa, demoRoles, type DemoRole } from "@/lib/demo-role";
 
 const SECRET_TAP_WINDOW_MS = 2000;
 const SECRET_TAP_COUNT = 5;
+
+const workerNavItems: { href: string; label: string; Icon: LucideIcon }[] = [
+  { href: "/worker", label: "ホーム", Icon: Home },
+  { href: "/worker/learn", label: "学習", Icon: BookOpen },
+  { href: "/worker/progress", label: "進捗", Icon: TrendingUp },
+  { href: "/worker/alerts", label: "期限", Icon: Bell },
+  { href: "/worker/support", label: "相談", Icon: Headphones },
+];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const unread = unreadDemoMessageCount();
   const { industry } = useIndustry();
+  const { role, setRole } = useDemoRole();
   const profile = getIndustryProfile(industry);
   const [secretOpen, setSecretOpen] = useState(false);
   const [secretModalKey, setSecretModalKey] = useState(0);
@@ -57,10 +76,21 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     "/more": "その他",
   };
 
+  const isWorker = role === "worker";
+  const isClient = role === "client";
+
+  const adminTopNavItems = shell.topNav.filter(
+    (item) => !(isClient && item.href === "/operations")
+  );
+
+  const adminBottomNavItems = shell.bottomNav.filter(
+    (item) => !(isClient && item.href === "/revenue")
+  );
+
   return (
     <div className="flex min-h-full flex-col">
       <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-        <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-4 px-4">
+        <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-2 px-4">
           <div className="flex min-w-0 items-center gap-2 shrink-0">
             <button
               type="button"
@@ -71,7 +101,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </button>
             {(profile.badgeLabel ?? branding.badgeLabel) ? (
               <Link
-                href={withIndustryQuery("/", industry)}
+                href={withDemoQuery("/", industry, role)}
                 className="shrink-0"
               >
                 <Badge variant="ai" className="hidden sm:inline-flex">
@@ -80,38 +110,84 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </Link>
             ) : null}
           </div>
-          <nav className="hidden md:flex flex-1 items-center justify-center gap-1 overflow-x-auto">
-            {shell.topNav.map(({ href, label, icon }) => {
-              const Icon = templateNavIcons[icon];
-              const active =
-                href === "/"
-                  ? pathname === "/"
-                  : pathname === href || pathname.startsWith(href + "/");
-              return (
-                <Link
-                  key={href}
-                  href={withIndustryQuery(href, industry)}
-                  className={cn(
-                    "flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors",
-                    active
-                      ? "bg-surface text-primary"
-                      : "text-muted hover:text-foreground hover:bg-surface/80"
-                  )}
-                >
-                  <Icon className="size-4 shrink-0 opacity-80" />
-                  {topNavLabelByHref[href] ?? label}
-                </Link>
-              );
-            })}
+
+          <div className="flex items-center gap-2 shrink-0">
+            <label className="sr-only" htmlFor="demo-role-select">
+              デモ表示ロール
+            </label>
+            <select
+              id="demo-role-select"
+              value={role}
+              onChange={(e) => setRole(e.target.value as DemoRole)}
+              className="max-w-[7.5rem] rounded-md border border-border bg-background px-2 py-1.5 text-xs font-medium text-foreground md:max-w-none md:text-sm"
+            >
+              {demoRoles.map((r) => (
+                <option key={r} value={r}>
+                  {demoRoleLabelJa[r]}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <nav className="hidden md:flex flex-1 items-center justify-center gap-1 overflow-x-auto min-w-0">
+            {isWorker
+              ? workerNavItems.map((item) => {
+                  const { href, label, Icon } = item;
+                  const active =
+                    href === "/worker"
+                      ? pathname === "/worker"
+                      : pathname === href || pathname.startsWith(href + "/");
+                  return (
+                    <Link
+                      key={href}
+                      href={withDemoQuery(href, industry, role)}
+                      className={cn(
+                        "flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors",
+                        active
+                          ? "bg-surface text-primary"
+                          : "text-muted hover:text-foreground hover:bg-surface/80"
+                      )}
+                    >
+                      <Icon className="size-4 shrink-0 opacity-80" />
+                      {label}
+                    </Link>
+                  );
+                })
+              : adminTopNavItems.map(({ href, label, icon }) => {
+                  const Icon = templateNavIcons[icon];
+                  const active =
+                    href === "/"
+                      ? pathname === "/"
+                      : pathname === href || pathname.startsWith(href + "/");
+                  return (
+                    <Link
+                      key={href}
+                      href={withDemoQuery(href, industry, role)}
+                      className={cn(
+                        "flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors",
+                        active
+                          ? "bg-surface text-primary"
+                          : "text-muted hover:text-foreground hover:bg-surface/80"
+                      )}
+                    >
+                      <Icon className="size-4 shrink-0 opacity-80" />
+                      {topNavLabelByHref[href] ?? label}
+                    </Link>
+                  );
+                })}
           </nav>
           {shell.showMessagesLink ? (
             <Link
-              href={withIndustryQuery("/messages", industry)}
-              className="relative flex items-center gap-1 rounded-lg p-2 text-muted hover:bg-surface hover:text-foreground"
+              href={withDemoQuery(
+                isWorker ? "/worker/support" : "/messages",
+                industry,
+                role
+              )}
+              className="relative flex items-center gap-1 rounded-lg p-2 text-muted hover:bg-surface hover:text-foreground shrink-0"
               aria-label="メッセージ"
             >
               <MessageSquare className="size-5" />
-              {unread > 0 && (
+              {!isWorker && unread > 0 && (
                 <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[10px] font-bold text-white">
                   {unread}
                 </span>
@@ -130,26 +206,47 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-background/95 pb-safe backdrop-blur md:hidden">
         <div className="mx-auto flex max-w-lg items-stretch justify-around">
-          {shell.bottomNav.map(({ href, label, icon }) => {
-            const Icon = templateNavIcons[icon];
-            const active =
-              href === "/"
-                ? pathname === "/"
-                : pathname === href || pathname.startsWith(href + "/");
-            return (
-              <Link
-                key={href}
-                href={withIndustryQuery(href, industry)}
-                className={cn(
-                  "flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-medium",
-                  active ? "text-primary" : "text-muted"
-                )}
-              >
-                <Icon className="size-5" />
-                {bottomNavLabelByHref[href] ?? label}
-              </Link>
-            );
-          })}
+          {isWorker
+            ? workerNavItems.map((item) => {
+                const { href, label, Icon } = item;
+                const active =
+                  href === "/worker"
+                    ? pathname === "/worker"
+                    : pathname === href || pathname.startsWith(href + "/");
+                return (
+                  <Link
+                    key={href}
+                    href={withDemoQuery(href, industry, role)}
+                    className={cn(
+                      "flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-medium",
+                      active ? "text-primary" : "text-muted"
+                    )}
+                  >
+                    <Icon className="size-5" />
+                    {label}
+                  </Link>
+                );
+              })
+            : adminBottomNavItems.map(({ href, label, icon }) => {
+                const Icon = templateNavIcons[icon];
+                const active =
+                  href === "/"
+                    ? pathname === "/"
+                    : pathname === href || pathname.startsWith(href + "/");
+                return (
+                  <Link
+                    key={href}
+                    href={withDemoQuery(href, industry, role)}
+                    className={cn(
+                      "flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-medium",
+                      active ? "text-primary" : "text-muted"
+                    )}
+                  >
+                    <Icon className="size-5" />
+                    {bottomNavLabelByHref[href] ?? label}
+                  </Link>
+                );
+              })}
         </div>
       </nav>
 

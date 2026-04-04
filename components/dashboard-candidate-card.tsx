@@ -15,13 +15,18 @@ import {
 import { cn } from "@/lib/utils";
 import type { EnabledIndustryKey } from "@/lib/industry-profiles";
 import { getIndustryProfile } from "@/lib/industry-profiles";
-import { withIndustryQuery } from "@/lib/industry-selection";
+import { withDemoQuery } from "@/lib/demo-query";
+import { useDemoRole } from "@/components/demo-role-context";
 
 type Props = {
   industry: EnabledIndustryKey;
   totalCount: number;
   n3OrAbove: number;
   top5: Candidate[];
+  /** 派遣ダッシュ等で Card タイトルを上書き */
+  titleOverride?: string;
+  /** 一覧リンクのラベル（末尾の矢印はそのまま） */
+  listCtaOverride?: string;
 };
 
 export function DashboardCandidateCard({
@@ -29,10 +34,15 @@ export function DashboardCandidateCard({
   totalCount,
   n3OrAbove,
   top5,
+  titleOverride,
+  listCtaOverride,
 }: Props) {
   const [open, setOpen] = useState(false);
+  const { role } = useDemoRole();
   const profile = getIndustryProfile(industry);
-  const candidateHref = withIndustryQuery("/candidates", industry);
+  const candidateHref = withDemoQuery("/candidates", industry, role);
+  const cardTitle = titleOverride ?? profile.labels.candidate;
+  const listCta = listCtaOverride ?? "一覧へ";
 
   return (
     <div className="flex h-full min-h-0 min-w-0 flex-col">
@@ -47,7 +57,7 @@ export function DashboardCandidateCard({
           />
           <div className="min-w-0 flex-1">
             <p className="line-clamp-2 text-[10px] font-semibold leading-tight text-foreground">
-              {profile.labels.candidate}
+              {cardTitle}
             </p>
             <p className="mt-0.5 line-clamp-2 text-[9px] leading-snug text-muted">
               {totalCount}{profile.kpiLabels.totalCountUnit}
@@ -60,7 +70,7 @@ export function DashboardCandidateCard({
         <CardHeader className="flex flex-row items-start justify-between space-y-0 p-5 pb-2">
           <CardTitle className="flex items-center gap-2 text-base font-semibold">
             <Users className="size-5 shrink-0 text-primary" />
-            {profile.labels.candidate}
+            {cardTitle}
           </CardTitle>
           <Badge variant="ai" className="shrink-0 px-2 text-xs">
             <Sparkles className="mr-1 size-3" />
@@ -104,7 +114,7 @@ export function DashboardCandidateCard({
                 {top5.map((c) => (
                   <li key={c.id}>
                     <Link
-                      href={withIndustryQuery(`/candidates/${c.id}`, industry)}
+                      href={withDemoQuery(`/candidates/${c.id}`, industry, role)}
                       onClick={(e) => e.stopPropagation()}
                       className="flex items-center gap-2 rounded-md px-1.5 py-1 transition-colors hover:bg-background/80"
                     >
@@ -133,7 +143,7 @@ export function DashboardCandidateCard({
             href={candidateHref}
             className="mt-auto inline-flex items-center gap-1 pt-2 text-sm font-medium text-primary"
           >
-            一覧へ <ArrowRight className="size-4" />
+            {listCta} <ArrowRight className="size-4" />
           </Link>
         </CardContent>
       </Card>

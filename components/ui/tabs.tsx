@@ -39,11 +39,12 @@ TabsTrigger.displayName = TabsPrimitive.Trigger.displayName;
 const TabsContent = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content>
->(({ className, ...props }, ref) => (
+>(({ className, tabIndex = -1, ...props }, ref) => (
   <TabsPrimitive.Content
     ref={ref}
+    tabIndex={tabIndex}
     className={cn(
-      "mt-4 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
+      "mt-4 [overflow-anchor:none] ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
       className
     )}
     {...props}

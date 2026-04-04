@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { FileText, ScanLine } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -11,13 +12,17 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { TemplatePageHeader, TemplatePageStack } from "@/components/templates/layout-primitives";
 import { useIndustry } from "@/components/industry-context";
+import { useDemoRole } from "@/components/demo-role-context";
 import { getIndustryDemoData } from "@/lib/demo-data-selector";
 import { getIndustryPageHints } from "@/lib/industry-page-hints";
 import { getIndustryProfile } from "@/lib/industry-profiles";
-import { withIndustryQuery } from "@/lib/industry-selection";
+import { aggregateUpcomingDeadlines } from "@/lib/deadline-aggregator";
+import { withDemoQuery } from "@/lib/demo-query";
 
 export default function DocumentsPage() {
   const { industry } = useIndustry();
+  const { role } = useDemoRole();
+  const urlSearch = useSearchParams();
   const profile = getIndustryProfile(industry);
   const hints = getIndustryPageHints(industry);
   const docHints = hints.documents;
@@ -25,6 +30,17 @@ export default function DocumentsPage() {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const alerts = data.countDocumentAlerts();
+
+  const highlightDeadlines = urlSearch.get("highlight") === "deadlines";
+  useEffect(() => {
+    if (!highlightDeadlines) return;
+    const id = requestAnimationFrame(() => {
+      document
+        .getElementById("deadline-focus")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    return () => cancelAnimationFrame(id);
+  }, [highlightDeadlines]);
 
   function runScan() {
     setOpen(true);
@@ -36,15 +52,27 @@ export default function DocumentsPage() {
     }, 1000);
   }
 
+  function runPdfPackDemo() {
+    toast.success("申請書類パック（PDF）を生成しました（デモ）");
+  }
+
   const blocked = data.candidates.filter(
     (c) => c.pipelineStatus === "document_blocked"
   );
+
+  const upcomingDeadlines = aggregateUpcomingDeadlines(industry, {
+    withinDays: 14,
+  });
 
   return (
     <TemplatePageStack>
       <TemplatePageHeader
         title={`${profile.labels.documents}管理`}
-        description={docHints.pageSubtitle}
+        description={
+          docHints.pageIntentJa
+            ? `${docHints.pageIntentJa} ${docHints.pageSubtitle}`
+            : docHints.pageSubtitle
+        }
       />
 
       <div className="flex flex-wrap gap-3">
@@ -52,8 +80,19 @@ export default function DocumentsPage() {
           <ScanLine className="size-4" />
           {docHints.ocrButtonLabel}
         </Button>
+        <Button
+          type="button"
+          variant="secondary"
+          className="min-h-11 gap-2"
+          onClick={runPdfPackDemo}
+        >
+          <FileText className="size-4" />
+          ビザ更新・申請書類PDF（デモ）
+        </Button>
         <Button variant="secondary" asChild className="min-h-11">
-          <Link href={withIndustryQuery("/candidates?view=pipeline", industry)}>
+          <Link
+            href={withDemoQuery("/candidates?view=pipeline", industry, role)}
+          >
             {profile.statusLabels.document_blocked}の{profile.labels.candidate}を見る
           </Link>
         </Button>
@@ -84,7 +123,9 @@ export default function DocumentsPage() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted">要フォロー</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted">
+              期限・アラート（要フォロー）
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold tabular-nums text-danger">{alerts}</p>
@@ -94,6 +135,57 @@ export default function DocumentsPage() {
           </CardContent>
         </Card>
       </div>
+
+      <Card id="deadline-focus">
+        <CardHeader>
+          <CardTitle className="text-base">
+            期限が近い手続き（14日以内・デモ）
+          </CardTitle>
+          <p className="text-sm text-muted">
+            ミルストーンと書類チェックリストの期限を、候補者ごとに集約しています（派遣スタッフィング業種）。
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {industry !== "staffing" ? (
+            <p className="text-sm text-muted">
+              本一覧は派遣スタッフィング業種のデモデータを使用します。業種を切り替えると表示が変わります。
+            </p>
+          ) : upcomingDeadlines.length === 0 ? (
+            <p className="text-sm text-muted">
+              14日以内の期限はありません（基準日: デモバンドルに準拠）。
+            </p>
+          ) : (
+            <ul className="space-y-2 text-sm">
+              {upcomingDeadlines.map((row, i) => (
+                <li key={`${row.candidateId}-${row.kind}-${row.dueIso}-${i}`}>
+                  <Link
+                    href={withDemoQuery(
+                      `/candidates/${row.candidateId}`,
+                      industry,
+                      role,
+                      { tab: "docs" }
+                    )}
+                    className="block rounded-lg border border-border p-3 hover:bg-surface"
+                  >
+                    <span className="font-medium">{row.candidateName}</span>
+                    <span className="mx-2 text-muted">·</span>
+                    <span className="text-muted">{row.labelJa}</span>
+                    <span className="mt-1 block text-xs text-muted tabular-nums">
+                      期限 {row.dueIso}
+                      {row.daysUntil != null
+                        ? `（あと${row.daysUntil}日）`
+                        : ""}
+                      <Badge variant="outline" className="ml-2">
+                        {row.kind === "milestone" ? "予定" : "書類"}
+                      </Badge>
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
 
       {blocked.length > 0 && (
         <Card>
@@ -107,7 +199,7 @@ export default function DocumentsPage() {
             {blocked.map((c) => (
               <Link
                 key={c.id}
-                href={withIndustryQuery(`/candidates/${c.id}`, industry)}
+                href={withDemoQuery(`/candidates/${c.id}`, industry, role)}
                 className="block min-h-[52px] rounded-lg border border-border p-3 text-sm hover:bg-surface"
               >
                 <span className="font-medium">{c.displayName}</span>

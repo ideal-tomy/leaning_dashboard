@@ -3,6 +3,13 @@ import {
   parseEnabledIndustryKey,
   type EnabledIndustryKey,
 } from "@/lib/industry-profiles";
+import {
+  getRoleFromSearchParams,
+  withDemoQuery,
+} from "@/lib/demo-query";
+import type { DemoRole } from "@/lib/demo-role";
+
+export type { DemoRole };
 
 type SearchParamsInput =
   | Record<string, string | string[] | undefined>
@@ -24,10 +31,4 @@ export function getIndustryFromSearchParams(
   return parseEnabledIndustryKey(value);
 }
 
-export function withIndustryQuery(
-  href: string,
-  industry: EnabledIndustryKey
-): string {
-  const join = href.includes("?") ? "&" : "?";
-  return `${href}${join}industry=${industry}`;
-}
+export { getRoleFromSearchParams, withDemoQuery };

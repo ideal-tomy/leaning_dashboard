@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import {
   ArrowRight,
   Building2,
@@ -10,6 +11,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DashboardCandidateCard } from "@/components/dashboard-candidate-card";
+import { DashboardKillerCards } from "@/components/dashboard-killer-cards";
 import { DashboardMobileCardSlim } from "@/components/dashboard-mobile-card-slim";
 import { DashboardExtensionRegion } from "@/components/dashboard-extension-region";
 import { TemplateDashboardHeader } from "@/components/templates/layout-primitives";
@@ -18,7 +20,8 @@ import { getIndustryPageHints } from "@/lib/industry-page-hints";
 import { getIndustryProfile } from "@/lib/industry-profiles";
 import {
   getIndustryFromSearchParams,
-  withIndustryQuery,
+  getRoleFromSearchParams,
+  withDemoQuery,
 } from "@/lib/industry-selection";
 import { getIndustryDemoData } from "@/lib/demo-data-selector";
 
@@ -39,9 +42,18 @@ type PageProps = {
 export default async function DashboardPage({ searchParams }: PageProps) {
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const industry = getIndustryFromSearchParams(resolvedSearchParams);
+  const role = getRoleFromSearchParams(resolvedSearchParams);
+  if (role === "worker") {
+    redirect(withDemoQuery("/worker", industry, role));
+  }
   const profile = getIndustryProfile(industry);
-  const homeHints = getIndustryPageHints(industry).home;
-  const docKpi = getIndustryPageHints(industry).documents;
+  const industryHints = getIndustryPageHints(industry);
+  const homeHints = industryHints.home;
+  const docKpi = industryHints.documents;
+  const gridCopy =
+    role === "admin" && industry === "staffing"
+      ? homeHints.dashboardGridCopy
+      : undefined;
   const data = getIndustryDemoData(industry);
 
   const pipeline = data.getPipelineCounts();
@@ -60,6 +72,30 @@ export default async function DashboardPage({ searchParams }: PageProps) {
         subtitle={profile.dashboardSubtitle || dashboard.pageSubtitle}
       />
 
+      <DashboardKillerCards industry={industry} role={role} />
+
+      {role === "admin" &&
+        industry === "staffing" &&
+        homeHints.adminDailyStepsJa &&
+        homeHints.adminDailyStepsJa.length > 0 && (
+          <Card className="border-primary/20 bg-primary/[0.04] shadow-sm">
+            <CardHeader className="pb-2 pt-4">
+              <CardTitle className="text-base font-semibold">
+                今日の3ステップ（デモ）
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pb-4 pt-0">
+              <ol className="list-decimal space-y-1.5 pl-5 text-sm text-foreground">
+                {homeHints.adminDailyStepsJa.map((step) => (
+                  <li key={step} className="leading-snug">
+                    {step}
+                  </li>
+                ))}
+              </ol>
+            </CardContent>
+          </Card>
+        )}
+
       <div className={dashboardGridClass(gridCols)}>
         <div className="flex h-full min-h-0 min-w-0 flex-col">
           <DashboardCandidateCard
@@ -67,25 +103,29 @@ export default async function DashboardPage({ searchParams }: PageProps) {
             totalCount={data.candidates.length}
             n3OrAbove={data.countN3OrAbove()}
             top5={top5}
+            titleOverride={gridCopy?.candidatesCardTitleJa}
+            listCtaOverride={gridCopy?.candidatesCardCtaJa}
           />
         </div>
 
         <div className="flex h-full min-h-0 min-w-0 flex-col">
           <DashboardMobileCardSlim
-            href={withIndustryQuery("/candidates?view=pipeline", industry)}
+            href={withDemoQuery("/candidates?view=pipeline", industry, role)}
             icon={GitBranch}
-            title={profile.labels.pipeline}
+            title={gridCopy?.pipelineCardTitleJa ?? profile.labels.pipeline}
             subtitle={`要フォロー（書類）：${docAlerts}件`}
           />
           <Link
-            href={withIndustryQuery("/candidates?view=pipeline", industry)}
+            href={withDemoQuery("/candidates?view=pipeline", industry, role)}
             className="group hidden min-h-0 w-full flex-1 flex-col md:flex"
           >
             <Card className="flex h-full min-h-0 flex-1 flex-col transition-all group-hover:border-primary/30 group-hover:shadow-md">
               <CardHeader className="shrink-0 p-5 pb-2">
                 <CardTitle className="flex items-center gap-2 text-base font-semibold">
                   <GitBranch className="size-5 shrink-0 text-primary" />
-                  <span className="leading-tight">{profile.labels.pipeline}</span>
+                  <span className="leading-tight">
+                    {gridCopy?.pipelineCardTitleJa ?? profile.labels.pipeline}
+                  </span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="flex min-h-0 flex-1 flex-col gap-4 p-5 pt-0">
@@ -122,7 +162,8 @@ export default async function DashboardPage({ searchParams }: PageProps) {
                   )}
                 </div>
                 <span className="mt-auto inline-flex shrink-0 items-center gap-1 pt-1 text-sm font-medium text-primary">
-                  詳細へ <ArrowRight className="size-4" />
+                  {gridCopy?.pipelineCardCtaJa ?? "詳細へ"}{" "}
+                  <ArrowRight className="size-4" />
                 </span>
               </CardContent>
             </Card>
@@ -131,20 +172,20 @@ export default async function DashboardPage({ searchParams }: PageProps) {
 
         <div className="flex h-full min-h-0 min-w-0 flex-col">
           <DashboardMobileCardSlim
-            href={withIndustryQuery("/clients", industry)}
+            href={withDemoQuery("/clients", industry, role)}
             icon={Building2}
-            title={profile.labels.client}
+            title={gridCopy?.clientsCardTitleJa ?? profile.labels.client}
             subtitle={`${data.clients.length}社`}
           />
           <Link
-            href={withIndustryQuery("/clients", industry)}
+            href={withDemoQuery("/clients", industry, role)}
             className="group hidden min-h-0 w-full flex-1 flex-col md:flex"
           >
             <Card className="flex h-full min-h-0 flex-1 flex-col transition-all group-hover:border-primary/30 group-hover:shadow-md">
               <CardHeader className="shrink-0 p-5 pb-2">
                 <CardTitle className="flex items-center gap-2 text-base font-semibold">
                   <Building2 className="size-5 shrink-0 text-primary" />
-                  {profile.labels.client}
+                  {gridCopy?.clientsCardTitleJa ?? profile.labels.client}
                 </CardTitle>
               </CardHeader>
               <CardContent className="flex min-h-0 flex-1 flex-col gap-3 p-5 pt-0">
@@ -168,7 +209,8 @@ export default async function DashboardPage({ searchParams }: PageProps) {
                   </ul>
                 </div>
                 <span className="mt-auto inline-flex shrink-0 items-center gap-1 pt-1 text-sm font-medium text-primary">
-                  一覧へ <ArrowRight className="size-4" />
+                  {gridCopy?.clientsCardCtaJa ?? "一覧へ"}{" "}
+                  <ArrowRight className="size-4" />
                 </span>
               </CardContent>
             </Card>
@@ -177,20 +219,20 @@ export default async function DashboardPage({ searchParams }: PageProps) {
 
         <div className="flex h-full min-h-0 min-w-0 flex-col">
           <DashboardMobileCardSlim
-            href={withIndustryQuery("/matching", industry)}
+            href={withDemoQuery("/matching", industry, role)}
             icon={ClipboardList}
-            title={profile.labels.matching}
+            title={gridCopy?.matchingCardTitleJa ?? profile.labels.matching}
             subtitle={homeHints.matchingMobileSubtitle}
           />
           <Link
-            href={withIndustryQuery("/matching", industry)}
+            href={withDemoQuery("/matching", industry, role)}
             className="group hidden min-h-0 w-full flex-1 flex-col md:flex"
           >
             <Card className="flex h-full min-h-0 flex-1 flex-col transition-all group-hover:border-primary/30 group-hover:shadow-md">
               <CardHeader className="flex shrink-0 flex-row items-start justify-between space-y-0 p-5 pb-2">
                 <CardTitle className="flex items-center gap-2 text-base font-semibold">
                   <ClipboardList className="size-5 shrink-0 text-primary" />
-                  {profile.labels.matching}
+                  {gridCopy?.matchingCardTitleJa ?? profile.labels.matching}
                 </CardTitle>
                 <Badge variant="ai" className="shrink-0 text-xs">
                   AI
@@ -206,7 +248,8 @@ export default async function DashboardPage({ searchParams }: PageProps) {
                   </div>
                 </div>
                 <span className="mt-auto inline-flex shrink-0 items-center gap-1 pt-1 text-sm font-medium text-primary">
-                  提案一覧へ <ArrowRight className="size-4" />
+                  {gridCopy?.matchingCardCtaJa ?? "提案一覧へ"}{" "}
+                  <ArrowRight className="size-4" />
                 </span>
               </CardContent>
             </Card>
@@ -215,20 +258,20 @@ export default async function DashboardPage({ searchParams }: PageProps) {
 
         <div className="flex h-full min-h-0 min-w-0 flex-col">
           <DashboardMobileCardSlim
-            href={withIndustryQuery("/documents", industry)}
+            href={withDemoQuery("/documents", industry, role)}
             icon={FileText}
-            title={profile.labels.documents}
+            title={gridCopy?.documentsCardTitleJa ?? profile.labels.documents}
             subtitle={homeHints.documentsMobileSubtitle}
           />
           <Link
-            href={withIndustryQuery("/documents", industry)}
+            href={withDemoQuery("/documents", industry, role)}
             className="group hidden min-h-0 w-full flex-1 flex-col md:flex"
           >
             <Card className="flex h-full min-h-0 flex-1 flex-col transition-all group-hover:border-primary/30 group-hover:shadow-md">
               <CardHeader className="flex shrink-0 flex-row items-start justify-between space-y-0 p-5 pb-2">
                 <CardTitle className="flex items-center gap-2 text-base font-semibold">
                   <FileText className="size-5 shrink-0 text-primary" />
-                  {profile.labels.documents}
+                  {gridCopy?.documentsCardTitleJa ?? profile.labels.documents}
                 </CardTitle>
                 <Badge variant="ai" className="shrink-0 text-xs">
                   OCR
@@ -246,55 +289,59 @@ export default async function DashboardPage({ searchParams }: PageProps) {
                   </div>
                 </div>
                 <span className="mt-auto inline-flex shrink-0 items-center gap-1 pt-1 text-sm font-medium text-primary">
-                  書類管理へ <ArrowRight className="size-4" />
+                  {gridCopy?.documentsCardCtaJa ?? "書類管理へ"}{" "}
+                  <ArrowRight className="size-4" />
                 </span>
               </CardContent>
             </Card>
           </Link>
         </div>
 
-        <div className="flex h-full min-h-0 min-w-0 flex-col">
-          <DashboardMobileCardSlim
-            href={withIndustryQuery("/revenue", industry)}
-            icon={TrendingUp}
-            title={profile.labels.revenue}
-            subtitle="売上推移"
-          />
-          <Link
-            href={withIndustryQuery("/revenue", industry)}
-            className="group hidden min-h-0 w-full flex-1 flex-col md:flex"
-          >
-            <Card className="flex h-full min-h-0 flex-1 flex-col transition-all group-hover:border-primary/30 group-hover:shadow-md">
-              <CardHeader className="flex shrink-0 flex-row items-start justify-between space-y-0 p-5 pb-2">
-                <CardTitle className="flex items-center gap-2 text-base font-semibold">
-                  <TrendingUp className="size-5 shrink-0 text-primary" />
-                  {profile.labels.revenue}
-                </CardTitle>
-                <Badge variant="ai" className="shrink-0 text-xs">
-                  LTV
-                </Badge>
-              </CardHeader>
-              <CardContent className="flex min-h-0 flex-1 flex-col gap-3 p-5 pt-0">
-                <div className="flex min-h-0 flex-1 flex-col gap-2">
-                  <div className="text-3xl font-bold tabular-nums">
-                    {lastRev}
-                    <span className="ml-1 text-base font-normal text-muted">
-                      万円/月
-                    </span>
+        {role !== "client" ? (
+          <div className="flex h-full min-h-0 min-w-0 flex-col">
+            <DashboardMobileCardSlim
+              href={withDemoQuery("/revenue", industry, role)}
+              icon={TrendingUp}
+              title={gridCopy?.revenueCardTitleJa ?? profile.labels.revenue}
+              subtitle="売上推移"
+            />
+            <Link
+              href={withDemoQuery("/revenue", industry, role)}
+              className="group hidden min-h-0 w-full flex-1 flex-col md:flex"
+            >
+              <Card className="flex h-full min-h-0 flex-1 flex-col transition-all group-hover:border-primary/30 group-hover:shadow-md">
+                <CardHeader className="flex shrink-0 flex-row items-start justify-between space-y-0 p-5 pb-2">
+                  <CardTitle className="flex items-center gap-2 text-base font-semibold">
+                    <TrendingUp className="size-5 shrink-0 text-primary" />
+                    {gridCopy?.revenueCardTitleJa ?? profile.labels.revenue}
+                  </CardTitle>
+                  <Badge variant="ai" className="shrink-0 text-xs">
+                    LTV
+                  </Badge>
+                </CardHeader>
+                <CardContent className="flex min-h-0 flex-1 flex-col gap-3 p-5 pt-0">
+                  <div className="flex min-h-0 flex-1 flex-col gap-2">
+                    <div className="text-3xl font-bold tabular-nums">
+                      {lastRev}
+                      <span className="ml-1 text-base font-normal text-muted">
+                        万円/月
+                      </span>
+                    </div>
+                    <p className="text-xs leading-snug text-muted">
+                      直近月の売上イメージ（ダミー推移）
+                    </p>
                   </div>
-                  <p className="text-xs leading-snug text-muted">
-                    直近月の売上イメージ（ダミー推移）
-                  </p>
-                </div>
-                <span className="mt-auto inline-flex shrink-0 items-center gap-1 pt-1 text-sm font-medium text-primary">
-                  収益画面へ <ArrowRight className="size-4" />
-                </span>
-              </CardContent>
-            </Card>
-          </Link>
-        </div>
+                  <span className="mt-auto inline-flex shrink-0 items-center gap-1 pt-1 text-sm font-medium text-primary">
+                    {gridCopy?.revenueCardCtaJa ?? "収益画面へ"}{" "}
+                    <ArrowRight className="size-4" />
+                  </span>
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
+        ) : null}
 
-        <DashboardExtensionRegion industry={industry} />
+        <DashboardExtensionRegion industry={industry} role={role} />
       </div>
     </div>
   );

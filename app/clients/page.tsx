@@ -11,7 +11,8 @@ import { getIndustryPageHints } from "@/lib/industry-page-hints";
 import { getIndustryProfile } from "@/lib/industry-profiles";
 import {
   getIndustryFromSearchParams,
-  withIndustryQuery,
+  getRoleFromSearchParams,
+  withDemoQuery,
 } from "@/lib/industry-selection";
 
 type PageProps = {
@@ -21,21 +22,27 @@ type PageProps = {
 export default async function ClientsPage({ searchParams }: PageProps) {
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const industry = getIndustryFromSearchParams(resolvedSearchParams);
+  const role = getRoleFromSearchParams(resolvedSearchParams);
   const profile = getIndustryProfile(industry);
   const clients = getIndustryDemoData(industry).clients;
-  const emphasis = getIndustryPageHints(industry).clients.listCardEmphasis;
+  const clientHints = getIndustryPageHints(industry).clients;
+  const emphasis = clientHints.listCardEmphasis;
+  const clientDesc = `${clients.length} 件のデモデータ。一覧から詳細・AI 候補へ進めます。`;
+  const clientHeaderDesc = clientHints.pageIntentJa
+    ? `${clientHints.pageIntentJa} ${clientDesc}`
+    : clientDesc;
 
   return (
     <TemplatePageStack>
       <TemplatePageHeader
         title={profile.labels.client}
-        description={`${clients.length} 件のデモデータ。一覧から詳細・AI 候補へ進めます。`}
+        description={clientHeaderDesc}
       />
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {clients.map((c) => (
           <Link
             key={c.id}
-            href={withIndustryQuery(`/clients/${c.id}`, industry)}
+            href={withDemoQuery(`/clients/${c.id}`, industry, role)}
             className="group block"
           >
             <Card className="h-full min-h-[120px] transition-all group-hover:border-primary/30">

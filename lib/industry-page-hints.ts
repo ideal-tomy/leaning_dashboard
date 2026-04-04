@@ -3,7 +3,8 @@ import type {
   DashboardExtensionSlotId,
 } from "@/lib/dashboard-extension-types";
 import type { EnabledIndustryKey } from "@/lib/industry-profiles";
-import { withIndustryQuery } from "@/lib/industry-selection";
+import { defaultDemoRole, type DemoRole } from "@/lib/demo-role";
+import { withDemoQuery } from "@/lib/demo-query";
 
 export type QuickLinkPath =
   | "documents"
@@ -11,6 +12,31 @@ export type QuickLinkPath =
   | "pipeline"
   | "revenue"
   | "candidates";
+
+/** トップキラーカード（派遣・admin 向けデモコピー） */
+export type DashboardKillerHintsPack = {
+  headlineAdminJa: string;
+  headlineClientJa: string;
+  card1: { titleJa: string; bodyJa: string; ctaJa: string };
+  card2: { titleJa: string; bodyJa: string; ctaJa: string };
+  card3: { titleJa: string; bodyJa: string; ctaJa: string };
+};
+
+/** メイングリッドの行動寄りタイトル・CTA（派遣・admin） */
+export type DashboardGridCopyStaffing = {
+  pipelineCardTitleJa: string;
+  pipelineCardCtaJa: string;
+  candidatesCardTitleJa: string;
+  candidatesCardCtaJa: string;
+  clientsCardTitleJa: string;
+  clientsCardCtaJa: string;
+  matchingCardTitleJa: string;
+  matchingCardCtaJa: string;
+  documentsCardTitleJa: string;
+  documentsCardCtaJa: string;
+  revenueCardTitleJa: string;
+  revenueCardCtaJa: string;
+};
 
 /** `/candidates/[id]` のタブ名・カード文言（派遣テンプレの直書きを業種ごとに差し替え） */
 export type CandidateDetailHints = {
@@ -42,6 +68,8 @@ export type IndustryPageHints = {
     defaultTab: "list" | "pipeline";
     /** モバイル Sheet 内の情報順 */
     sheetOrder: "statusFirst" | "alertFirst";
+    /** この画面で終わらせること（1行・派遣デモ用） */
+    pageIntentJa?: string;
   };
   documents: {
     pageSubtitle: string;
@@ -51,14 +79,17 @@ export type IndustryPageHints = {
     sheetTitle: string;
     ocrSampleName: string;
     ocrSampleLines: string[];
+    pageIntentJa?: string;
   };
   matching: {
     emptyState: string;
+    pageIntentJa?: string;
   };
   operations: {
     csvHint: string;
     kpiTiles: { label: string; value: string; sub?: string }[];
     timeline: { title: string; time: string; badge?: string }[];
+    pageIntentJa?: string;
   };
   knowledge: {
     pageSubtitle: string;
@@ -71,9 +102,14 @@ export type IndustryPageHints = {
     matchingDesktopTeaser: string;
     matchingDesktopReason: string;
     documentsMobileSubtitle: string;
+    /** 派遣・admin：今日の3ステップ */
+    adminDailyStepsJa?: string[];
+    killerPack?: DashboardKillerHintsPack;
+    dashboardGridCopy?: DashboardGridCopyStaffing;
   };
   clients: {
     listCardEmphasis: "region" | "openSlots" | "culture";
+    pageIntentJa?: string;
   };
   clientDetail: {
     quickLinks: { label: string; path: QuickLinkPath }[];
@@ -83,6 +119,15 @@ export type IndustryPageHints = {
   dashboardExtensionOverrides?: Partial<
     Record<DashboardExtensionSlotId, DashboardExtensionOverride>
   >;
+  /** /learning-insights（学習サマリー・派遣デモ） */
+  learningInsights?: {
+    pageTitleJa: string;
+    pageSubtitleJa: string;
+    pageIntentJa: string;
+  };
+  revenue?: {
+    pageIntentJa?: string;
+  };
 };
 
 const hints: Record<EnabledIndustryKey, IndustryPageHints> = {
@@ -92,9 +137,13 @@ const hints: Record<EnabledIndustryKey, IndustryPageHints> = {
         "面接調整から入国・講習までの進捗を一覧化。書類不備はパイプラインと連動したデモです。",
       defaultTab: "list",
       sheetOrder: "alertFirst",
+      pageIntentJa:
+        "誰を次にフォローするか決め、詳細で学習・認定・配属を確認する。",
     },
     documents: {
       pageSubtitle: "在留・パスポート等の生成ステータスと OCR デモ（API なし）",
+      pageIntentJa:
+        "期限が近い手続きと書類不備を洗い出し、生成・OCR のデモで次アクションをイメージする。",
       kpiComplete: 12,
       kpiReview: 3,
       ocrButtonLabel: "パスポート OCR（デモ）",
@@ -108,6 +157,8 @@ const hints: Record<EnabledIndustryKey, IndustryPageHints> = {
     },
     matching: {
       emptyState: "案件に紐づく推奨候補がまだありません（デモ）",
+      pageIntentJa:
+        "案件ごとに推奨候補と理由を比較し、教育要件の充足も含めて提案のたたき台にする。",
     },
     operations: {
       csvHint: "勤怠 CSV は次期で取込予定（デモ）",
@@ -122,6 +173,8 @@ const hints: Record<EnabledIndustryKey, IndustryPageHints> = {
         { title: "書類不備フォロー SMS 送信", time: "昨日", badge: "完了" },
         { title: "請求締めデータ生成（バッチ）", time: "4/1 0:00", badge: "予定" },
       ],
+      pageIntentJa:
+        "勤怠・請求・タイムラインのハブとして、今日のオペタスクの着手点を把握する。",
     },
     knowledge: {
       pageSubtitle:
@@ -142,8 +195,52 @@ const hints: Record<EnabledIndustryKey, IndustryPageHints> = {
       matchingDesktopReason:
         "「規律重視の現場には軍・警察経験者が適合」— 3行理由つき（デモ）",
       documentsMobileSubtitle: "画像で書類作成",
+      adminDailyStepsJa: [
+        "学習フォローが必要な人を開き、連絡・面談の優先順位をつける。",
+        "期限が近い在留・面談を書類ハブで確認し、不備を潰す。",
+        "学習サマリーで日本語・倫理の伸びを見て、工場説明の材料にする。",
+      ],
+      killerPack: {
+        headlineAdminJa: "支援機関：いま効くフォローと期限を先に処理する",
+        headlineClientJa: "工場向け：学習とコンプライアンスを数字で説明する",
+        card1: {
+          titleJa: "今日フォローする学習者を開く",
+          bodyJa:
+            "オンライン進捗が低い・止まっている人から優先して確認します（デモ）。",
+          ctaJa: "フォロー対象の一覧へ",
+        },
+        card2: {
+          titleJa: "期限が近い手続きをまとめて見る",
+          bodyJa: "在留・面談など、対応が必要な期限を一覧で確認します（デモ）。",
+          ctaJa: "期限・書類ハブへ",
+        },
+        card3: {
+          titleJa: "全体の学習効果をチャートで見る",
+          bodyJa:
+            "日本語到達と倫理モジュールの横断サマリー。詳細は次の画面でグラフ表示します。",
+          ctaJa: "学習サマリー（チャート）へ",
+        },
+      },
+      dashboardGridCopy: {
+        pipelineCardTitleJa: "選考・ビザの詰まりを見る",
+        pipelineCardCtaJa: "パイプラインを開いてフォローする",
+        candidatesCardTitleJa: "候補者を検索・優先度付けする",
+        candidatesCardCtaJa: "全候補者を一覧する",
+        clientsCardTitleJa: "派遣先の欠員を把握する",
+        clientsCardCtaJa: "案件一覧を開く",
+        matchingCardTitleJa: "案件に合う人を提案する",
+        matchingCardCtaJa: "AI提案一覧を見る",
+        documentsCardTitleJa: "書類を処理する",
+        documentsCardCtaJa: "書類管理を開く",
+        revenueCardTitleJa: "収益の感触を掴む",
+        revenueCardCtaJa: "収益画面を開く",
+      },
     },
-    clients: { listCardEmphasis: "openSlots" },
+    clients: {
+      listCardEmphasis: "openSlots",
+      pageIntentJa:
+        "どの派遣先に空きがあり、どこを優先提案するかを一覧で把握する。",
+    },
     clientDetail: {
       quickLinks: [
         { label: "書類・OCR", path: "documents" },
@@ -174,6 +271,17 @@ const hints: Record<EnabledIndustryKey, IndustryPageHints> = {
       aiFooterNote:
         "動画レジュメ解析・離職リスクは本番 AI 連携で拡張予定（デモは静的テキスト）。",
       showJlptBadge: true,
+    },
+    learningInsights: {
+      pageTitleJa: "学習サマリー",
+      pageSubtitleJa:
+        "登録スタッフ全体の日本語到達と倫理モジュールの分布（デモデータ）。",
+      pageIntentJa:
+        "学習コンテンツの効き方を俯瞰し、工場向け説明や研修計画のたたき台にする。",
+    },
+    revenue: {
+      pageIntentJa:
+        "売上・LTV の推移をざっくり確認し、経営・営業との会話の入口にする。",
     },
   },
   "real-estate": {
@@ -806,7 +914,8 @@ export function getIndustryPageHints(
 
 export function quickLinkHref(
   path: QuickLinkPath,
-  industry: EnabledIndustryKey
+  industry: EnabledIndustryKey,
+  role: DemoRole = defaultDemoRole
 ): string {
   const base =
     path === "pipeline"
@@ -818,5 +927,5 @@ export function quickLinkHref(
           : path === "revenue"
             ? "/revenue"
             : "/candidates";
-  return withIndustryQuery(base, industry);
+  return withDemoQuery(base, industry, role);
 }
