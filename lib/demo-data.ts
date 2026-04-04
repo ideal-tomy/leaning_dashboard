@@ -902,6 +902,9 @@ export const candidates: Candidate[] = [
     documentAlertJa: "出生証明の翻訳が不備。再提出待ち。",
     photoUrl: avatar("cand-dhammika-appuhamy"),
     detailDemo: {
+      documentDeficiencyUrgency: "high",
+      documentDeficiencyHeadlineJa:
+        "4/10までに修正翻訳の再アップロードが最優先です。",
       healthSummaryJa:
         "在留申請が書類不備で停止中。出生証明の翻訳修正がクリティカルパスです。",
       followReasons: [
@@ -1257,11 +1260,57 @@ export const candidates: Candidate[] = [
     driversLicenseLk: false,
     aiScore: 65,
     aiScoreRationale: "ポテンシャル枠。基礎研修とペア配属が有効。",
-    ...statusMap("書類準備中"),
+    ...statusMap("書類不備停止"),
     passportNumber: "N4567890",
     passportExpiry: "2032-07-20",
-    coeStatusJa: "パスポート取得待ち・書類整備中",
+    coeStatusJa: "履歴書の職歴記載で補正依頼（軽微）",
+    documentAlertJa:
+      "職歴の期間表記が一部不明瞭。修正版の提出待ち（デモ）。",
     photoUrl: avatar("cand-shani-mendis"),
+    detailDemo: {
+      documentDeficiencyUrgency: "medium",
+      documentDeficiencyHeadlineJa:
+        "履歴書の職歴欄を本人確認のうえ修正版をアップロードしてください。",
+      docChecklist: [
+        {
+          labelJa: "履歴書（日本語）",
+          status: "issue",
+          dueIso: "2026-04-18",
+        },
+      ],
+    },
+  }),
+  cand({
+    id: "cand-sanduni-rathnayake",
+    displayName: "Sanduni Rathnayake",
+    legalNameFull: "Sanduni Rathnayake",
+    nameKatakana: "サンドゥニ ラトナーヤケ",
+    age: 23,
+    gender: "female",
+    nationality: "スリランカ",
+    birthDate: "2003-11-08",
+    birthPlace: "Galle, Sri Lanka",
+    residence: { country: "スリランカ", city: "ゴール" },
+    jlpt: "N5",
+    backgroundSummary: "事務補助の経験。丁寧な性格。",
+    educationWorkHistory: "専門学校事務科卒。事務アルバイト1年。",
+    skillTags: ["事務", "丁寧", "若手"],
+    tokuteiGinoFoodManufacturing: false,
+    driversLicenseLk: false,
+    aiScore: 70,
+    aiScoreRationale: "軽微な書類指摘のみ。フォローで申請再開見込み（デモ）。",
+    ...statusMap("書類不備停止"),
+    passportNumber: "N6677889",
+    passportExpiry: "2033-05-12",
+    coeStatusJa: "軽微な記載修正の確認中",
+    documentAlertJa:
+      "申請書の署名欄に日付のみの記載。フル署名の再提出を推奨（デモ・低緊急）。",
+    photoUrl: avatar("cand-sanduni-rathnayake"),
+    detailDemo: {
+      documentDeficiencyUrgency: "low",
+      documentDeficiencyHeadlineJa:
+        "次回定例面談で署名を取得し、スキャンを差し替え予定。",
+    },
   }),
   cand({
     id: "cand-ruwan-perera",

@@ -177,6 +177,9 @@ export interface DocumentResolutionGuideDemo {
   completionCriteriaJa: string;
 }
 
+/** 書類不備フォロー一覧（デモ）用の緊急度 */
+export type DocumentDeficiencyUrgencyDemo = "high" | "medium" | "low";
+
 export interface CandidateDetailDemo {
   /** ヘッダー1行サマリー */
   healthSummaryJa?: string;
@@ -198,6 +201,10 @@ export interface CandidateDetailDemo {
   dispatchHistory?: DispatchHistoryEntryDemo[];
   /** 書類不備時の解決ナビ */
   documentResolution?: DocumentResolutionGuideDemo;
+  /** 書類不備フォロー画面用（document_blocked 想定） */
+  documentDeficiencyUrgency?: DocumentDeficiencyUrgencyDemo;
+  /** 一覧用の次の一手（1行） */
+  documentDeficiencyHeadlineJa?: string;
 }
 
 export interface Candidate {

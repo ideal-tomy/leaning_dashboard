@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { FileText, ScanLine } from "lucide-react";
@@ -16,8 +16,50 @@ import { useDemoRole } from "@/components/demo-role-context";
 import { getIndustryDemoData } from "@/lib/demo-data-selector";
 import { getIndustryPageHints } from "@/lib/industry-page-hints";
 import { getIndustryProfile } from "@/lib/industry-profiles";
+import type { EnabledIndustryKey } from "@/lib/industry-profiles";
+import type { DemoRole } from "@/lib/demo-role";
 import { aggregateUpcomingDeadlines } from "@/lib/deadline-aggregator";
+import type { DeadlineRow } from "@/lib/deadline-aggregator";
 import { withDemoQuery } from "@/lib/demo-query";
+
+function DeadlineRowsList({
+  rows,
+  industry,
+  role,
+}: {
+  rows: DeadlineRow[];
+  industry: EnabledIndustryKey;
+  role: DemoRole;
+}) {
+  return (
+    <ul className="space-y-2 text-sm">
+      {rows.map((row, i) => (
+        <li key={`${row.candidateId}-${row.kind}-${row.dueIso}-${i}`}>
+          <Link
+            href={withDemoQuery(
+              `/candidates/${row.candidateId}`,
+              industry,
+              role,
+              { tab: "docs" }
+            )}
+            className="block rounded-lg border border-border p-3 hover:bg-surface"
+          >
+            <span className="font-medium">{row.candidateName}</span>
+            <span className="mx-2 text-muted">·</span>
+            <span className="text-muted">{row.labelJa}</span>
+            <span className="mt-1 block text-xs text-muted tabular-nums">
+              期限 {row.dueIso}
+              {row.daysUntil != null ? `（あと${row.daysUntil}日）` : ""}
+              <Badge variant="outline" className="ml-2">
+                {row.kind === "milestone" ? "予定" : "書類"}
+              </Badge>
+            </span>
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 export default function DocumentsPage() {
   const { industry } = useIndustry();
@@ -52,10 +94,6 @@ export default function DocumentsPage() {
     }, 1000);
   }
 
-  function runPdfPackDemo() {
-    toast.success("申請書類パック（PDF）を生成しました（デモ）");
-  }
-
   const blocked = data.candidates.filter(
     (c) => c.pipelineStatus === "document_blocked"
   );
@@ -63,6 +101,15 @@ export default function DocumentsPage() {
   const upcomingDeadlines = aggregateUpcomingDeadlines(industry, {
     withinDays: 14,
   });
+
+  const milestoneDeadlines = useMemo(
+    () => upcomingDeadlines.filter((r) => r.kind === "milestone"),
+    [upcomingDeadlines]
+  );
+  const documentDeadlines = useMemo(
+    () => upcomingDeadlines.filter((r) => r.kind === "document"),
+    [upcomingDeadlines]
+  );
 
   return (
     <TemplatePageStack>
@@ -80,18 +127,17 @@ export default function DocumentsPage() {
           <ScanLine className="size-4" />
           {docHints.ocrButtonLabel}
         </Button>
-        <Button
-          type="button"
-          variant="secondary"
-          className="min-h-11 gap-2"
-          onClick={runPdfPackDemo}
-        >
-          <FileText className="size-4" />
-          ビザ更新・申請書類PDF（デモ）
+        <Button variant="secondary" asChild className="min-h-11 gap-2">
+          <Link
+            href={withDemoQuery("/documents/visa-draft", industry, role)}
+          >
+            <FileText className="size-4" />
+            ビザ更新・申請書類PDF（デモ）
+          </Link>
         </Button>
         <Button variant="secondary" asChild className="min-h-11">
           <Link
-            href={withDemoQuery("/candidates?view=pipeline", industry, role)}
+            href={withDemoQuery("/documents/deficiencies", industry, role)}
           >
             {profile.statusLabels.document_blocked}の{profile.labels.candidate}を見る
           </Link>
@@ -155,34 +201,36 @@ export default function DocumentsPage() {
               14日以内の期限はありません（基準日: デモバンドルに準拠）。
             </p>
           ) : (
-            <ul className="space-y-2 text-sm">
-              {upcomingDeadlines.map((row, i) => (
-                <li key={`${row.candidateId}-${row.kind}-${row.dueIso}-${i}`}>
-                  <Link
-                    href={withDemoQuery(
-                      `/candidates/${row.candidateId}`,
-                      industry,
-                      role,
-                      { tab: "docs" }
-                    )}
-                    className="block rounded-lg border border-border p-3 hover:bg-surface"
-                  >
-                    <span className="font-medium">{row.candidateName}</span>
-                    <span className="mx-2 text-muted">·</span>
-                    <span className="text-muted">{row.labelJa}</span>
-                    <span className="mt-1 block text-xs text-muted tabular-nums">
-                      期限 {row.dueIso}
-                      {row.daysUntil != null
-                        ? `（あと${row.daysUntil}日）`
-                        : ""}
-                      <Badge variant="outline" className="ml-2">
-                        {row.kind === "milestone" ? "予定" : "書類"}
-                      </Badge>
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <h3 className="text-sm font-semibold text-foreground">
+                  面接・日程・連絡（予定）
+                </h3>
+                {milestoneDeadlines.length === 0 ? (
+                  <p className="text-sm text-muted">該当なし</p>
+                ) : (
+                  <DeadlineRowsList
+                    rows={milestoneDeadlines}
+                    industry={industry}
+                    role={role}
+                  />
+                )}
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-sm font-semibold text-foreground">
+                  書類・申請
+                </h3>
+                {documentDeadlines.length === 0 ? (
+                  <p className="text-sm text-muted">該当なし</p>
+                ) : (
+                  <DeadlineRowsList
+                    rows={documentDeadlines}
+                    industry={industry}
+                    role={role}
+                  />
+                )}
+              </div>
+            </div>
           )}
         </CardContent>
       </Card>
@@ -194,12 +242,24 @@ export default function DocumentsPage() {
               <FileText className="size-5" />
               {profile.statusLabels.document_blocked}の{profile.labels.candidate}
             </CardTitle>
+            <p className="text-sm text-muted">
+              緊急度別の一覧は{" "}
+              <Link
+                href={withDemoQuery("/documents/deficiencies", industry, role)}
+                className="font-medium text-primary underline-offset-4 hover:underline"
+              >
+                書類不備フォロー（デモ）
+              </Link>
+              から開けます。
+            </p>
           </CardHeader>
           <CardContent className="space-y-2">
             {blocked.map((c) => (
               <Link
                 key={c.id}
-                href={withDemoQuery(`/candidates/${c.id}`, industry, role)}
+                href={withDemoQuery(`/candidates/${c.id}`, industry, role, {
+                  tab: "docs",
+                })}
                 className="block min-h-[52px] rounded-lg border border-border p-3 text-sm hover:bg-surface"
               >
                 <span className="font-medium">{c.displayName}</span>
