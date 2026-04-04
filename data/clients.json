@@ -1,0 +1,265 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "entity": "clients",
+    "referenceDate": "2026-04-03"
+  },
+  "clients": [
+    {
+      "id": "client-marufuku",
+      "legalNameJa": "株式会社 丸福惣菜",
+      "tradeNameJa": "丸福惣菜",
+      "industryJa": "コンビニ向け弁当・惣菜製造",
+      "prefectureJa": "千葉県",
+      "cityJa": "野田市",
+      "addressLineJa": "千葉県野田市〇〇",
+      "cultureJa": "挨拶・規律に厳しい。元職人気質の社長が衛生と身だしなみを最重視。",
+      "aiTargetProfileJa": "元軍人・警察官、体育会系・規律重視の人材",
+      "representative": {
+        "nameJa": "田中 徳男",
+        "age": 62,
+        "noteJa": "叩き上げ。遅刻や身だしなみに非常に厳しい。"
+      },
+      "workplaceEnvironmentJa": "ライン作業中心。HACCP準拠のため手洗い・消毒手順が複雑。",
+      "currentChallengesJa": "直近3ヶ月で若手日本人2名が「朝が早い」「社長の小言」と離職。",
+      "recruitmentJa": "特定技能 3名募集。時給1,150円（深夜手当別）。寮完備（社宅）。",
+      "operations": {
+        "currentAssignees": 4,
+        "openSlots": 3,
+        "retentionRatePct": 78,
+        "satisfactionScore": 4.1
+      },
+      "ltMonthlyProfitPerHeadJpy": 55000,
+      "contact": {
+        "email": "hr@marufuku-souzai.example.jp",
+        "phone": "04-7123-4567",
+        "contactPersonJa": "人事部 佐藤"
+      },
+      "matchingHintTags": ["規律", "衛生", "早起き", "食品製造", "特定技能"]
+    },
+    {
+      "id": "client-edomae",
+      "legalNameJa": "有限会社 江戸前水産加工",
+      "tradeNameJa": "江戸前水産加工",
+      "industryJa": "水産加工",
+      "prefectureJa": "東京都",
+      "cityJa": "江東区",
+      "addressLineJa": "東京都江東区〇〇",
+      "cultureJa": "立ち仕事・低温環境が基本。体力と継続力が問われる現場。",
+      "aiTargetProfileJa": "漁業・水産経験、20代男性・体力に自信がある人材",
+      "representative": {
+        "nameJa": "鈴木 海人",
+        "age": 54,
+        "noteJa": "卸出身。現場主義で説明は短め。"
+      },
+      "workplaceEnvironmentJa": "冷蔵・冷凍庫近辺の作業多。防水・防寒装備あり。",
+      "currentChallengesJa": "繁忙期は残業増。離職理由の多くが「寒さ・立ちっぱなし」。",
+      "recruitmentJa": "特定技能 2名。時給1,200円〜。早番シフト中心。",
+      "operations": {
+        "currentAssignees": 6,
+        "openSlots": 2,
+        "retentionRatePct": 71,
+        "satisfactionScore": 3.8
+      },
+      "ltMonthlyProfitPerHeadJpy": 48000,
+      "contact": {
+        "email": "work@edomae-suisan.example.jp",
+        "phone": "03-3456-7890",
+        "contactPersonJa": "製造課 高橋"
+      },
+      "matchingHintTags": ["体力", "低温", "水産", "早番", "立ち仕事"]
+    },
+    {
+      "id": "client-fresh-bread",
+      "legalNameJa": "株式会社 フレッシュ製パン",
+      "tradeNameJa": "フレッシュ製パン",
+      "industryJa": "パン製造",
+      "prefectureJa": "埼玉県",
+      "cityJa": "川口市",
+      "addressLineJa": "埼玉県川口市〇〇",
+      "cultureJa": "チーム作業。レシピ通りの分量・時間管理が厳しい。",
+      "aiTargetProfileJa": "細かい作業が得意、女性比率が高いラインとの相性重視",
+      "representative": {
+        "nameJa": "木村 パン子",
+        "age": 48,
+        "noteJa": "製パン歴30年。新人への声かけが丁寧。"
+      },
+      "workplaceEnvironmentJa": "成形・焼成ライン。粉塵対策と温度管理が徹底されている。",
+      "currentChallengesJa": "深夜帯の欠員。単純ミスによる廃棄コストが課題。",
+      "recruitmentJa": "特定技能 4名。時給1,080円〜。シフト制。",
+      "operations": {
+        "currentAssignees": 9,
+        "openSlots": 4,
+        "retentionRatePct": 85,
+        "satisfactionScore": 4.4
+      },
+      "ltMonthlyProfitPerHeadJpy": 42000,
+      "contact": {
+        "email": "factory@fresh-bread.example.jp",
+        "phone": "048-234-5678",
+        "contactPersonJa": "工場長 伊藤"
+      },
+      "matchingHintTags": ["チームワーク", "正確さ", "製パン", "女性フレンドリー"]
+    },
+    {
+      "id": "client-kanto-veg",
+      "legalNameJa": "株式会社 関東ベジタブル",
+      "tradeNameJa": "関東ベジタブル",
+      "industryJa": "野菜カット・サラダ製造",
+      "prefectureJa": "神奈川県",
+      "cityJa": "相模原市",
+      "addressLineJa": "神奈川県相模原市〇〇",
+      "cultureJa": "スピード重視。単純作業の反復がメイン。",
+      "aiTargetProfileJa": "忍耐力、農家・単純作業経験者",
+      "representative": {
+        "nameJa": "中村 菜摘",
+        "age": 51,
+        "noteJa": "数字（kg/h）で管理。説明はマニュアル化済み。"
+      },
+      "workplaceEnvironmentJa": "カットライン。冷蔵庫内作業と常温作業の切替あり。",
+      "currentChallengesJa": "ピーク時の欠員でライン停止リスク。",
+      "recruitmentJa": "特定技能 5名。時給1,050円〜。日勤中心。",
+      "operations": {
+        "currentAssignees": 11,
+        "openSlots": 5,
+        "retentionRatePct": 80,
+        "satisfactionScore": 4.0
+      },
+      "ltMonthlyProfitPerHeadJpy": 39000,
+      "contact": {
+        "email": "recruit@kanto-veg.example.jp",
+        "phone": "042-567-8901",
+        "contactPersonJa": "製造部 渡辺"
+      },
+      "matchingHintTags": ["スピード", "単純作業", "農業", "野菜"]
+    },
+    {
+      "id": "client-johoku-niku",
+      "legalNameJa": "株式会社 城北食肉卸",
+      "tradeNameJa": "城北食肉卸",
+      "industryJa": "精肉加工・卸",
+      "prefectureJa": "栃木県",
+      "cityJa": "宇都宮市",
+      "addressLineJa": "栃木県宇都宮市〇〇",
+      "cultureJa": "刃物使用。力仕事と安全管理が最重要。高賃金で稼ぎ重視層向け。",
+      "aiTargetProfileJa": "腕力のある男性、食肉・解体経験者優遇",
+      "representative": {
+        "nameJa": "斎藤 剛",
+        "age": 57,
+        "noteJa": "安全研修を徹底。ケガゼロ運動を掲げる。"
+      },
+      "workplaceEnvironmentJa": "低温加工室。防刃手袋・メッシュエプロン必須。",
+      "currentChallengesJa": "地方のため応募が少なめ。初任者の定着に3ヶ月必要。",
+      "recruitmentJa": "特定技能 2名。時給1,280円〜。住宅手当あり。",
+      "operations": {
+        "currentAssignees": 5,
+        "openSlots": 2,
+        "retentionRatePct": 74,
+        "satisfactionScore": 3.9
+      },
+      "ltMonthlyProfitPerHeadJpy": 61000,
+      "contact": {
+        "email": "jobs@johoku-niku.example.jp",
+        "phone": "028-678-9012",
+        "contactPersonJa": "加工課 山本"
+      },
+      "matchingHintTags": ["力仕事", "食肉", "高時給", "安全"]
+    },
+    {
+      "id": "client-yamato-bento",
+      "legalNameJa": "株式会社 大和弁当センター",
+      "tradeNameJa": "大和弁当センター",
+      "industryJa": "弁当盛付・配送センター",
+      "prefectureJa": "茨城県",
+      "cityJa": "つくば市",
+      "addressLineJa": "茨城県つくば市〇〇",
+      "cultureJa": "衛生管理徹底。外国人受入実績が多くオンボーディングが整備されている。",
+      "aiTargetProfileJa": "初心者・若手ポテンシャル、チームワーク重視",
+      "representative": {
+        "nameJa": "岡田 衛生",
+        "age": 45,
+        "noteJa": "外国人技能実習・特定技能の定着ノウハウあり。"
+      },
+      "workplaceEnvironmentJa": "盛付ラインと金属検出。動画マニュアルと通訳アプリ併用。",
+      "currentChallengesJa": "新規オープンラインの増員。品質クレームゼロが目標。",
+      "recruitmentJa": "特定技能 6名。時給1,100円〜。社員食堂あり。",
+      "operations": {
+        "currentAssignees": 14,
+        "openSlots": 6,
+        "retentionRatePct": 88,
+        "satisfactionScore": 4.5
+      },
+      "ltMonthlyProfitPerHeadJpy": 45000,
+      "contact": {
+        "email": "hr@yamato-bento.example.jp",
+        "phone": "029-789-0123",
+        "contactPersonJa": "総務 林"
+      },
+      "matchingHintTags": ["衛生", "初心者OK", "外国人受入", "弁当"]
+    },
+    {
+      "id": "client-irodori",
+      "legalNameJa": "株式会社 彩りデリカ",
+      "tradeNameJa": "彩りデリカ",
+      "industryJa": "冷凍食品製造",
+      "prefectureJa": "群馬県",
+      "cityJa": "高崎市",
+      "addressLineJa": "群馬県高崎市〇〇",
+      "cultureJa": "最新設備。タッチパネル・ラインPC操作が日常業務に含まれる。",
+      "aiTargetProfileJa": "ITリテラシーのある若手、学習意欲が高い人材",
+      "representative": {
+        "nameJa": "藤原 智也",
+        "age": 42,
+        "noteJa": "DX推進担当兼任。データ入力ミスをKPI管理。"
+      },
+      "workplaceEnvironmentJa": "自動ライン監視と異常停止対応。簡単なトラブルシュート研修あり。",
+      "currentChallengesJa": "パネル操作が苦手な人材の早期離脱を防ぎたい。",
+      "recruitmentJa": "特定技能 3名。時給1,130円〜。資格手当あり。",
+      "operations": {
+        "currentAssignees": 7,
+        "openSlots": 3,
+        "retentionRatePct": 82,
+        "satisfactionScore": 4.2
+      },
+      "ltMonthlyProfitPerHeadJpy": 47000,
+      "contact": {
+        "email": "factory@irodori-delica.example.jp",
+        "phone": "027-890-1234",
+        "contactPersonJa": "製造技術 井上"
+      },
+      "matchingHintTags": ["PC操作", "若手", "冷凍食品", "自動ライン"]
+    },
+    {
+      "id": "client-sanriku-chiba",
+      "legalNameJa": "三陸フーズ株式会社 千葉支店",
+      "tradeNameJa": "三陸フーズ(千葉支店)",
+      "industryJa": "缶詰・レトルト製造",
+      "prefectureJa": "千葉県",
+      "cityJa": "銚子市",
+      "addressLineJa": "千葉県銚子市〇〇",
+      "cultureJa": "繁忙期は残業多め。稼ぎたい人・送金目的が明確な人材と相性が良い。",
+      "aiTargetProfileJa": "既婚者、送金意欲が高い、残業適応できる人材",
+      "representative": {
+        "nameJa": "大西 繁",
+        "age": 55,
+        "noteJa": "漁業地縁。繁忙期のシフト調整に長けている。"
+      },
+      "workplaceEnvironmentJa": "缶詰ライン。高温工程と重量物搬送あり。",
+      "currentChallengesJa": "繁忙期3ヶ月の離職率が課題。メンタルケア研修を導入中。",
+      "recruitmentJa": "特定技能 4名。時給1,120円〜。残業代別途。寮相談可。",
+      "operations": {
+        "currentAssignees": 10,
+        "openSlots": 4,
+        "retentionRatePct": 76,
+        "satisfactionScore": 3.7
+      },
+      "ltMonthlyProfitPerHeadJpy": 52000,
+      "contact": {
+        "email": "chiba@sanriku-foods.example.jp",
+        "phone": "0479-901-2345",
+        "contactPersonJa": "支店長 松井"
+      },
+      "matchingHintTags": ["残業", "送金", "缶詰", "既婚者歓迎"]
+    }
+  ]
+}

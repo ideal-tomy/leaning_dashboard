@@ -1,0 +1,48 @@
+import type { Candidate, CandidatePipelineStatus, ClientCompany, DemoDataBundle } from "@data/types";
+
+function avatar(seed: string) { return `https://api.dicebear.com/7.x/notionists/svg?seed=${encodeURIComponent(seed)}`; }
+function scoreOrder(j: Candidate["jlpt"]): number { const o: Record<string, number> = { N5: 1, N4: 2, N3: 3, N2: 4, N1: 5 }; return o[j] ?? 0; }
+
+export const clients: ClientCompany[] = [
+  { id: "med-unit-1", legalNameJa: "みらい総合クリニック", tradeNameJa: "みらい総合クリニック", industryJa: "外来クリニック", prefectureJa: "東京都", cityJa: "中央区", cultureJa: "患者待ち時間短縮を重視。", aiTargetProfileJa: "トリアージと記録が正確なスタッフ。", workplaceEnvironmentJa: "早番/遅番の2交代。", recruitmentJa: "受付・看護補助 2枠。", operations: { currentAssignees: 13, openSlots: 2, retentionRatePct: 84, satisfactionScore: 4.3 }, ltMonthlyProfitPerHeadJpy: 62000, contact: { email: "med1@example.jp", phone: "03-7400-5501", contactPersonJa: "事務長 小林" }, matchingHintTags: ["記録", "トリアージ", "外来"] },
+  { id: "med-unit-2", legalNameJa: "青葉ケアステーション株式会社", tradeNameJa: "青葉ケアステーション", industryJa: "訪問介護", prefectureJa: "神奈川県", cityJa: "横浜市", cultureJa: "訪問時間厳守と共有重視。", aiTargetProfileJa: "訪問計画遵守ができるスタッフ。", workplaceEnvironmentJa: "移動多め。", recruitmentJa: "訪問スタッフ 3枠。", operations: { currentAssignees: 15, openSlots: 3, retentionRatePct: 79, satisfactionScore: 4.1 }, ltMonthlyProfitPerHeadJpy: 58000, contact: { email: "med2@example.jp", phone: "045-920-5502", contactPersonJa: "管理者 石井" }, matchingHintTags: ["訪問", "共有", "時間厳守"] },
+  { id: "med-unit-3", legalNameJa: "中部リハビリセンター", tradeNameJa: "中部リハビリセンター", industryJa: "リハビリ施設", prefectureJa: "愛知県", cityJa: "名古屋市", cultureJa: "記録品質と計画達成を重視。", aiTargetProfileJa: "計画遂行とモニタリングが得意なスタッフ。", workplaceEnvironmentJa: "日中シフト中心。", recruitmentJa: "リハ助手 1枠。", operations: { currentAssignees: 9, openSlots: 1, retentionRatePct: 82, satisfactionScore: 4.0 }, ltMonthlyProfitPerHeadJpy: 55000, contact: { email: "med3@example.jp", phone: "052-920-5503", contactPersonJa: "主任 近藤" }, matchingHintTags: ["計画", "モニタリング", "記録"] },
+  { id: "med-unit-4", legalNameJa: "北都ナーシングホーム", tradeNameJa: "北都ナーシングホーム", industryJa: "介護施設", prefectureJa: "北海道", cityJa: "札幌市", cultureJa: "夜勤体制の安定重視。", aiTargetProfileJa: "夜勤シフトに強いスタッフ。", workplaceEnvironmentJa: "夜勤あり。", recruitmentJa: "介護スタッフ 2枠。", operations: { currentAssignees: 11, openSlots: 2, retentionRatePct: 76, satisfactionScore: 3.8 }, ltMonthlyProfitPerHeadJpy: 60000, contact: { email: "med4@example.jp", phone: "011-940-5504", contactPersonJa: "施設長 岡田" }, matchingHintTags: ["夜勤", "介護記録", "安定稼働"] },
+  { id: "med-unit-5", legalNameJa: "九州メディケアネット株式会社", tradeNameJa: "九州メディケアネット", industryJa: "在宅医療支援", prefectureJa: "福岡県", cityJa: "福岡市", cultureJa: "多職種連携を重視。", aiTargetProfileJa: "連携報告が正確なスタッフ。", workplaceEnvironmentJa: "訪問+オンライン会議。", recruitmentJa: "連携コーディネーター 1枠。", operations: { currentAssignees: 8, openSlots: 1, retentionRatePct: 81, satisfactionScore: 4.2 }, ltMonthlyProfitPerHeadJpy: 63000, contact: { email: "med5@example.jp", phone: "092-940-5505", contactPersonJa: "統括 西村" }, matchingHintTags: ["多職種連携", "報告", "在宅"] },
+];
+
+function cand(partial: Omit<Candidate, "contact" | "registeredAt"> & { contact?: Partial<Candidate["contact"]> }): Candidate {
+  return { ...partial, contact: { email: "staff@example.jp", phone: "03-0000-5500", ...partial.contact }, registeredAt: "2026-04-03" };
+}
+function statusMap(label: string): { pipelineStatus: CandidatePipelineStatus; pipelineStatusLabelJa: string } {
+  const m: Record<string, { pipelineStatus: CandidatePipelineStatus; pipelineStatusLabelJa: string }> = {
+    配属待ち: { pipelineStatus: "awaiting_entry", pipelineStatusLabelJa: "配属待ち" },
+    面談調整: { pipelineStatus: "interview_coordination", pipelineStatusLabelJa: "面談調整" },
+    院内研修中: { pipelineStatus: "training", pipelineStatusLabelJa: "院内研修中" },
+    配置確定: { pipelineStatus: "offer_accepted", pipelineStatusLabelJa: "配置確定" },
+    勤務調整中: { pipelineStatus: "visa_applying", pipelineStatusLabelJa: "勤務調整中" },
+    記録不備: { pipelineStatus: "document_blocked", pipelineStatusLabelJa: "記録不備" },
+    医療書類準備: { pipelineStatus: "document_prep", pipelineStatusLabelJa: "医療書類準備" },
+  };
+  return m[label] ?? m["面談調整"];
+}
+
+export const candidates: Candidate[] = [
+  cand({ id: "med-staff-1", displayName: "田村 由紀", legalNameFull: "田村 由紀", nameKatakana: "タムラ ユキ", age: 32, gender: "female", nationality: "日本", birthDate: "1994-08-21", birthPlace: "Tokyo", residence: { country: "日本", city: "東京都" }, jlpt: "N3", backgroundSummary: "外来看護補助6年。", educationWorkHistory: "受付連携・トリアージ補助を担当。", skillTags: ["記録", "トリアージ", "外来"], tokuteiGinoFoodManufacturing: false, driversLicenseLk: false, aiScore: 92, aiScoreRationale: "記録精度と対応速度が高い。", ...statusMap("配置確定"), passportNumber: "NA", passportExpiry: "NA", coeStatusJa: "初回シフト確定", plannedAssignment: { clientId: "med-unit-1", jobTitleJa: "外来看護補助", monthlySalaryJpy: 0 }, photoUrl: avatar("med-staff-1") }),
+  cand({ id: "med-staff-2", displayName: "山口 直人", legalNameFull: "山口 直人", nameKatakana: "ヤマグチ ナオト", age: 36, gender: "male", nationality: "日本", birthDate: "1990-01-05", birthPlace: "Yokohama", residence: { country: "日本", city: "神奈川県" }, jlpt: "N4", backgroundSummary: "訪問介護経験4年。", educationWorkHistory: "訪問記録と家族連携を担当。", skillTags: ["訪問", "共有", "時間厳守"], tokuteiGinoFoodManufacturing: false, driversLicenseLk: true, aiScore: 84, aiScoreRationale: "訪問計画順守に強み。", ...statusMap("勤務調整中"), passportNumber: "NA", passportExpiry: "NA", coeStatusJa: "訪問先調整中", photoUrl: avatar("med-staff-2") }),
+  cand({ id: "med-staff-3", displayName: "伊藤 美月", legalNameFull: "伊藤 美月", nameKatakana: "イトウ ミヅキ", age: 27, gender: "female", nationality: "日本", birthDate: "1999-11-14", birthPlace: "Nagoya", residence: { country: "日本", city: "愛知県" }, jlpt: "N4", backgroundSummary: "リハビリ助手経験あり。", educationWorkHistory: "計画モニタリング補助を担当。", skillTags: ["計画", "モニタリング", "記録"], tokuteiGinoFoodManufacturing: false, driversLicenseLk: false, aiScore: 80, aiScoreRationale: "計画運用への適性が高い。", ...statusMap("院内研修中"), passportNumber: "NA", passportExpiry: "NA", coeStatusJa: "研修プログラム進行中", photoUrl: avatar("med-staff-3") }),
+  cand({ id: "med-staff-4", displayName: "小川 智也", legalNameFull: "小川 智也", nameKatakana: "オガワ トモヤ", age: 40, gender: "male", nationality: "日本", birthDate: "1986-03-30", birthPlace: "Sapporo", residence: { country: "日本", city: "北海道" }, jlpt: "N3", backgroundSummary: "介護夜勤経験8年。", educationWorkHistory: "夜勤帯リーダー経験あり。", skillTags: ["夜勤", "介護記録", "安定稼働"], tokuteiGinoFoodManufacturing: false, driversLicenseLk: true, aiScore: 75, aiScoreRationale: "夜勤適性は高いが記録修正が必要。", ...statusMap("医療書類準備"), passportNumber: "NA", passportExpiry: "NA", coeStatusJa: "夜勤配置前チェック中", documentAlertJa: "記録フォーマット統一の再教育対象。", photoUrl: avatar("med-staff-4") }),
+  cand({ id: "med-staff-5", displayName: "松本 遥", legalNameFull: "松本 遥", nameKatakana: "マツモト ハルカ", age: 31, gender: "female", nationality: "日本", birthDate: "1995-06-12", birthPlace: "Fukuoka", residence: { country: "日本", city: "福岡県" }, jlpt: "N5", backgroundSummary: "在宅医療コーディネート経験2年。", educationWorkHistory: "多職種カンファレンス運営補助。", skillTags: ["多職種連携", "報告", "在宅"], tokuteiGinoFoodManufacturing: false, driversLicenseLk: true, aiScore: 68, aiScoreRationale: "連携力は高いが記録の粒度に課題。", ...statusMap("記録不備"), passportNumber: "NA", passportExpiry: "NA", coeStatusJa: "再指導予定", documentAlertJa: "連携報告書の記載漏れ。", photoUrl: avatar("med-staff-5") }),
+];
+
+export const demoBundle: DemoDataBundle = { meta: { version: "1.0.0", locale: "ja-JP", referenceDate: "2026-04-03", descriptionJa: "医療・介護テンプレート用ダミーデータ（5拠点・5スタッフ）" }, candidates, clients };
+export function getClientById(id: string) { return clients.find((c) => c.id === id); }
+export function getCandidateById(id: string) { return candidates.find((c) => c.id === id); }
+export function getPipelineCounts(): Record<CandidatePipelineStatus, number> { const init: Record<CandidatePipelineStatus, number> = { awaiting_entry: 0, interview_coordination: 0, training: 0, offer_accepted: 0, visa_applying: 0, document_blocked: 0, document_prep: 0 }; for (const c of candidates) init[c.pipelineStatus] += 1; return init; }
+export function countN3OrAbove() { return candidates.filter((c) => scoreOrder(c.jlpt) >= 3).length; }
+export function getTopCandidatesByAiScore(limit: number) { return [...candidates].sort((a, b) => b.aiScore - a.aiScore).slice(0, limit); }
+export function countDocumentAlerts() { return candidates.filter((c) => c.pipelineStatus === "document_blocked" || c.pipelineStatus === "document_prep" || Boolean(c.documentAlertJa)).length; }
+export function totalOpenSlots() { return clients.reduce((s, c) => s + c.operations.openSlots, 0); }
+export function monthlyRevenueTrend() { return [{ month: "2025-11", amountManYen: 86 }, { month: "2025-12", amountManYen: 88 }, { month: "2026-01", amountManYen: 89 }, { month: "2026-02", amountManYen: 91 }, { month: "2026-03", amountManYen: 94 }, { month: "2026-04", amountManYen: 96 }]; }
+export function scoreCandidateForClient(candidate: Candidate, client: ClientCompany) { const hit = candidate.skillTags.filter((t) => client.matchingHintTags.some((h) => h.includes(t) || t.includes(h))).length; const pct = Math.min(97, 56 + hit * 8 + Math.floor((candidate.aiScore - 60) / 3)); const reason = `${client.tradeNameJa}の重視点（${client.matchingHintTags.slice(0, 2).join("・")}）と、${candidate.displayName}の特性（${candidate.skillTags.slice(0, 3).join("・")}）が一致しています。`; return { pct, reason }; }
+export function getMatchesForClient(clientId: string) { const client = getClientById(clientId); if (!client) return []; return [...candidates].map((c) => ({ candidate: c, ...scoreCandidateForClient(c, client) })).sort((a, b) => b.pct - a.pct).slice(0, 5); }
