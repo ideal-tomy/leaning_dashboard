@@ -24,17 +24,8 @@ import {
   withDemoQuery,
 } from "@/lib/industry-selection";
 import { getDemoFactoryClient } from "@/lib/demo-factory-client";
+import { CANDIDATE_PIPELINE_DISPLAY_ORDER } from "@/lib/candidates-pipeline-order";
 import { getIndustryDemoData } from "@/lib/demo-data-selector";
-
-const pipelineOrder = [
-  "interview_coordination",
-  "offer_accepted",
-  "visa_applying",
-  "awaiting_entry",
-  "training",
-  "document_prep",
-  "document_blocked",
-] as const;
 
 type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
@@ -180,7 +171,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
               <CardContent className="flex min-h-0 flex-1 flex-col gap-4 p-5 pt-0">
                 <div className="flex min-h-0 flex-1 flex-col gap-4">
                   <div className="flex h-3 w-full shrink-0 overflow-hidden rounded-full bg-surface">
-                    {pipelineOrder.map((key) => {
+                    {CANDIDATE_PIPELINE_DISPLAY_ORDER.map((key) => {
                       const n = pipeline[key];
                       if (n === 0) return null;
                       const w = Math.max(8, (n / totalPipeline) * 100);
@@ -195,7 +186,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
                     })}
                   </div>
                   <ul className="grid min-h-0 flex-1 grid-cols-2 content-start gap-x-2 gap-y-1 text-xs leading-tight text-muted">
-                    {pipelineOrder.map((key) => (
+                    {CANDIDATE_PIPELINE_DISPLAY_ORDER.map((key) => (
                       <li key={key} className="flex justify-between gap-1">
                         <span className="truncate">{profile.statusLabels[key]}</span>
                         <span className="shrink-0 font-semibold tabular-nums text-foreground">

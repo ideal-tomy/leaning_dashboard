@@ -6,6 +6,12 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { GitBranch, Search } from "lucide-react";
 import type { Candidate, JlptLevel } from "@data/types";
+import {
+  CANDIDATE_PIPELINE_DISPLAY_ORDER,
+  CANDIDATE_PIPELINE_PHASE_GROUPS,
+  STAFFING_PIPELINE_LIST_FILTER_DOCUMENT_WORK,
+} from "@/lib/candidates-pipeline-order";
+import type { EnabledIndustryKey } from "@/lib/industry-profiles";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -34,6 +40,60 @@ function statusBadgeVariant(
   return "default";
 }
 
+function isPipelineStageParam(
+  value: string | null
+): value is Candidate["pipelineStatus"] {
+  return (
+    value !== null &&
+    (CANDIDATE_PIPELINE_DISPLAY_ORDER as readonly string[]).includes(value)
+  );
+}
+
+type PipelineListFilter =
+  | { kind: "status"; status: Candidate["pipelineStatus"] }
+  | { kind: "document_work" };
+
+function parsePipelineListFilter(
+  param: string | null,
+  industry: EnabledIndustryKey
+): PipelineListFilter | null {
+  if (!param) return null;
+  if (
+    industry === "staffing" &&
+    param === STAFFING_PIPELINE_LIST_FILTER_DOCUMENT_WORK
+  ) {
+    return { kind: "document_work" };
+  }
+  if (isPipelineStageParam(param)) return { kind: "status", status: param };
+  return null;
+}
+
+type PipelineUiSlot =
+  | { kind: "single"; status: Candidate["pipelineStatus"] }
+  | { kind: "document_work" };
+
+function expandPipelinePhaseStagesToSlots(
+  industry: EnabledIndustryKey,
+  stages: readonly Candidate["pipelineStatus"][]
+): PipelineUiSlot[] {
+  const out: PipelineUiSlot[] = [];
+  let staffingDocMergedEmitted = false;
+  for (const s of stages) {
+    if (industry === "staffing") {
+      if (s === "document_blocked") continue;
+      if (s === "document_prep") {
+        if (!staffingDocMergedEmitted) {
+          out.push({ kind: "document_work" });
+          staffingDocMergedEmitted = true;
+        }
+        continue;
+      }
+    }
+    out.push({ kind: "single", status: s });
+  }
+  return out;
+}
+
 export function CandidatesSection() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -41,14 +101,19 @@ export function CandidatesSection() {
   const view = searchParams.get("view");
   const followupLearning = searchParams.get("followup") === "learning";
   const industry = getIndustryFromSearchParams(searchParams);
+  const pipelineStageParam = searchParams.get("pipelineStage");
+  const listFilter = parsePipelineListFilter(pipelineStageParam, industry);
+  const stageFilterActive = listFilter !== null;
   const pageHints = getIndustryPageHints(industry);
   const resolvedDefaultTab = followupLearning
     ? "list"
-    : view === "pipeline"
-      ? "pipeline"
-      : view === "list"
-        ? "list"
-        : pageHints.candidates.defaultTab;
+    : stageFilterActive
+      ? "list"
+      : view === "pipeline"
+        ? "pipeline"
+        : view === "list"
+          ? "list"
+          : pageHints.candidates.defaultTab;
   const [tab, setTab] = useState(resolvedDefaultTab);
   const [q, setQ] = useState("");
   const [jlpt, setJlpt] = useState<JlptLevel | "all">("all");
@@ -110,6 +175,30 @@ export function CandidatesSection() {
   const filtered = followupLearning
     ? learningFollowupOrdered(searchFiltered)
     : searchFiltered;
+
+  const pipelineFiltered =
+    listFilter?.kind === "document_work"
+      ? filtered.filter(
+          (c) =>
+            c.pipelineStatus === "document_prep" ||
+            c.pipelineStatus === "document_blocked"
+        )
+      : listFilter?.kind === "status"
+        ? filtered.filter((c) => c.pipelineStatus === listFilter.status)
+        : filtered;
+
+  function buildCandidatesHref(
+    updates: Record<string, string | null | undefined>
+  ) {
+    const p = new URLSearchParams(searchParams.toString());
+    for (const [key, val] of Object.entries(updates)) {
+      if (val === null || val === undefined || val === "") p.delete(key);
+      else p.set(key, val);
+    }
+    p.set("industry", industry);
+    p.set("role", role);
+    return `/candidates?${p.toString()}`;
+  }
 
   function openCandidate(c: Candidate) {
     if (isMobile) {
@@ -183,12 +272,21 @@ export function CandidatesSection() {
     );
   }
 
+  const pageIntentPrimary =
+    industry === "staffing" &&
+    role === "client" &&
+    pageHints.candidates.pageIntentClientJa
+      ? pageHints.candidates.pageIntentClientJa
+      : pageHints.candidates.pageIntentJa;
+
   const headerDescription = [
-    pageHints.candidates.pageIntentJa,
+    pageIntentPrimary,
     `${candidates.length} 件のデモデータ。${pageHints.candidates.pageSubtitle} スマホはタップでクイック表示。`,
   ]
     .filter(Boolean)
     .join(" ");
+
+  const pipelineDemo = pageHints.candidates.pipelineDemo;
 
   return (
     <div className="space-y-6">
@@ -210,7 +308,17 @@ export function CandidatesSection() {
 
       <Tabs
         value={tab}
-        onValueChange={(v) => setTab(v as "list" | "pipeline")}
+        onValueChange={(v) => {
+          const next = v as "list" | "pipeline";
+          setTab(next);
+          if (next === "pipeline") {
+            router.replace(
+              buildCandidatesHref({ view: "pipeline", pipelineStage: null })
+            );
+          } else {
+            router.replace(buildCandidatesHref({ view: "list" }));
+          }
+        }}
         className="w-full"
       >
         <TabsList className="w-full max-w-md">
@@ -224,24 +332,267 @@ export function CandidatesSection() {
         </TabsList>
 
         <TabsContent value="pipeline" className="space-y-4">
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {(
-              Object.entries(pipeline) as [
-                Candidate["pipelineStatus"],
-                number,
-              ][]
-            ).map(([key, n]) => (
-              <Card key={key}>
-                <CardContent className="p-4">
-                  <p className="text-xs text-muted">{profile.statusLabels[key]}</p>
-                  <p className="text-2xl font-bold tabular-nums">{n}</p>
-                </CardContent>
-              </Card>
+          {pipelineDemo ? (
+            <p className="text-sm leading-relaxed text-muted">
+              {role === "client"
+                ? pipelineDemo.pipelineIntroClientJa
+                : pipelineDemo.pipelineIntroAdminJa}
+            </p>
+          ) : null}
+          <div className="space-y-8">
+            {CANDIDATE_PIPELINE_PHASE_GROUPS.map((phase) => (
+              <section key={phase.id} className="space-y-3">
+                <h3 className="border-b border-border pb-2 text-sm font-semibold tracking-tight text-foreground">
+                  {phase.titleJa}
+                </h3>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {expandPipelinePhaseStagesToSlots(industry, phase.stages).map(
+                    (slot) => {
+                      if (slot.kind === "document_work") {
+                        const nPrep = pipeline.document_prep;
+                        const nBlocked = pipeline.document_blocked;
+                        const n = nPrep + nBlocked;
+                        const preview = candidates
+                          .filter(
+                            (c) =>
+                              c.pipelineStatus === "document_prep" ||
+                              c.pipelineStatus === "document_blocked"
+                          )
+                          .slice(0, 2);
+                        const merged =
+                          pipelineDemo?.pipelineDocumentWorkMerged;
+                        const hintJa =
+                          merged == null
+                            ? null
+                            : role === "client"
+                              ? merged.clientJa
+                              : merged.adminJa;
+                        const lens =
+                          merged == null
+                            ? null
+                            : role === "client"
+                              ? merged.lensClient
+                              : merged.lensAdmin;
+                        const titleJa =
+                          merged?.titleJa ?? "書類（準備中・不備）";
+                        return (
+                          <button
+                            key="document_work"
+                            type="button"
+                            onClick={() => {
+                              router.push(
+                                buildCandidatesHref({
+                                  view: "list",
+                                  pipelineStage:
+                                    STAFFING_PIPELINE_LIST_FILTER_DOCUMENT_WORK,
+                                })
+                              );
+                              setTab("list");
+                            }}
+                            className={cn(
+                              "rounded-xl border border-border bg-card text-left transition-all",
+                              "hover:border-primary/35 hover:shadow-md",
+                              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+                            )}
+                          >
+                            <Card className="border-0 shadow-none">
+                              <CardContent className="space-y-2 p-4">
+                                <p className="text-xs font-medium text-muted">
+                                  {titleJa}
+                                </p>
+                                <p className="text-2xl font-bold tabular-nums">
+                                  {n}
+                                </p>
+                                <p className="text-[11px] tabular-nums text-muted">
+                                  準備中 {nPrep} · 不備 {nBlocked}
+                                </p>
+                                {lens ? (
+                                  <dl className="space-y-1.5 rounded-md border border-border/80 bg-muted/30 px-2.5 py-2 text-left">
+                                    <div>
+                                      <dt className="text-[10px] font-semibold uppercase tracking-wide text-muted">
+                                        状況
+                                      </dt>
+                                      <dd className="text-xs leading-snug text-foreground">
+                                        {lens.situationJa}
+                                      </dd>
+                                    </div>
+                                    <div>
+                                      <dt className="text-[10px] font-semibold uppercase tracking-wide text-muted">
+                                        与える影響
+                                      </dt>
+                                      <dd className="text-xs leading-snug text-foreground">
+                                        {lens.impactJa}
+                                      </dd>
+                                    </div>
+                                    <div>
+                                      <dt className="text-[10px] font-semibold uppercase tracking-wide text-muted">
+                                        気にする主体
+                                      </dt>
+                                      <dd className="text-xs leading-snug text-foreground">
+                                        {lens.ownerJa}
+                                      </dd>
+                                    </div>
+                                  </dl>
+                                ) : null}
+                                {hintJa ? (
+                                  <p className="text-xs leading-snug text-muted">
+                                    <span className="font-medium text-foreground/80">
+                                      フォロー目安:{" "}
+                                    </span>
+                                    {hintJa}
+                                  </p>
+                                ) : null}
+                                {preview.length > 0 ? (
+                                  <ul className="border-t border-border/80 pt-2 text-xs text-foreground">
+                                    {preview.map((c) => (
+                                      <li key={c.id} className="truncate">
+                                        {c.displayName}
+                                      </li>
+                                    ))}
+                                    {n > 2 ? (
+                                      <li className="text-muted">
+                                        ほか {n - 2} 名
+                                      </li>
+                                    ) : null}
+                                  </ul>
+                                ) : null}
+                                <p className="text-xs font-medium text-primary">
+                                  押して一覧に絞り込む
+                                </p>
+                              </CardContent>
+                            </Card>
+                          </button>
+                        );
+                      }
+
+                      const status = slot.status;
+                      const n = pipeline[status];
+                      const preview = candidates
+                        .filter((c) => c.pipelineStatus === status)
+                        .slice(0, 2);
+                      const hints = pipelineDemo?.pipelineStageHints[status];
+                      const hintJa =
+                        hints == null
+                          ? null
+                          : role === "client"
+                            ? hints.clientJa
+                            : hints.adminJa;
+                      const lens =
+                        hints == null
+                          ? null
+                          : role === "client"
+                            ? hints.lensClient
+                            : hints.lensAdmin;
+                      return (
+                        <button
+                          key={status}
+                          type="button"
+                          onClick={() => {
+                            router.push(
+                              buildCandidatesHref({
+                                view: "list",
+                                pipelineStage: status,
+                              })
+                            );
+                            setTab("list");
+                          }}
+                          className={cn(
+                            "rounded-xl border border-border bg-card text-left transition-all",
+                            "hover:border-primary/35 hover:shadow-md",
+                            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+                          )}
+                        >
+                          <Card className="border-0 shadow-none">
+                            <CardContent className="space-y-2 p-4">
+                              <p className="text-xs font-medium text-muted">
+                                {profile.statusLabels[status]}
+                              </p>
+                              <p className="text-2xl font-bold tabular-nums">
+                                {n}
+                              </p>
+                              {lens ? (
+                                <dl className="space-y-1.5 rounded-md border border-border/80 bg-muted/30 px-2.5 py-2 text-left">
+                                  <div>
+                                    <dt className="text-[10px] font-semibold uppercase tracking-wide text-muted">
+                                      状況
+                                    </dt>
+                                    <dd className="text-xs leading-snug text-foreground">
+                                      {lens.situationJa}
+                                    </dd>
+                                  </div>
+                                  <div>
+                                    <dt className="text-[10px] font-semibold uppercase tracking-wide text-muted">
+                                      与える影響
+                                    </dt>
+                                    <dd className="text-xs leading-snug text-foreground">
+                                      {lens.impactJa}
+                                    </dd>
+                                  </div>
+                                  <div>
+                                    <dt className="text-[10px] font-semibold uppercase tracking-wide text-muted">
+                                      気にする主体
+                                    </dt>
+                                    <dd className="text-xs leading-snug text-foreground">
+                                      {lens.ownerJa}
+                                    </dd>
+                                  </div>
+                                </dl>
+                              ) : null}
+                              {hintJa ? (
+                                <p className="text-xs leading-snug text-muted">
+                                  <span className="font-medium text-foreground/80">
+                                    フォロー目安:{" "}
+                                  </span>
+                                  {hintJa}
+                                </p>
+                              ) : null}
+                              {preview.length > 0 ? (
+                                <ul className="border-t border-border/80 pt-2 text-xs text-foreground">
+                                  {preview.map((c) => (
+                                    <li key={c.id} className="truncate">
+                                      {c.displayName}
+                                    </li>
+                                  ))}
+                                  {n > 2 ? (
+                                    <li className="text-muted">
+                                      ほか {n - 2} 名
+                                    </li>
+                                  ) : null}
+                                </ul>
+                              ) : null}
+                              <p className="text-xs font-medium text-primary">
+                                押して一覧に絞り込む
+                              </p>
+                            </CardContent>
+                          </Card>
+                        </button>
+                      );
+                    }
+                  )}
+                </div>
+              </section>
             ))}
           </div>
         </TabsContent>
 
         <TabsContent value="list" className="space-y-4">
+          {stageFilterActive && listFilter ? (
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-primary/25 bg-primary/[0.06] px-3 py-2 text-sm">
+              <span>
+                {listFilter.kind === "document_work"
+                  ? `「${
+                      pipelineDemo?.pipelineDocumentWorkMerged?.titleJa ??
+                      "書類（準備中・不備）"
+                    }」（準備中・不備の合算）のみ表示中（デモ）`
+                  : `ステージ「${profile.statusLabels[listFilter.status]}」のみ表示中（デモ）`}
+              </span>
+              <Button variant="ghost" size="sm" className="h-8 shrink-0" asChild>
+                <Link href={buildCandidatesHref({ pipelineStage: null })}>
+                  フィルタを解除
+                </Link>
+              </Button>
+            </div>
+          ) : null}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted" />
@@ -269,7 +620,12 @@ export function CandidatesSection() {
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-            {filtered.map((c) => (
+            {pipelineFiltered.length === 0 ? (
+              <p className="col-span-full py-8 text-center text-sm text-muted">
+                条件に一致する候補者がありません。
+              </p>
+            ) : null}
+            {pipelineFiltered.map((c) => (
               <button
                 key={c.id}
                 type="button"

@@ -1,3 +1,4 @@
+import type { CandidatePipelineStatus } from "@data/types";
 import type {
   DashboardExtensionOverride,
   DashboardExtensionSlotId,
@@ -90,14 +91,56 @@ export type CandidateDetailHints = {
   showJlptBadge: boolean;
 };
 
+/** 段階の勤務イメージ・影響・対応主体（パイプラインカードで一目用） */
+export type CandidatesPipelineStageLens = {
+  situationJa: string;
+  impactJa: string;
+  ownerJa: string;
+};
+
+export type CandidatesPipelineStageRoleHints = {
+  /** オペ上のフォロー点（1行・補足） */
+  adminJa: string;
+  clientJa: string;
+  lensAdmin: CandidatesPipelineStageLens;
+  lensClient: CandidatesPipelineStageLens;
+};
+
+export type CandidatesPipelineStageHints = Record<
+  CandidatePipelineStatus,
+  CandidatesPipelineStageRoleHints
+>;
+
+/** 候補者ページ・パイプラインタブの派遣デモ用コピー */
+export type CandidatesPipelineDemo = {
+  pipelineIntroAdminJa: string;
+  pipelineIntroClientJa: string;
+  pipelineStageHints: CandidatesPipelineStageHints;
+  /**
+   * staffing のみ: `document_prep` と `document_blocked` を1カードにまとめるときのタイトル・レンズ・フォロー文
+   * （一覧絞り込みは `pipelineStage=document_work`）
+   */
+  pipelineDocumentWorkMerged?: {
+    titleJa: string;
+    adminJa: string;
+    clientJa: string;
+    lensAdmin: CandidatesPipelineStageLens;
+    lensClient: CandidatesPipelineStageLens;
+  };
+};
+
 export type IndustryPageHints = {
   candidates: {
     pageSubtitle: string;
     defaultTab: "list" | "pipeline";
     /** モバイル Sheet 内の情報順 */
     sheetOrder: "statusFirst" | "alertFirst";
-    /** この画面で終わらせること（1行・派遣デモ用） */
+    /** この画面で終わらせること（1行・派遣デモ・支援機関向け） */
     pageIntentJa?: string;
+    /** 工場ロール向けのページ意図（派遣デモ） */
+    pageIntentClientJa?: string;
+    /** パイプラインタブの説明・ステージ別ヒント（派遣デモ） */
+    pipelineDemo?: CandidatesPipelineDemo;
   };
   documents: {
     pageSubtitle: string;
@@ -181,6 +224,179 @@ const hints: Record<EnabledIndustryKey, IndustryPageHints> = {
       sheetOrder: "alertFirst",
       pageIntentJa:
         "誰を次にフォローするか決め、詳細で学習・認定・配属を確認する。",
+      pageIntentClientJa:
+        "配属予定や入社見通しの人物を把握し、詳細で労働条件・学習状況を確認する。手続きの主導は支援機関です（デモ）。",
+      pipelineDemo: {
+        pipelineIntroAdminJa:
+          "選考から入社準備まで、ステージ別の人数で滞留と優先フォローを俯瞰します。カードを押すと該当者だけ一覧に絞り込みます（デモ）。一覧タブで検索・詳細へ進めます。",
+        pipelineIntroClientJa:
+          "入社・配属の見通しをステージ別に参照できます。手続きの実行は支援機関が担います。カードから該当者一覧に絞り込めます（デモ）。",
+        pipelineStageHints: {
+          interview_coordination: {
+            adminJa: "面接日程・先方調整。ここが膨らむと後工程が遅延しやすい。",
+            clientJa: "面接前・日程調整中。現場が直接動く段階ではありません（デモ）。",
+            lensAdmin: {
+              situationJa:
+                "学習・書類の土台が整い、先は「どの派遣先と面接するか」の調整が中心。",
+              impactJa:
+                "ここが詰まると採用決定まで全体が伸び、欠員補充の計画がずれやすい。",
+              ownerJa:
+                "支援機関（送客・面接調整）が主。派遣先は面接設定・条件すり合わせに協力。",
+            },
+            lensClient: {
+              situationJa:
+                "まだ貴社に配属されていない候補。面接・マッチングの前後段階（デモ）。",
+              impactJa:
+                "採用決定の遅れは、将来的な入社時期の後ろ倒しに直結しうる。",
+              ownerJa:
+                "主に支援機関。貴社は面接同席・条件回答など限定的な関与（デモ）。",
+            },
+          },
+          offer_accepted: {
+            adminJa: "内定後フォロー・条件確定。ビザ・書類準備へつなぐ。",
+            clientJa: "内定〜条件固め。入社候補の時期イメージのたたき台。",
+            lensAdmin: {
+              situationJa:
+                "条件は原則合意済み。次は査証申請に向けた書類・本人フォローが主戦場。",
+              impactJa:
+                "内定取り消しや条件変更は、この後の手続きコストに直結する。",
+              ownerJa:
+                "支援機関（契約・書類・本人連絡）。派遣先は条件確認・承認のレス要。",
+            },
+            lensClient: {
+              situationJa:
+                "貴社オファー前提の段階。まだ査証・入国はこれから（出勤は先）。",
+              impactJa:
+                "条件のすり直しが入ると、入社予定の共有が後ろにずれる。",
+              ownerJa:
+                "支援機関が窓口。貴社は人事／現場リーダーが必要時のみ関与（デモ）。",
+            },
+          },
+          visa_applying: {
+            adminJa: "COE・査証の進捗管理。法務・期限アラートの要所。",
+            clientJa: "在留・査証手続き中。完了見込みは支援機関に確認（デモ）。",
+            lensAdmin: {
+              situationJa:
+                "手続きが完了すれば就労・入国に進める段階。いまは行政・書類の待ち時間含む。",
+              impactJa:
+                "期限超過や不備は入国全体がストップし、派遣先の稼働計画に影響。",
+              ownerJa:
+                "支援機関（入管・法務連携）が主。派遣先は結果共有の受け手。",
+            },
+            lensClient: {
+              situationJa:
+                "在留・査証の審査・発給待ち。完了後に初めて入国・勤務開始の確度が上がる。",
+              impactJa:
+                "遅延すると入社予定日の再調整が必要になる。",
+              ownerJa:
+                "支援機関が一元対応。貴社はスケジュール共有の参照でよい（デモ）。",
+            },
+          },
+          awaiting_entry: {
+            adminJa: "入国・入社手配。フライト・住居・講習の段取り確認。",
+            clientJa: "入国待ち。入社予定日の共有イメージを握る段階。",
+            lensAdmin: {
+              situationJa:
+                "査証取得後〜入国直前。フライト・宿泊・入国後講習の段取り固め。",
+              impactJa:
+                "手配ミスは入国当日トラブルや初日出勤遅れに直結。",
+              ownerJa:
+                "支援機関＋手配担当。派遣先は初日勤務・受入れ担当の確定。",
+            },
+            lensClient: {
+              situationJa:
+                "もうすぐ貴社に来る人がいる段階。初日出勤・受入れのイメージを握る。",
+              impactJa:
+                "遅延・欠航はライン配置と研修の段取りに影響。",
+              ownerJa:
+                "現場・人事が「初日」を意識。手続き本体は支援機関（デモ）。",
+            },
+          },
+          training: {
+            adminJa: "講習・研修フォロー。修了要件と現場配属のつなぎ。",
+            clientJa: "入国後講習等。現場配属前の状態（デモ）。",
+            lensAdmin: {
+              situationJa:
+                "入国後の法定・社内講習・適性確認。修了後に現場配属へ。",
+              impactJa:
+                "修了遅れは現場デビューがずれ、欠員枠の埋まり方に影響。",
+              ownerJa:
+                "支援機関＋講習担当。派遣先は配属先・メンターの事前確保。",
+            },
+            lensClient: {
+              situationJa:
+                "貴社配属直前。現場に出す前の最終仕上げ期間（デモ）。",
+              impactJa:
+                "配属日の変更はシフト・OJT計画の組み替えが必要。",
+              ownerJa:
+                "貴社現場リーダーが配属日・メンターを意識。講習は支援機関側。",
+            },
+          },
+          document_prep: {
+            adminJa: "書類作成・提出前。OCR・生成デモと連動しやすい。",
+            clientJa: "書類準備中。提出・審査は支援機関側の作業が中心。",
+            lensAdmin: {
+              situationJa:
+                "申請パッケージを組み立て中。提出前の最終チェックが焦点。",
+              impactJa:
+                "ここで手戻りが少ないほど、査証工程が短くなる。",
+              ownerJa:
+                "支援機関（書類・OCR オペ）。派遣先の関与は限定的（デモ）。",
+            },
+            lensClient: {
+              situationJa:
+                "まだ査証申請の火種に至っていない準備段階。",
+              impactJa:
+                "貴社の採用タイムラインへの影響は間接的（全体の出発点）。",
+              ownerJa:
+                "支援機関主導。貴社は必要書類の依頼があれば協力（デモ）。",
+            },
+          },
+          document_blocked: {
+            adminJa: "不備・差戻し。最優先でフォローしてパイプラインを動かす。",
+            clientJa: "書類に遅延あり。詳細は候補者画面で把握（支援機関フォロー中・参考）。",
+            lensAdmin: {
+              situationJa:
+                "提出物の不備・追加要求で手続きが止まっている状態。",
+              impactJa:
+                "放置すると以降の工程がすべて止まり、欠員補充のボトルネックになる。",
+              ownerJa:
+                "支援機関が最優先対応。派遣先は追加資料の提供依頼に応じる場合あり。",
+            },
+            lensClient: {
+              situationJa:
+                "入社・就労に進む前の手続きが止まっている可能性（参考情報）。",
+              impactJa:
+                "解消まで入社予定が不確定。計画はバッファを見ておくと安全。",
+              ownerJa:
+                "対応は支援機関。貴社は状況共有の確認に留める（デモ）。",
+            },
+          },
+        },
+        pipelineDocumentWorkMerged: {
+          titleJa: "書類（準備中・不備）",
+          adminJa:
+            "準備中は提出前チェック、不備は差戻し対応。同一ビューで人数と優先度を俯瞰し、一覧から個別に潰す。",
+          clientJa:
+            "書類の準備・修正が進行中。詳細・期限は支援機関に確認（デモ）。",
+          lensAdmin: {
+            situationJa:
+              "申請パッケージの作成・提出前調整と、不備・追加要求による差戻しが混在するゾーン。",
+            impactJa:
+              "準備の手戻りは査証工程を伸ばし、不備の放置は手続き全体を止める。どちらも欠員補充に直結する。",
+            ownerJa:
+              "支援機関が主担当（書類・法務・本人連絡）。派遣先は追加資料・承認依頼に協力。",
+          },
+          lensClient: {
+            situationJa:
+              "まだ査証・入社確定の前段で、書類の準備または修正が走っている状態（デモ）。",
+            impactJa:
+              "解消遅れは入社予定の後ろ倒しに繋がりうる。計画は余裕を見ておくと安全。",
+            ownerJa:
+              "手続きの実行は支援機関。貴社は状況共有の確認と、依頼があれば資料協力（デモ）。",
+          },
+        },
+      },
     },
     documents: {
       pageSubtitle: "在留・パスポート等の生成ステータスと OCR デモ（API なし）",
