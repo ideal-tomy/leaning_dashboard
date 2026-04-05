@@ -9,6 +9,7 @@ import {
   getIndustryFromSearchParams,
   getRoleFromSearchParams,
 } from "@/lib/industry-selection";
+import { FactoryMatchingSection } from "@/components/factory-matching-section";
 import { MatchingSection } from "./matching-section";
 
 type PageProps = {
@@ -38,18 +39,22 @@ export default async function MatchingPage({ searchParams }: PageProps) {
         description={matchDesc}
       />
       {industry === "staffing" && role === "client" ? (
-        <Card className="border-primary/20 bg-primary/[0.04] shadow-sm">
-          <CardHeader className="pb-2 pt-4">
-            <CardTitle className="text-base font-semibold">
-              条件と通知（デモ）
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pb-4 pt-0 text-sm text-muted">
-            希望条件を保存すると、登録ワーカーに合致があれば通知を受け取る想定です。閲覧範囲は支援機関のポリシーに従います（デモ・送信なし）。
-          </CardContent>
-        </Card>
-      ) : null}
-      <MatchingSection industry={industry} />
+        <>
+          <Card className="border-primary/20 bg-primary/[0.04] shadow-sm">
+            <CardHeader className="pb-2 pt-4">
+              <CardTitle className="text-base font-semibold">
+                条件と通知（デモ）
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pb-4 pt-0 text-sm text-muted">
+              希望条件を保存すると、登録ワーカーに合致があれば通知を受け取る想定です。閲覧範囲は支援機関のポリシーに従います（デモ・送信なし）。
+            </CardContent>
+          </Card>
+          <FactoryMatchingSection />
+        </>
+      ) : (
+        <MatchingSection industry={industry} />
+      )}
     </TemplatePageStack>
   );
 }

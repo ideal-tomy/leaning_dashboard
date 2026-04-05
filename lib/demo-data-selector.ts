@@ -14,7 +14,7 @@ import * as logistics from "@/lib/demo-data.logistics";
 import * as education from "@/lib/demo-data.education";
 import type { EnabledIndustryKey } from "@/lib/industry-profiles";
 
-type DemoDataModule = {
+export type DemoDataModule = {
   clients: ClientCompany[];
   /** 一覧・書類ページ等で使用 */
   candidates: Candidate[];
