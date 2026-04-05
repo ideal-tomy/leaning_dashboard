@@ -341,10 +341,16 @@ export function CandidatesSection() {
           ) : null}
           <div className="space-y-8">
             {CANDIDATE_PIPELINE_PHASE_GROUPS.map((phase) => (
-              <section key={phase.id} className="space-y-3">
-                <h3 className="border-b border-border pb-2 text-sm font-semibold tracking-tight text-foreground">
-                  {phase.titleJa}
-                </h3>
+              <section key={phase.id} className="space-y-4">
+                <div className="relative overflow-hidden rounded-xl border border-primary/25 bg-gradient-to-br from-primary/[0.12] via-primary/[0.05] to-card shadow-sm dark:border-primary/35 dark:from-primary/[0.18] dark:via-primary/[0.08]">
+                  <div
+                    className="absolute inset-y-0 left-0 w-1 bg-primary"
+                    aria-hidden
+                  />
+                  <h3 className="px-5 py-4 pl-6 text-lg font-bold leading-snug tracking-tight text-foreground sm:text-xl">
+                    {phase.titleJa}
+                  </h3>
+                </div>
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {expandPipelinePhaseStagesToSlots(industry, phase.stages).map(
                     (slot) => {
