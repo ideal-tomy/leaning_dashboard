@@ -104,6 +104,11 @@ export type CandidatesPipelineStageRoleHints = {
   clientJa: string;
   lensAdmin: CandidatesPipelineStageLens;
   lensClient: CandidatesPipelineStageLens;
+  /**
+   * パイプラインカードの人数内訳（2行固定・派遣デモ）
+   * 1行目＝当該ステージ合計、2行目＝当該ステージかつ documentAlertJa あり
+   */
+  pipelineCardSubMetricLabelsJa: readonly [string, string];
 };
 
 export type CandidatesPipelineStageHints = Record<
@@ -251,6 +256,10 @@ const hints: Record<EnabledIndustryKey, IndustryPageHints> = {
               ownerJa:
                 "主に支援機関。貴社は面接同席・条件回答など限定的な関与（デモ）。",
             },
+            pipelineCardSubMetricLabelsJa: [
+              "日程調整中",
+              "要注意（アラート）",
+            ],
           },
           offer_accepted: {
             adminJa: "内定後フォロー・条件確定。ビザ・書類準備へつなぐ。",
@@ -271,6 +280,10 @@ const hints: Record<EnabledIndustryKey, IndustryPageHints> = {
               ownerJa:
                 "支援機関が窓口。貴社は人事／現場リーダーが必要時のみ関与（デモ）。",
             },
+            pipelineCardSubMetricLabelsJa: [
+              "内定フォロー中",
+              "要注意（アラート）",
+            ],
           },
           visa_applying: {
             adminJa: "COE・査証の進捗管理。法務・期限アラートの要所。",
@@ -291,6 +304,10 @@ const hints: Record<EnabledIndustryKey, IndustryPageHints> = {
               ownerJa:
                 "支援機関が一元対応。貴社はスケジュール共有の参照でよい（デモ）。",
             },
+            pipelineCardSubMetricLabelsJa: [
+              "審査・等待期間中",
+              "要注意（アラート）",
+            ],
           },
           awaiting_entry: {
             adminJa: "入国・入社手配。フライト・住居・講習の段取り確認。",
@@ -311,6 +328,10 @@ const hints: Record<EnabledIndustryKey, IndustryPageHints> = {
               ownerJa:
                 "現場・人事が「初日」を意識。手続き本体は支援機関（デモ）。",
             },
+            pipelineCardSubMetricLabelsJa: [
+              "入国手配進行中",
+              "要注意（アラート）",
+            ],
           },
           training: {
             adminJa: "講習・研修フォロー。修了要件と現場配属のつなぎ。",
@@ -331,6 +352,10 @@ const hints: Record<EnabledIndustryKey, IndustryPageHints> = {
               ownerJa:
                 "貴社現場リーダーが配属日・メンターを意識。講習は支援機関側。",
             },
+            pipelineCardSubMetricLabelsJa: [
+              "講習・研修実施中",
+              "要注意（アラート）",
+            ],
           },
           document_prep: {
             adminJa: "書類作成・提出前。OCR・生成デモと連動しやすい。",
@@ -351,6 +376,10 @@ const hints: Record<EnabledIndustryKey, IndustryPageHints> = {
               ownerJa:
                 "支援機関主導。貴社は必要書類の依頼があれば協力（デモ）。",
             },
+            pipelineCardSubMetricLabelsJa: [
+              "作成・確認中",
+              "要注意（アラート）",
+            ],
           },
           document_blocked: {
             adminJa: "不備・差戻し。最優先でフォローしてパイプラインを動かす。",
@@ -371,6 +400,10 @@ const hints: Record<EnabledIndustryKey, IndustryPageHints> = {
               ownerJa:
                 "対応は支援機関。貴社は状況共有の確認に留める（デモ）。",
             },
+            pipelineCardSubMetricLabelsJa: [
+              "差戻し対応中",
+              "要注意（アラート）",
+            ],
           },
         },
         pipelineDocumentWorkMerged: {

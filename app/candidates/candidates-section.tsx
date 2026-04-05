@@ -94,6 +94,52 @@ function expandPipelinePhaseStagesToSlots(
   return out;
 }
 
+/** パイプラインカード2行目の人数（デモ：当該ステージかつ一覧アラート文あり） */
+function pipelineStageAlertCount(
+  list: Candidate[],
+  status: Candidate["pipelineStatus"]
+): number {
+  return list.filter(
+    (c) =>
+      c.pipelineStatus === status && Boolean(c.documentAlertJa?.trim())
+  ).length;
+}
+
+const FALLBACK_PIPELINE_SUB_LABELS = ["該当", "要注意（アラート）"] as const;
+
+function PipelineCardSubMetricsBlock({
+  line1Label,
+  line1Count,
+  line2Label,
+  line2Count,
+}: {
+  line1Label: string;
+  line1Count: number;
+  line2Label: string;
+  line2Count: number;
+}) {
+  return (
+    <div className="flex min-h-[2.75rem] shrink-0 flex-col justify-center gap-0.5 text-[11px] tabular-nums leading-snug text-muted">
+      <p>
+        {line1Label}：{line1Count}人
+      </p>
+      <p>
+        {line2Label}：{line2Count}人
+      </p>
+    </div>
+  );
+}
+
+const pipelineCardButtonClass = cn(
+  "flex h-full min-h-0 flex-col text-left",
+  "rounded-xl border border-border bg-card transition-all",
+  "hover:border-primary/35 hover:shadow-md",
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+);
+
+const pipelineLensDlClass =
+  "min-h-[9rem] space-y-1.5 rounded-md border border-border/80 bg-muted/30 px-2.5 py-2 text-left";
+
 export function CandidatesSection() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -351,7 +397,7 @@ export function CandidatesSection() {
                     {phase.titleJa}
                   </h3>
                 </div>
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid auto-rows-fr gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {expandPipelinePhaseStagesToSlots(industry, phase.stages).map(
                     (slot) => {
                       if (slot.kind === "document_work") {
@@ -395,25 +441,30 @@ export function CandidatesSection() {
                               );
                               setTab("list");
                             }}
-                            className={cn(
-                              "rounded-xl border border-border bg-card text-left transition-all",
-                              "hover:border-primary/35 hover:shadow-md",
-                              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
-                            )}
+                            className={pipelineCardButtonClass}
                           >
-                            <Card className="border-0 shadow-none">
-                              <CardContent className="space-y-2 p-4">
-                                <p className="text-xs font-medium text-muted">
-                                  {titleJa}
-                                </p>
-                                <p className="text-2xl font-bold tabular-nums">
-                                  {n}
-                                </p>
-                                <p className="text-[11px] tabular-nums text-muted">
-                                  準備中 {nPrep} · 不備 {nBlocked}
-                                </p>
+                            <Card className="flex h-full min-h-0 flex-1 flex-col border-0 shadow-none">
+                              <CardContent className="flex min-h-0 flex-1 flex-col gap-2 p-4">
+                                <div className="flex shrink-0 flex-col gap-2">
+                                  <p className="line-clamp-2 min-h-[2.5rem] text-base font-semibold leading-snug tracking-tight text-foreground">
+                                    {titleJa}
+                                  </p>
+                                  <p className="text-2xl font-bold tabular-nums text-foreground">
+                                    {n}
+                                    <span className="text-lg font-semibold">
+                                      人
+                                    </span>
+                                  </p>
+                                  <PipelineCardSubMetricsBlock
+                                    line1Label="準備中"
+                                    line1Count={nPrep}
+                                    line2Label="不備"
+                                    line2Count={nBlocked}
+                                  />
+                                </div>
+                                <div className="flex min-h-0 flex-1 flex-col gap-2">
                                 {lens ? (
-                                  <dl className="space-y-1.5 rounded-md border border-border/80 bg-muted/30 px-2.5 py-2 text-left">
+                                  <dl className={pipelineLensDlClass}>
                                     <div>
                                       <dt className="text-[10px] font-semibold uppercase tracking-wide text-muted">
                                         状況
@@ -462,7 +513,8 @@ export function CandidatesSection() {
                                     ) : null}
                                   </ul>
                                 ) : null}
-                                <p className="text-xs font-medium text-primary">
+                                </div>
+                                <p className="mt-auto shrink-0 pt-1 text-xs font-medium text-primary">
                                   押して一覧に絞り込む
                                 </p>
                               </CardContent>
@@ -473,6 +525,7 @@ export function CandidatesSection() {
 
                       const status = slot.status;
                       const n = pipeline[status];
+                      const nAlert = pipelineStageAlertCount(candidates, status);
                       const preview = candidates
                         .filter((c) => c.pipelineStatus === status)
                         .slice(0, 2);
@@ -489,6 +542,9 @@ export function CandidatesSection() {
                           : role === "client"
                             ? hints.lensClient
                             : hints.lensAdmin;
+                      const subLabels =
+                        hints?.pipelineCardSubMetricLabelsJa ??
+                        FALLBACK_PIPELINE_SUB_LABELS;
                       return (
                         <button
                           key={status}
@@ -502,22 +558,30 @@ export function CandidatesSection() {
                             );
                             setTab("list");
                           }}
-                          className={cn(
-                            "rounded-xl border border-border bg-card text-left transition-all",
-                            "hover:border-primary/35 hover:shadow-md",
-                            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
-                          )}
+                          className={pipelineCardButtonClass}
                         >
-                          <Card className="border-0 shadow-none">
-                            <CardContent className="space-y-2 p-4">
-                              <p className="text-xs font-medium text-muted">
-                                {profile.statusLabels[status]}
-                              </p>
-                              <p className="text-2xl font-bold tabular-nums">
-                                {n}
-                              </p>
+                          <Card className="flex h-full min-h-0 flex-1 flex-col border-0 shadow-none">
+                            <CardContent className="flex min-h-0 flex-1 flex-col gap-2 p-4">
+                              <div className="flex shrink-0 flex-col gap-2">
+                                <p className="line-clamp-2 min-h-[2.5rem] text-base font-semibold leading-snug tracking-tight text-foreground">
+                                  {profile.statusLabels[status]}
+                                </p>
+                                <p className="text-2xl font-bold tabular-nums text-foreground">
+                                  {n}
+                                  <span className="text-lg font-semibold">
+                                    人
+                                  </span>
+                                </p>
+                                <PipelineCardSubMetricsBlock
+                                  line1Label={subLabels[0]}
+                                  line1Count={n}
+                                  line2Label={subLabels[1]}
+                                  line2Count={nAlert}
+                                />
+                              </div>
+                              <div className="flex min-h-0 flex-1 flex-col gap-2">
                               {lens ? (
-                                <dl className="space-y-1.5 rounded-md border border-border/80 bg-muted/30 px-2.5 py-2 text-left">
+                                <dl className={pipelineLensDlClass}>
                                   <div>
                                     <dt className="text-[10px] font-semibold uppercase tracking-wide text-muted">
                                       状況
@@ -566,7 +630,8 @@ export function CandidatesSection() {
                                   ) : null}
                                 </ul>
                               ) : null}
-                              <p className="text-xs font-medium text-primary">
+                              </div>
+                              <p className="mt-auto shrink-0 pt-1 text-xs font-medium text-primary">
                                 押して一覧に絞り込む
                               </p>
                             </CardContent>
