@@ -24,6 +24,12 @@ const links = [
 export default function MorePage() {
   const { industry } = useIndustry();
   const { role } = useDemoRole();
+  const hideDocsAndOps = industry === "staffing" && role === "client";
+  const visibleLinks = hideDocsAndOps
+    ? links.filter(
+        (l) => l.href !== "/documents" && l.href !== "/operations"
+      )
+    : links;
 
   return (
     <div className="space-y-6">
@@ -32,7 +38,7 @@ export default function MorePage() {
         <p className="mt-1 text-sm text-muted">モバイル用ショートカット</p>
       </div>
       <div className="grid gap-3">
-        {links.map(({ href, label, icon: Icon, desc }) => (
+        {visibleLinks.map(({ href, label, icon: Icon, desc }) => (
           <Link key={href} href={withDemoQuery(href, industry, role)}>
             <Card className="transition-all hover:border-primary/30">
               <CardHeader className="flex flex-row items-center gap-3 space-y-0 pb-2">

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Building2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +10,7 @@ import {
 import { getIndustryDemoData } from "@/lib/demo-data-selector";
 import { getIndustryPageHints } from "@/lib/industry-page-hints";
 import { getIndustryProfile } from "@/lib/industry-profiles";
+import { DEMO_FACTORY_CLIENT_ID } from "@/lib/demo-factory-client";
 import {
   getIndustryFromSearchParams,
   getRoleFromSearchParams,
@@ -23,6 +25,11 @@ export default async function ClientsPage({ searchParams }: PageProps) {
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const industry = getIndustryFromSearchParams(resolvedSearchParams);
   const role = getRoleFromSearchParams(resolvedSearchParams);
+  if (industry === "staffing" && role === "client") {
+    redirect(
+      withDemoQuery(`/clients/${DEMO_FACTORY_CLIENT_ID}`, industry, role)
+    );
+  }
   const profile = getIndustryProfile(industry);
   const clients = getIndustryDemoData(industry).clients;
   const clientHints = getIndustryPageHints(industry).clients;

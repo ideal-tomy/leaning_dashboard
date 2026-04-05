@@ -14,7 +14,7 @@ type Props = {
 
 /** ダッシュボード下段：拡張枠スロット（テンプレ設定＋業種オーバーライド） */
 export function DashboardExtensionRegion({ industry, role }: Props) {
-  const slots = resolveDashboardExtensionSlots(industry);
+  const slots = resolveDashboardExtensionSlots(industry, role);
   if (slots.length === 0) return null;
 
   return (

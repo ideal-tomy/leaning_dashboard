@@ -38,6 +38,34 @@ export type DashboardGridCopyStaffing = {
   revenueCardCtaJa: string;
 };
 
+/** 派遣・工場ロール（client）— 書類・収益カードなし */
+export type DashboardGridCopyClient = {
+  pipelineCardTitleJa: string;
+  pipelineCardCtaJa: string;
+  candidatesCardTitleJa: string;
+  candidatesCardCtaJa: string;
+  clientsCardTitleJa: string;
+  clientsCardCtaJa: string;
+  matchingCardTitleJa: string;
+  matchingCardCtaJa: string;
+};
+
+/** キラー行の CTA リンク（工場ロール用・書類ハブを避ける） */
+export type DashboardKillerClientCard = {
+  titleJa: string;
+  bodyJa: string;
+  ctaJa: string;
+  ctaPath: string;
+  ctaQuery?: Record<string, string>;
+};
+
+export type DashboardKillerHintsPackClient = {
+  headlineJa: string;
+  card1: DashboardKillerClientCard;
+  card2: DashboardKillerClientCard;
+  card3: DashboardKillerClientCard;
+};
+
 /** `/candidates/[id]` のタブ名・カード文言（派遣テンプレの直書きを業種ごとに差し替え） */
 export type CandidateDetailHints = {
   tabBasic: string;
@@ -84,6 +112,8 @@ export type IndustryPageHints = {
   matching: {
     emptyState: string;
     pageIntentJa?: string;
+    /** 工場ロール向けページ説明（派遣デモ） */
+    clientPageIntentJa?: string;
   };
   operations: {
     csvHint: string;
@@ -104,8 +134,16 @@ export type IndustryPageHints = {
     documentsMobileSubtitle: string;
     /** 派遣・admin：今日の3ステップ */
     adminDailyStepsJa?: string[];
+    /** 派遣・工場ロール：今日の3ステップ */
+    clientDailyStepsJa?: string[];
     killerPack?: DashboardKillerHintsPack;
+    /** 派遣・工場ロール向けキラー行 */
+    killerPackClient?: DashboardKillerHintsPackClient;
     dashboardGridCopy?: DashboardGridCopyStaffing;
+    clientDashboardGridCopy?: DashboardGridCopyClient;
+    matchingClientMobileSubtitle?: string;
+    matchingClientDesktopTeaser?: string;
+    matchingClientDesktopReason?: string;
   };
   clients: {
     listCardEmphasis: "region" | "openSlots" | "culture";
@@ -117,6 +155,10 @@ export type IndustryPageHints = {
   candidateDetail: CandidateDetailHints;
   /** ダッシュ拡張枠の文言・パス・非表示（未指定は app-template-config の既定） */
   dashboardExtensionOverrides?: Partial<
+    Record<DashboardExtensionSlotId, DashboardExtensionOverride>
+  >;
+  /** 工場ロール時の拡張枠差し替え（派遣デモなど） */
+  dashboardExtensionClientOverrides?: Partial<
     Record<DashboardExtensionSlotId, DashboardExtensionOverride>
   >;
   /** /learning-insights（学習サマリー・派遣デモ） */
@@ -159,6 +201,8 @@ const hints: Record<EnabledIndustryKey, IndustryPageHints> = {
       emptyState: "案件に紐づく推奨候補がまだありません（デモ）",
       pageIntentJa:
         "案件ごとに推奨候補と理由を比較し、教育要件の充足も含めて提案のたたき台にする。",
+      clientPageIntentJa:
+        "登録支援機関にいるワーカーの公開範囲の情報を閲覧し、条件に合う人材の発見やスカウト・通知のたたき台にする（デモ）。",
     },
     operations: {
       csvHint: "勤怠 CSV は次期で取込予定（デモ）",
@@ -200,6 +244,11 @@ const hints: Record<EnabledIndustryKey, IndustryPageHints> = {
         "期限が近い在留・面談を書類ハブで確認し、不備を潰す。",
         "学習サマリーで日本語・倫理の伸びを見て、工場説明の材料にする。",
       ],
+      clientDailyStepsJa: [
+        "配属中・予定のスタッフの状態と期限を確認し、必要なら支援機関へ連絡する。",
+        "マッチングで条件に合う登録ワーカーを探し、スカウトや通知のたたき台にする。",
+        "学習サマリーで現場説明・研修の材料を把握する。",
+      ],
       killerPack: {
         headlineAdminJa: "支援機関：いま効くフォローと期限を先に処理する",
         headlineClientJa: "工場向け：学習とコンプライアンスを数字で説明する",
@@ -221,6 +270,37 @@ const hints: Record<EnabledIndustryKey, IndustryPageHints> = {
           ctaJa: "学習サマリー（チャート）へ",
         },
       },
+      killerPackClient: {
+        headlineJa: "工場：配属スタッフの状態とスカウト候補を先に見る",
+        card1: {
+          titleJa: "配属スタッフの学習・フォローを開く",
+          bodyJa:
+            "進捗が止まっている人から、現場での声かけ優先度をつけます（デモ）。",
+          ctaJa: "フォロー対象の一覧へ",
+          ctaPath: "/candidates",
+          ctaQuery: { followup: "learning" },
+        },
+        card2: {
+          titleJa: "期限が近い人を一覧で見る",
+          bodyJa:
+            "在留・面談など、共有された期限は候補者一覧のパイプラインから確認します（デモ）。",
+          ctaJa: "パイプラインを開く",
+          ctaPath: "/candidates",
+          ctaQuery: { view: "pipeline" },
+        },
+        card3: {
+          titleJa: "学習・コンプライアンスのサマリー",
+          bodyJa:
+            "日本語到達と倫理モジュールの全体像。説明会や監査の材料に使えます。",
+          ctaJa: "学習サマリーへ",
+          ctaPath: "/learning-insights",
+        },
+      },
+      matchingClientMobileSubtitle: "条件・スカウト（デモ）",
+      matchingClientDesktopTeaser:
+        "登録支援機関にいるワーカーのうち、公開された範囲のプロフィールとスキル候補を参照します。",
+      matchingClientDesktopReason:
+        "「夜勤可・日本語N3」など条件を保存すると、合致候補がいた際に通知を受け取る想定です（デモ）。",
       dashboardGridCopy: {
         pipelineCardTitleJa: "選考・ビザの詰まりを見る",
         pipelineCardCtaJa: "パイプラインを開いてフォローする",
@@ -234,6 +314,16 @@ const hints: Record<EnabledIndustryKey, IndustryPageHints> = {
         documentsCardCtaJa: "書類管理を開く",
         revenueCardTitleJa: "収益の感触を掴む",
         revenueCardCtaJa: "収益画面を開く",
+      },
+      clientDashboardGridCopy: {
+        pipelineCardTitleJa: "入社・配属までの見通し",
+        pipelineCardCtaJa: "ステータスを確認する",
+        candidatesCardTitleJa: "配属中・予定のスタッフ",
+        candidatesCardCtaJa: "一覧を開く",
+        clientsCardTitleJa: "自社の配置・契約サマリー",
+        clientsCardCtaJa: "自社情報を見る",
+        matchingCardTitleJa: "人材を探す・関心を通知する",
+        matchingCardCtaJa: "マッチングを開く",
       },
     },
     clients: {
@@ -282,6 +372,17 @@ const hints: Record<EnabledIndustryKey, IndustryPageHints> = {
     revenue: {
       pageIntentJa:
         "売上・LTV の推移をざっくり確認し、経営・営業との会話の入口にする。",
+    },
+    dashboardExtensionClientOverrides: {
+      attendanceBilling: { enabled: false },
+      fieldReports: {
+        title: "現場からの共有",
+        subtitle: "動画・写真で報告（将来拡張）",
+        desktopTitle: "現場共有 → 学習・教育に活用（拡張枠）",
+        desktopBody:
+          "稼働状況を動画や写真でアップロードし、支援機関と共有する想定です。学習・教育フィードバックやコンプライアンス確認に活用できる拡張ポイントです（デモ・未接続）。",
+        desktopCta: "報告ハブへ",
+      },
     },
   },
   "real-estate": {

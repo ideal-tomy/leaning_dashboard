@@ -53,10 +53,30 @@ const defaultPack: DashboardKillerHintsPack = {
 export function DashboardKillerCards({ industry, role }: Props) {
   if (role === "worker") return null;
 
-  const pack =
-    getIndustryPageHints(industry).home.killerPack ?? defaultPack;
-  const headline =
-    role === "client" ? pack.headlineClientJa : pack.headlineAdminJa;
+  const home = getIndustryPageHints(industry).home;
+  const pack = home.killerPack ?? defaultPack;
+  const clientPack = home.killerPackClient;
+  const useClientKiller = role === "client" && clientPack;
+
+  const headline = useClientKiller
+    ? clientPack.headlineJa
+    : role === "client"
+      ? pack.headlineClientJa
+      : pack.headlineAdminJa;
+
+  const c1 = useClientKiller ? clientPack.card1 : pack.card1;
+  const c2 = useClientKiller ? clientPack.card2 : pack.card2;
+  const c3 = useClientKiller ? clientPack.card3 : pack.card3;
+
+  const card1Href = useClientKiller
+    ? withDemoQuery(clientPack.card1.ctaPath, industry, role, clientPack.card1.ctaQuery)
+    : withDemoQuery("/candidates", industry, role, { followup: "learning" });
+  const card2Href = useClientKiller
+    ? withDemoQuery(clientPack.card2.ctaPath, industry, role, clientPack.card2.ctaQuery)
+    : withDemoQuery("/documents", industry, role, { highlight: "deadlines" });
+  const card3Href = useClientKiller
+    ? withDemoQuery(clientPack.card3.ctaPath, industry, role, clientPack.card3.ctaQuery)
+    : withDemoQuery("/learning-insights", industry, role);
 
   const stalled = getStalledWorkers();
   const alerts = getDemoAlerts().slice(0, 6);
@@ -71,11 +91,11 @@ export function DashboardKillerCards({ industry, role }: Props) {
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-base">
               <AlertTriangle className="size-5 text-amber-600" />
-              {pack.card1.titleJa}
+              {c1.titleJa}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
-            <p className="text-muted">{pack.card1.bodyJa}</p>
+            <p className="text-muted">{c1.bodyJa}</p>
             <ul className="space-y-1.5">
               {stalled.map((w) => (
                 <li
@@ -90,12 +110,10 @@ export function DashboardKillerCards({ industry, role }: Props) {
               ))}
             </ul>
             <Link
-              href={withDemoQuery("/candidates", industry, role, {
-                followup: "learning",
-              })}
+              href={card1Href}
               className="inline-flex text-xs font-medium text-primary hover:underline"
             >
-              {pack.card1.ctaJa}
+              {c1.ctaJa}
             </Link>
           </CardContent>
         </Card>
@@ -104,11 +122,11 @@ export function DashboardKillerCards({ industry, role }: Props) {
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-base">
               <CalendarClock className="size-5 text-primary" />
-              {pack.card2.titleJa}
+              {c2.titleJa}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
-            <p className="text-muted">{pack.card2.bodyJa}</p>
+            <p className="text-muted">{c2.bodyJa}</p>
             <ul className="max-h-40 space-y-1.5 overflow-y-auto">
               {alerts.map((a) => (
                 <li
@@ -126,12 +144,10 @@ export function DashboardKillerCards({ industry, role }: Props) {
               ))}
             </ul>
             <Link
-              href={withDemoQuery("/documents", industry, role, {
-                highlight: "deadlines",
-              })}
+              href={card2Href}
               className="inline-flex text-xs font-medium text-primary hover:underline"
             >
-              {pack.card2.ctaJa}
+              {c2.ctaJa}
             </Link>
           </CardContent>
         </Card>
@@ -140,11 +156,11 @@ export function DashboardKillerCards({ industry, role }: Props) {
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-base">
               <TrendingUp className="size-5 text-emerald-600" />
-              {pack.card3.titleJa}
+              {c3.titleJa}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <p className="text-sm text-muted">{pack.card3.bodyJa}</p>
+            <p className="text-sm text-muted">{c3.bodyJa}</p>
             <div className="flex flex-wrap gap-2 text-sm">
               <Badge variant="secondary" className="gap-1">
                 <BarChart3 className="size-3.5" />
@@ -155,10 +171,10 @@ export function DashboardKillerCards({ industry, role }: Props) {
               </Badge>
             </div>
             <Link
-              href={withDemoQuery("/learning-insights", industry, role)}
+              href={card3Href}
               className="inline-flex text-xs font-medium text-primary hover:underline"
             >
-              {pack.card3.ctaJa}
+              {c3.ctaJa}
             </Link>
           </CardContent>
         </Card>

@@ -5,6 +5,7 @@ import type {
   DashboardExtensionIconName,
   DashboardExtensionSlotBase,
 } from "@/lib/dashboard-extension-types";
+import type { DemoRole } from "@/lib/demo-role";
 import { getIndustryPageHints } from "@/lib/industry-page-hints";
 import type { EnabledIndustryKey } from "@/lib/industry-profiles";
 
@@ -24,16 +25,24 @@ export type ResolvedDashboardExtensionSlot = Omit<
 
 /** テンプレ設定 × 業種オーバーライド後の拡張枠（表示用） */
 export function resolveDashboardExtensionSlots(
-  industry: EnabledIndustryKey
+  industry: EnabledIndustryKey,
+  role?: DemoRole
 ): ResolvedDashboardExtensionSlot[] {
   const bases = appTemplateConfig.dashboard.extensionSlots;
-  const overrides =
-    getIndustryPageHints(industry).dashboardExtensionOverrides ?? {};
+  const hints = getIndustryPageHints(industry);
+  const overrides = hints.dashboardExtensionOverrides ?? {};
+  const clientOverrides =
+    role === "client" ? (hints.dashboardExtensionClientOverrides ?? {}) : {};
 
   const out: ResolvedDashboardExtensionSlot[] = [];
   for (const base of bases) {
     if (!base.enabled) continue;
-    const o = overrides[base.id];
+    const baseOverride = overrides[base.id];
+    const clientLayer = clientOverrides[base.id];
+    const o =
+      clientLayer !== undefined
+        ? { ...baseOverride, ...clientLayer }
+        : baseOverride;
     if (o?.enabled === false) continue;
 
     const { enabled: _e, ...restOverride } = o ?? {};
