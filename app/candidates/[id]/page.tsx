@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   TemplatePageHeader,
+  TemplateMobileFlowSection,
   TemplatePageStack,
 } from "@/components/templates/layout-primitives";
 import { CandidateActivityTimeline } from "@/components/candidate-activity-timeline";
@@ -21,6 +22,8 @@ import { CandidateDocumentVault } from "@/components/candidate-document-vault";
 import { CandidateInterviewLogs } from "@/components/candidate-interview-logs";
 import { CandidateLearningDemoPanel } from "@/components/candidate-learning-demo-panel";
 import { LearningComplianceBadge } from "@/components/learning-compliance-badge";
+import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
+import { NextActionCard } from "@/components/navigation/next-action-card";
 import { getIndustryDemoData } from "@/lib/demo-data-selector";
 import { getIndustryPageHints } from "@/lib/industry-page-hints";
 import { getIndustryProfile } from "@/lib/industry-profiles";
@@ -87,15 +90,50 @@ export default async function CandidateDetailPage({
     Boolean(c.detailDemo?.documentResolution) ||
     c.pipelineStatus === "document_blocked" ||
     Boolean(c.documentAlertJa);
+  const mobileNextHref =
+    industry === "staffing"
+      ? withDemoQuery("/learning-insights", industry, role)
+      : withDemoQuery("/documents", industry, role, { highlight: "deadlines" });
+  const mobileNextLabel =
+    industry === "staffing" ? "学習サマリーへ" : "期限手続きへ";
 
   return (
     <TemplatePageStack>
-      <Button variant="ghost" size="sm" asChild className="-ml-2 gap-1 self-start">
+      <TemplateMobileFlowSection>
+        <MobileFlowBar
+          backHref={withDemoQuery("/candidates", industry, role)}
+          backLabel={`${profile.labels.candidate}一覧`}
+          pageLabel="候補者詳細"
+          nextHref={mobileNextHref}
+          nextLabel="次へ"
+        />
+      </TemplateMobileFlowSection>
+
+      <Button
+        variant="ghost"
+        size="sm"
+        asChild
+        className="-ml-2 hidden gap-1 self-start md:inline-flex"
+      >
         <Link href={withDemoQuery("/candidates", industry, role)}>
           <ArrowLeft className="size-4" />
           {profile.labels.candidate}一覧
         </Link>
       </Button>
+
+      <NextActionCard
+        className="md:hidden"
+        title="次のアクション"
+        reasonTag={industry === "staffing" ? "学習確認" : "期限確認"}
+        reasonTone={industry === "staffing" ? "ai" : "warning"}
+        description={
+          industry === "staffing"
+            ? "学習進捗と対面認定の確認に進むと、次のフォローを決めやすくなります。"
+            : "期限が近い書類を先に確認すると、手戻りを防げます。"
+        }
+        actionHref={mobileNextHref}
+        actionLabel={mobileNextLabel}
+      />
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
         <Image

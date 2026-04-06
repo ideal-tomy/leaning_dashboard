@@ -7,8 +7,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import {
   TemplatePageHeader,
+  TemplateMobileFlowSection,
   TemplatePageStack,
 } from "@/components/templates/layout-primitives";
+import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
+import { NextActionCard } from "@/components/navigation/next-action-card";
 import { DEMO_FACTORY_CLIENT_ID } from "@/lib/demo-factory-client";
 import { getFactoryPlacementsForClient } from "@/lib/demo-factory-placements";
 import { getIndustryDemoData } from "@/lib/demo-data-selector";
@@ -52,21 +55,50 @@ export default async function ClientDetailPage({ params, searchParams }: Props) 
   const locationLine = `${client.industryJa} · ${client.prefectureJa}${
     client.cityJa ? ` ${client.cityJa}` : ""
   }`;
+  const backHref = withDemoQuery(
+    isFactoryClientDetail ? "/" : "/clients",
+    industry,
+    role
+  );
+  const nextHref = withDemoQuery("/matching", industry, role);
 
   return (
     <TemplatePageStack>
-      <Button variant="ghost" size="sm" asChild className="-ml-2 gap-1 self-start">
-        <Link
-          href={withDemoQuery(
-            isFactoryClientDetail ? "/" : "/clients",
-            industry,
-            role
-          )}
-        >
+      <TemplateMobileFlowSection>
+        <MobileFlowBar
+          backHref={backHref}
+          backLabel={isFactoryClientDetail ? "ダッシュボード" : `${profile.labels.client}一覧`}
+          pageLabel="派遣先詳細"
+          nextHref={nextHref}
+          nextLabel="次へ"
+        />
+      </TemplateMobileFlowSection>
+
+      <Button
+        variant="ghost"
+        size="sm"
+        asChild
+        className="-ml-2 hidden gap-1 self-start md:inline-flex"
+      >
+        <Link href={backHref}>
           <ArrowLeft className="size-4" />
           {isFactoryClientDetail ? "ダッシュボード" : `${profile.labels.client}一覧`}
         </Link>
       </Button>
+
+      <NextActionCard
+        className="md:hidden"
+        title="次のアクション"
+        reasonTag={client.operations.openSlots > 0 ? "欠員対応" : "提案候補"}
+        reasonTone={client.operations.openSlots > 0 ? "warning" : "ai"}
+        description={
+          client.operations.openSlots > 0
+            ? "未充足枠を埋めるため、優先して候補者検索へ進みます。"
+            : "追加で提案候補を確認し、次の打診先を決めます。"
+        }
+        actionHref={nextHref}
+        actionLabel="マッチングへ"
+      />
 
       <TemplatePageHeader
         title={client.legalNameJa}

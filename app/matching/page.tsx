@@ -1,13 +1,17 @@
 import {
   TemplatePageHeader,
+  TemplateMobileFlowSection,
   TemplatePageStack,
 } from "@/components/templates/layout-primitives";
+import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
+import { NextActionCard } from "@/components/navigation/next-action-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getIndustryPageHints } from "@/lib/industry-page-hints";
 import { getIndustryProfile } from "@/lib/industry-profiles";
 import {
   getIndustryFromSearchParams,
   getRoleFromSearchParams,
+  withDemoQuery,
 } from "@/lib/industry-selection";
 import { FactoryMatchingSection } from "@/components/factory-matching-section";
 import { MatchingSection } from "./matching-section";
@@ -34,9 +38,27 @@ export default async function MatchingPage({ searchParams }: PageProps) {
 
   return (
     <TemplatePageStack>
+      <TemplateMobileFlowSection>
+        <MobileFlowBar
+          backHref={withDemoQuery("/clients", industry, role)}
+          backLabel="派遣先一覧"
+          pageLabel={profile.labels.matching}
+          nextHref={withDemoQuery("/operations", industry, role)}
+          nextLabel="次へ"
+        />
+      </TemplateMobileFlowSection>
       <TemplatePageHeader
         title={profile.labels.matching}
         description={matchDesc}
+      />
+      <NextActionCard
+        className="md:hidden"
+        title="次のアクション"
+        reasonTag="実務連携"
+        reasonTone="success"
+        description="提案候補を確認したら、運用画面で配属・定着の進捗へ繋げます。"
+        actionHref={withDemoQuery("/operations", industry, role)}
+        actionLabel="実務画面へ"
       />
       {industry === "staffing" && role === "client" ? (
         <>

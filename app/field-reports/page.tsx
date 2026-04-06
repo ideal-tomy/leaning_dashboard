@@ -3,8 +3,11 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   TemplatePageHeader,
+  TemplateMobileFlowSection,
   TemplatePageStack,
 } from "@/components/templates/layout-primitives";
+import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
+import { NextActionCard } from "@/components/navigation/next-action-card";
 import { getIndustryProfile } from "@/lib/industry-profiles";
 import {
   getIndustryFromSearchParams,
@@ -45,9 +48,27 @@ export default async function FieldReportsPage({ searchParams }: PageProps) {
 
   return (
     <TemplatePageStack>
+      <TemplateMobileFlowSection>
+        <MobileFlowBar
+          backHref={withDemoQuery("/operations", industry, role)}
+          backLabel="実務へ戻る"
+          pageLabel="報告・写真ハブ"
+          nextHref={withDemoQuery("/documents", industry, role)}
+          nextLabel="次へ"
+        />
+      </TemplateMobileFlowSection>
       <TemplatePageHeader
         title="報告・写真ハブ（デモ）"
         description={`${profile.labels.client}や現場単位の提出タスクと証跡を一覧する想定です。送り忘れ・探索・取り違えを減らす「公式の確認場所」として使います。`}
+      />
+      <NextActionCard
+        className="md:hidden"
+        title="次のアクション"
+        reasonTag="書類連携"
+        reasonTone="success"
+        description="提出状況を確認後、書類管理で期限・保管を続けて確認できます。"
+        actionHref={withDemoQuery("/documents", industry, role)}
+        actionLabel="書類管理へ"
       />
 
       <div className="flex flex-wrap gap-2">

@@ -6,8 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageTagLinks } from "@/components/page-tag-links";
 import {
   TemplatePageHeader,
+  TemplateMobileFlowSection,
   TemplatePageStack,
 } from "@/components/templates/layout-primitives";
+import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
+import { NextActionCard } from "@/components/navigation/next-action-card";
 import { Button } from "@/components/ui/button";
 import { getIndustryDemoData } from "@/lib/demo-data-selector";
 import { getIndustryPageHints } from "@/lib/industry-page-hints";
@@ -55,9 +58,27 @@ export default async function ClientsPage({ searchParams }: PageProps) {
 
   return (
     <TemplatePageStack>
+      <TemplateMobileFlowSection>
+        <MobileFlowBar
+          backHref={withDemoQuery("/", industry, role)}
+          backLabel="ダッシュボード"
+          pageLabel={profile.labels.client}
+          nextHref={withDemoQuery("/matching", industry, role)}
+          nextLabel="次へ"
+        />
+      </TemplateMobileFlowSection>
       <TemplatePageHeader
         title={profile.labels.client}
         description={`${clientHeaderDesc} ${clients.length}件のデモデータを表示しています。`}
+      />
+      <NextActionCard
+        className="md:hidden"
+        title="次のアクション"
+        reasonTag="提案準備"
+        reasonTone="ai"
+        description="候補先を見たら、マッチングで提案候補の比較に進みます。"
+        actionHref={withDemoQuery("/matching", industry, role)}
+        actionLabel="マッチングへ"
       />
       <PageTagLinks
         label="表示タグ"

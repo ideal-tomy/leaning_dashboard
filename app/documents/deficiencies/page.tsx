@@ -8,8 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   TemplatePageHeader,
+  TemplateMobileFlowSection,
   TemplatePageStack,
 } from "@/components/templates/layout-primitives";
+import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
+import { NextActionCard } from "@/components/navigation/next-action-card";
 import { useIndustry } from "@/components/industry-context";
 import { useDemoRole } from "@/components/demo-role-context";
 import type { Candidate, DocumentDeficiencyUrgencyDemo } from "@data/types";
@@ -75,12 +78,37 @@ export default function DocumentDeficienciesPage() {
 
   return (
     <TemplatePageStack>
-      <Button variant="ghost" size="sm" asChild className="-ml-2 gap-1 self-start">
+      <TemplateMobileFlowSection>
+        <MobileFlowBar
+          backHref={withDemoQuery("/documents", industry, role)}
+          backLabel={`${profile.labels.documents}管理`}
+          pageLabel="書類不備フォロー"
+          nextHref={withDemoQuery("/candidates?focus=risk", industry, role)}
+          nextLabel="次へ"
+        />
+      </TemplateMobileFlowSection>
+
+      <Button
+        variant="ghost"
+        size="sm"
+        asChild
+        className="-ml-2 hidden gap-1 self-start md:inline-flex"
+      >
         <Link href={withDemoQuery("/documents", industry, role)}>
           <ArrowLeft className="size-4" />
           {profile.labels.documents}管理に戻る
         </Link>
       </Button>
+
+      <NextActionCard
+        className="md:hidden"
+        title="次のアクション"
+        reasonTag="優先対応"
+        reasonTone="danger"
+        description="要フォロー候補者の一覧へ進み、今日の対応順を確定します。"
+        actionHref={withDemoQuery("/candidates?focus=risk", industry, role)}
+        actionLabel="要フォロー候補者へ"
+      />
 
       <div className="flex flex-wrap items-start gap-3">
         <div className="min-w-0 flex-1">

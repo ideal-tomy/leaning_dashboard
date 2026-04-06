@@ -4,8 +4,11 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   TemplatePageHeader,
+  TemplateMobileFlowSection,
   TemplatePageStack,
 } from "@/components/templates/layout-primitives";
+import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
+import { NextActionCard } from "@/components/navigation/next-action-card";
 import { demoClientRequests } from "@/lib/demo-client-requests";
 import {
   getIndustryFromSearchParams,
@@ -35,9 +38,27 @@ export default async function ClientRequestsPage({ searchParams }: PageProps) {
 
   return (
     <TemplatePageStack>
+      <TemplateMobileFlowSection>
+        <MobileFlowBar
+          backHref={withDemoQuery("/operations", industry, role)}
+          backLabel="実務へ戻る"
+          pageLabel="未対応クライアント要望"
+          nextHref={withDemoQuery("/clients", industry, role)}
+          nextLabel="次へ"
+        />
+      </TemplateMobileFlowSection>
       <TemplatePageHeader
         title="未対応クライアント要望"
         description="受信一覧を確認し、AI要約と対応提案を参考に一次対応を進めます。"
+      />
+      <NextActionCard
+        className="md:hidden"
+        title="次のアクション"
+        reasonTag={selected.urgency === "high" ? "要対応" : "候補先調整"}
+        reasonTone={selected.urgency === "high" ? "danger" : "warning"}
+        description="要望確認後は派遣先一覧へ進み、調整先を確定します。"
+        actionHref={withDemoQuery("/clients", industry, role)}
+        actionLabel="派遣先一覧へ"
       />
 
       <div className="grid gap-3 lg:grid-cols-[1.1fr_1fr]">

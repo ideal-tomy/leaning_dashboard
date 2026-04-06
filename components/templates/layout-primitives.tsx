@@ -41,6 +41,26 @@ export function TemplateTwoColumnGrid({
   );
 }
 
+/** スマホ導線バー用（ヘッダー直下で固定表示） */
+export function TemplateMobileFlowSection({
+  className,
+  children,
+}: {
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      className={cn(
+        "md:hidden -mx-1 px-1",
+        className
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
 /** ページ見出し＋説明（ダッシュ・内ページ共通） */
 export function TemplatePageHeader({
   title,
@@ -53,7 +73,7 @@ export function TemplatePageHeader({
 }) {
   return (
     <div className={className}>
-      <h1 className="text-2xl font-semibold text-primary-alt">{title}</h1>
+      <h1 className="text-xl font-semibold text-primary-alt sm:text-2xl">{title}</h1>
       {description ? (
         <p className="mt-1 text-sm text-muted">{description}</p>
       ) : null}

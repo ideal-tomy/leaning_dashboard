@@ -6,11 +6,17 @@ import { MessageSquare, Send, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { TemplatePageHeader, TemplatePageStack } from "@/components/templates/layout-primitives";
+import {
+  TemplateMobileFlowSection,
+  TemplatePageHeader,
+  TemplatePageStack,
+} from "@/components/templates/layout-primitives";
 import { getIndustryPageHints } from "@/lib/industry-page-hints";
 import type { EnabledIndustryKey } from "@/lib/industry-profiles";
 import { withDemoQuery } from "@/lib/demo-query";
 import { useDemoRole } from "@/components/demo-role-context";
+import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
+import { NextActionCard } from "@/components/navigation/next-action-card";
 
 type Props = {
   industry: EnabledIndustryKey;
@@ -37,7 +43,25 @@ export function KnowledgePageClient({ industry }: Props) {
 
   return (
     <TemplatePageStack>
+      <TemplateMobileFlowSection>
+        <MobileFlowBar
+          backHref={withDemoQuery("/messages", industry, role)}
+          backLabel="メッセージ"
+          pageLabel="ナレッジAI"
+          nextHref={withDemoQuery("/matching", industry, role)}
+          nextLabel="次へ"
+        />
+      </TemplateMobileFlowSection>
       <TemplatePageHeader title="ナレッジ AI" description={hints.pageSubtitle} />
+      <NextActionCard
+        className="md:hidden"
+        title="次のアクション"
+        reasonTag="提案理由"
+        reasonTone="ai"
+        description="回答確認後はマッチング理由の確認に進み、説明を一貫させます。"
+        actionHref={withDemoQuery("/matching", industry, role)}
+        actionLabel="マッチングへ"
+      />
 
       <div className="flex flex-wrap gap-2">
         <Button variant="secondary" size="sm" asChild>

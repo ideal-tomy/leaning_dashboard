@@ -5,6 +5,9 @@ import { Languages } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { TemplateMobileFlowSection, TemplatePageStack } from "@/components/templates/layout-primitives";
+import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
+import { NextActionCard } from "@/components/navigation/next-action-card";
 import type { DemoMessage } from "@/lib/demo-messages";
 import { demoMessages } from "@/lib/demo-messages";
 import { cn } from "@/lib/utils";
@@ -23,7 +26,16 @@ export default function MessagesPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <TemplatePageStack>
+      <TemplateMobileFlowSection>
+        <MobileFlowBar
+          backHref="/more"
+          backLabel="その他"
+          pageLabel="ワーカーメッセージ"
+          nextHref="/knowledge"
+          nextLabel="次へ"
+        />
+      </TemplateMobileFlowSection>
       <div>
         <h1 className="text-2xl font-semibold text-primary-alt">
           ワーカーメッセージ
@@ -34,6 +46,15 @@ export default function MessagesPage() {
           に追記してください。
         </p>
       </div>
+      <NextActionCard
+        className="md:hidden"
+        title="次のアクション"
+        reasonTag="対応判断"
+        reasonTone="warning"
+        description="翻訳確認後はナレッジAIで返答方針を確認できます。"
+        actionHref="/knowledge"
+        actionLabel="ナレッジAIへ"
+      />
 
       <ul className="space-y-3">
         {demoMessages.map((m) => (
@@ -80,6 +101,6 @@ export default function MessagesPage() {
           </li>
         ))}
       </ul>
-    </div>
+    </TemplatePageStack>
   );
 }

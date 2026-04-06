@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -36,6 +37,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
     : undefined;
   const pipeline = data.getPipelineCounts();
   const docAlerts = data.countDocumentAlerts();
+  const openSlotCount = data.totalOpenSlots();
   const viewMode = resolveDashboardViewMode(industry, role);
   const topCards = buildDashboardTopCards(viewMode, industry, role, {
     totalCandidates: data.candidates.length,
@@ -56,22 +58,65 @@ export default async function DashboardPage({ searchParams }: PageProps) {
         subtitle={profile.dashboardSubtitle || dashboard.pageSubtitle}
       />
 
-      <DashboardKillerCards industry={industry} role={role} />
-      <Separator />
+      <div className="md:hidden space-y-4">
+        <div className="-mx-1 overflow-x-auto pb-1">
+          <div className="flex min-w-max gap-2 px-1">
+            {topCards.map((card) => (
+              <Link
+                key={card.id}
+                href={withDemoQuery(card.href, industry, role)}
+                className="rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium text-foreground whitespace-nowrap"
+              >
+                {card.title}
+              </Link>
+            ))}
+          </div>
+        </div>
 
-      <div className="space-y-4">
-        <DashboardTopCardGrid cards={topCards} />
-        <Card className="border-dashed border-primary/30 bg-primary/[0.02]">
+        <DashboardKillerCards industry={industry} role={role} />
+
+        <Card className="border-dashed border-border/80 bg-background/70">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold">
-              オプション機能（必要時に追加）
+            <CardTitle className="text-sm font-semibold">
+              今日のサマリー
             </CardTitle>
           </CardHeader>
-          <CardContent className="pt-0 text-sm text-muted">
-            トップは主要導線のみ表示しています。下記の拡張枠から、運用や説明に合わせて機能を追加できます。
+          <CardContent className="pt-0 text-xs text-muted">
+            要対応書類 {docAlerts}件 / 未充足枠 {openSlotCount}名 / 研修中{" "}
+            {pipeline.training}名
           </CardContent>
         </Card>
-        <DashboardExtensionRegion industry={industry} role={role} />
+      </div>
+
+      <div className="hidden space-y-4 md:block">
+        <DashboardKillerCards industry={industry} role={role} />
+        <Separator />
+        <div className="space-y-4">
+          <DashboardTopCardGrid cards={topCards} />
+          <Card className="border-dashed border-primary/30 bg-primary/[0.02]">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base font-semibold">
+                オプション機能（必要時に追加）
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0 text-sm text-muted">
+              トップは主要導線のみ表示しています。下記の拡張枠から、運用や説明に合わせて機能を追加できます。
+            </CardContent>
+          </Card>
+          <DashboardExtensionRegion industry={industry} role={role} />
+        </div>
+      </div>
+      
+      <div className="md:hidden">
+        <Separator />
+        <div className="pt-4">
+          <Link
+            href={withDemoQuery("/more", industry, role)}
+            className="inline-flex text-xs font-medium text-primary hover:underline"
+          >
+            その他の機能を見る
+          </Link>
+        </div>
       </div>
     </div>
   );

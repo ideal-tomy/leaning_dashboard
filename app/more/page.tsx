@@ -9,6 +9,9 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { TemplateMobileFlowSection, TemplatePageStack } from "@/components/templates/layout-primitives";
+import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
+import { NextActionCard } from "@/components/navigation/next-action-card";
 import { useIndustry } from "@/components/industry-context";
 import { useDemoRole } from "@/components/demo-role-context";
 import { withDemoQuery } from "@/lib/demo-query";
@@ -32,11 +35,29 @@ export default function MorePage() {
     : links;
 
   return (
-    <div className="space-y-6">
+    <TemplatePageStack>
+      <TemplateMobileFlowSection>
+        <MobileFlowBar
+          backHref={withDemoQuery("/", industry, role)}
+          backLabel="ダッシュボード"
+          pageLabel="その他"
+          nextHref={withDemoQuery("/messages", industry, role)}
+          nextLabel="次へ"
+        />
+      </TemplateMobileFlowSection>
       <div>
         <h1 className="text-2xl font-semibold text-primary-alt">その他</h1>
         <p className="mt-1 text-sm text-muted">モバイル用ショートカット</p>
       </div>
+      <NextActionCard
+        className="md:hidden"
+        title="次のアクション"
+        reasonTag="連絡確認"
+        reasonTone="secondary"
+        description="まずはメッセージ確認から始めると、次の実務判断がしやすくなります。"
+        actionHref={withDemoQuery("/messages", industry, role)}
+        actionLabel="メッセージへ"
+      />
       <div className="grid gap-3">
         {visibleLinks.map(({ href, label, icon: Icon, desc }) => (
           <Link key={href} href={withDemoQuery(href, industry, role)}>
@@ -53,6 +74,6 @@ export default function MorePage() {
           </Link>
         ))}
       </div>
-    </div>
+    </TemplatePageStack>
   );
 }

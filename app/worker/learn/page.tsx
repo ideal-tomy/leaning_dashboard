@@ -1,5 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { TemplateMobileFlowSection, TemplatePageStack } from "@/components/templates/layout-primitives";
+import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
+import { NextActionCard } from "@/components/navigation/next-action-card";
 
 const modules = [
   { titleJa: "職場のあいさつ", titleSi: "කාර්ය ස්ථානයේ ආචාර", done: true },
@@ -10,13 +13,31 @@ const modules = [
 
 export default function WorkerLearnPage() {
   return (
-    <div className="space-y-4">
+    <TemplatePageStack className="space-y-4">
+      <TemplateMobileFlowSection>
+        <MobileFlowBar
+          backHref="/worker"
+          backLabel="マイホーム"
+          pageLabel="学習モジュール"
+          nextHref="/worker/progress"
+          nextLabel="次へ"
+        />
+      </TemplateMobileFlowSection>
       <div>
         <h1 className="text-xl font-semibold text-primary-alt">学習モジュール</h1>
         <p className="mt-1 text-xs text-muted">
           ඉගෙනුම් මොඩියුල — デモ用の並びです。
         </p>
       </div>
+      <NextActionCard
+        className="md:hidden"
+        title="次のアクション"
+        reasonTag="進捗確認"
+        reasonTone="warning"
+        description="学習後は進捗画面で到達率を確認すると次の学習が決めやすくなります。"
+        actionHref="/worker/progress"
+        actionLabel="進捗へ"
+      />
       <ul className="space-y-2">
         {modules.map((m) => (
           <li key={m.titleJa}>
@@ -34,6 +55,6 @@ export default function WorkerLearnPage() {
           </li>
         ))}
       </ul>
-    </div>
+    </TemplatePageStack>
   );
 }

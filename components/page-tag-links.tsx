@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 export type PageTagLink = {
@@ -12,31 +11,55 @@ type Props = {
   label: string;
   currentId: string;
   tags: PageTagLink[];
+  mobileScrollable?: boolean;
+  stickyOnMobile?: boolean;
+  mobileTopClassName?: string;
 };
 
-export function PageTagLinks({ label, currentId, tags }: Props) {
+export function PageTagLinks({
+  label,
+  currentId,
+  tags,
+  mobileScrollable = false,
+  stickyOnMobile = false,
+  mobileTopClassName = "top-14",
+}: Props) {
   return (
-    <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border/80 bg-card p-2.5">
-      <Badge variant="outline" className="text-[11px]">
-        {label}
-      </Badge>
-      {tags.map((tag) => {
-        const active = tag.id === currentId;
-        return (
-          <Link
-            key={tag.id}
-            href={tag.href}
-            className={cn(
-              "rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
-              active
-                ? "bg-primary text-primary-foreground"
-                : "bg-surface text-muted hover:text-foreground"
-            )}
-          >
-            {tag.label}
-          </Link>
-        );
-      })}
+    <div
+      className={cn(
+        "border-b border-border/70 pb-2",
+        stickyOnMobile && `sticky z-30 ${mobileTopClassName} md:static`,
+        stickyOnMobile && "bg-surface/95 backdrop-blur"
+      )}
+    >
+      <span className="sr-only">{label}</span>
+      <div
+        className={cn(
+          "flex items-center gap-3",
+          mobileScrollable
+            ? "overflow-x-auto whitespace-nowrap pb-0.5 md:mt-0 md:flex-wrap md:overflow-visible md:whitespace-normal"
+            : "flex-wrap md:mt-0"
+        )}
+      >
+        {tags.map((tag) => {
+          const active = tag.id === currentId;
+          return (
+            <Link
+              key={tag.id}
+              href={tag.href}
+            scroll={false}
+              className={cn(
+                "shrink-0 border-b-2 px-0.5 py-1 text-sm font-medium transition-colors whitespace-nowrap",
+                active
+                  ? "border-primary text-primary"
+                  : "border-transparent text-muted hover:text-foreground"
+              )}
+            >
+              {tag.label}
+            </Link>
+          );
+        })}
+      </div>
     </div>
   );
 }

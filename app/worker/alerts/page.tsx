@@ -1,6 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { getDemoAlerts } from "@/lib/demo-workers";
+import { TemplateMobileFlowSection, TemplatePageStack } from "@/components/templates/layout-primitives";
+import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
+import { NextActionCard } from "@/components/navigation/next-action-card";
 
 const DEMO_WORKER_ID = "w-kasun";
 
@@ -8,13 +11,31 @@ export default function WorkerAlertsPage() {
   const mine = getDemoAlerts().filter((a) => a.workerId === DEMO_WORKER_ID);
 
   return (
-    <div className="space-y-4">
+    <TemplatePageStack className="space-y-4">
+      <TemplateMobileFlowSection>
+        <MobileFlowBar
+          backHref="/worker/progress"
+          backLabel="進捗"
+          pageLabel="お知らせ・期限"
+          nextHref="/worker/support"
+          nextLabel="次へ"
+        />
+      </TemplateMobileFlowSection>
       <div>
         <h1 className="text-xl font-semibold text-primary-alt">お知らせ・期限</h1>
         <p className="mt-1 text-xs text-muted">
           දැනුම්දීම් — あなたに関係するアラートのみ表示（デモ）。
         </p>
       </div>
+      <NextActionCard
+        className="md:hidden"
+        title="次のアクション"
+        reasonTag="相談導線"
+        reasonTone="success"
+        description="期限確認後はサポートから問い合わせ導線を確認できます。"
+        actionHref="/worker/support"
+        actionLabel="サポートへ"
+      />
       {mine.length === 0 ? (
         <p className="text-sm text-muted">現在表示するアラートはありません。</p>
       ) : (
@@ -36,6 +57,6 @@ export default function WorkerAlertsPage() {
           ))}
         </ul>
       )}
-    </div>
+    </TemplatePageStack>
   );
 }

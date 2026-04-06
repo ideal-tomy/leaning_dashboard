@@ -11,7 +11,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { TemplatePageHeader, TemplatePageStack } from "@/components/templates/layout-primitives";
+import { TemplateMobileFlowSection } from "@/components/templates/layout-primitives";
 import { PageTagLinks } from "@/components/page-tag-links";
+import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
+import { NextActionCard } from "@/components/navigation/next-action-card";
 import { useIndustry } from "@/components/industry-context";
 import { useDemoRole } from "@/components/demo-role-context";
 import { getIndustryDemoData } from "@/lib/demo-data-selector";
@@ -171,6 +174,15 @@ export default function DocumentsPage() {
 
   return (
     <TemplatePageStack>
+      <TemplateMobileFlowSection>
+        <MobileFlowBar
+          backHref={withDemoQuery("/", industry, role)}
+          backLabel="ダッシュボード"
+          pageLabel={`${profile.labels.documents}管理`}
+          nextHref={withDemoQuery("/documents/deficiencies", industry, role)}
+          nextLabel="次へ"
+        />
+      </TemplateMobileFlowSection>
       <TemplatePageHeader
         title={`${profile.labels.documents}管理`}
         description={
@@ -180,6 +192,16 @@ export default function DocumentsPage() {
               ? "期限・更新が必要な項目を確認し、優先順に対応します。"
               : "入国前手続きを確認し、差戻しや未提出を解消します。"
         }
+      />
+
+      <NextActionCard
+        className="md:hidden"
+        title="次のアクション"
+        reasonTag="不備対応"
+        reasonTone="danger"
+        description="書類不備フォローに進むと、緊急度順で対応対象を把握できます。"
+        actionHref={withDemoQuery("/documents/deficiencies", industry, role)}
+        actionLabel="書類不備フォローへ"
       />
 
       <PageTagLinks

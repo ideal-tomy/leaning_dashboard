@@ -4,8 +4,11 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   TemplatePageHeader,
+  TemplateMobileFlowSection,
   TemplatePageStack,
 } from "@/components/templates/layout-primitives";
+import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
+import { NextActionCard } from "@/components/navigation/next-action-card";
 import { PageTagLinks } from "@/components/page-tag-links";
 import { getIndustryPageHints } from "@/lib/industry-page-hints";
 import { getIndustryProfile } from "@/lib/industry-profiles";
@@ -61,9 +64,27 @@ export default async function OperationsPage({ searchParams }: PageProps) {
 
   return (
     <TemplatePageStack>
+      <TemplateMobileFlowSection>
+        <MobileFlowBar
+          backHref={withDemoQuery("/", industry, role)}
+          backLabel="ダッシュボード"
+          pageLabel={profile.labels.operations}
+          nextHref={withDemoQuery("/client-requests", industry, role)}
+          nextLabel="次へ"
+        />
+      </TemplateMobileFlowSection>
       <TemplatePageHeader
         title={profile.labels.operations}
         description={opsDesc}
+      />
+      <NextActionCard
+        className="md:hidden"
+        title="次のアクション"
+        reasonTag={tag === "deploy" ? "要対応" : "先方連携"}
+        reasonTone={tag === "deploy" ? "danger" : "warning"}
+        description="未対応クライアント要望を確認し、優先順で一次対応を進めます。"
+        actionHref={withDemoQuery("/client-requests", industry, role)}
+        actionLabel="未対応要望へ"
       />
       <PageTagLinks
         label="表示タグ"

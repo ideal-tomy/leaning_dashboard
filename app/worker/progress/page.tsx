@@ -1,5 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { demoWorkers } from "@/lib/demo-workers";
+import { TemplateMobileFlowSection, TemplatePageStack } from "@/components/templates/layout-primitives";
+import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
+import { NextActionCard } from "@/components/navigation/next-action-card";
 
 function Bar({ value }: { value: number }) {
   return (
@@ -19,13 +22,31 @@ export default function WorkerProgressPage() {
   const ethicsPct = Math.min(100, (me.ethicsDoneCount / 6) * 100);
 
   return (
-    <div className="space-y-4">
+    <TemplatePageStack className="space-y-4">
+      <TemplateMobileFlowSection>
+        <MobileFlowBar
+          backHref="/worker/learn"
+          backLabel="学習"
+          pageLabel="進捗"
+          nextHref="/worker/alerts"
+          nextLabel="次へ"
+        />
+      </TemplateMobileFlowSection>
       <div>
         <h1 className="text-xl font-semibold text-primary-alt">進捗</h1>
         <p className="mt-1 text-xs text-muted">
           ප්‍රගතිය — 工場向けダッシュの数値と同じデモデータです。
         </p>
       </div>
+      <NextActionCard
+        className="md:hidden"
+        title="次のアクション"
+        reasonTag="期限確認"
+        reasonTone="warning"
+        description="進捗確認後は期限アラートを確認し、優先順位を決めます。"
+        actionHref="/worker/alerts"
+        actionLabel="お知らせ・期限へ"
+      />
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-base">日本語到達</CardTitle>
@@ -46,6 +67,6 @@ export default function WorkerProgressPage() {
           </p>
         </CardContent>
       </Card>
-    </div>
+    </TemplatePageStack>
   );
 }

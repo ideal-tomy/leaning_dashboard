@@ -4,14 +4,18 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Search } from "lucide-react";
-import type { Candidate, DispatchHistoryEntryDemo, JlptLevel } from "@data/types";
+import { ChevronDown, Search } from "lucide-react";
+import type { Candidate, JlptLevel } from "@data/types";
 import { Badge } from "@/components/ui/badge";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { TemplatePageHeader } from "@/components/templates/layout-primitives";
+import { TemplateMobileFlowSection } from "@/components/templates/layout-primitives";
 import { PageTagLinks } from "@/components/page-tag-links";
+import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
+import { NextActionCard } from "@/components/navigation/next-action-card";
 import { useMobile } from "@/hooks/use-mobile";
 import { getIndustryDemoData } from "@/lib/demo-data-selector";
 import { getIndustryProfile } from "@/lib/industry-profiles";
@@ -23,19 +27,11 @@ import { parsePageTag } from "@/lib/page-tag";
 
 const jlptOptions: JlptLevel[] = ["N5", "N4", "N3", "N2", "N1"];
 
-type CandidateGroupId =
-  | "pre_entry"
-  | "post_entry"
-  | "before_contract"
-  | "after_contract_90"
-  | "after_contract_91";
+type CandidateGroupId = "pre_entry" | "post_entry";
 
 const groupOrder: Array<{ id: CandidateGroupId; label: string; hint: string }> = [
   { id: "pre_entry", label: "入国前", hint: "ビザ・書類・入国前の準備段階" },
-  { id: "post_entry", label: "入国後", hint: "研修・初期立ち上げを確認する段階" },
-  { id: "before_contract", label: "派遣先契約前", hint: "配属前の契約・条件確認段階" },
-  { id: "after_contract_90", label: "派遣先契約後（90日以内）", hint: "定着フォローを優先する段階" },
-  { id: "after_contract_91", label: "派遣先契約後（90日以上）", hint: "安定稼働。問題時のみ重点確認" },
+  { id: "post_entry", label: "入国後", hint: "研修・配属・定着フォロー段階" },
 ];
 
 function statusBadgeVariant(
@@ -45,21 +41,6 @@ function statusBadgeVariant(
   if (s === "document_prep" || s === "training") return "warning";
   if (s === "offer_accepted" || s === "awaiting_entry") return "success";
   return "default";
-}
-
-function daysSince(dateIso: string): number {
-  const diffMs = Date.now() - new Date(dateIso).getTime();
-  if (!Number.isFinite(diffMs)) return 0;
-  return Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
-}
-
-function latestDispatch(candidate: Candidate): DispatchHistoryEntryDemo | null {
-  const history = candidate.detailDemo?.dispatchHistory;
-  if (!history || history.length === 0) return null;
-  const completed = history
-    .filter((h) => h.kind === "completed")
-    .sort((a, b) => (a.startDate < b.startDate ? 1 : -1));
-  return completed[0] ?? null;
 }
 
 function resolveGroup(candidate: Candidate): CandidateGroupId {
@@ -72,12 +53,7 @@ function resolveGroup(candidate: Candidate): CandidateGroupId {
     "awaiting_entry",
   ];
   if (preEntryStatuses.includes(candidate.pipelineStatus)) return "pre_entry";
-  if (candidate.pipelineStatus === "training") return "post_entry";
-
-  const latest = latestDispatch(candidate);
-  if (!latest) return "before_contract";
-  const days = daysSince(latest.startDate);
-  return days <= 90 ? "after_contract_90" : "after_contract_91";
+  return "post_entry";
 }
 
 export function CandidatesSection() {
@@ -95,6 +71,10 @@ export function CandidatesSection() {
   const [jlpt, setJlpt] = useState<JlptLevel | "all">("all");
   const [sheetOpen, setSheetOpen] = useState(false);
   const [preview, setPreview] = useState<Candidate | null>(null);
+  const [groupOpen, setGroupOpen] = useState<Record<CandidateGroupId, boolean>>({
+    pre_entry: true,
+    post_entry: false,
+  });
   const isMobile = useMobile();
   const profile = getIndustryProfile(industry);
   const data = getIndustryDemoData(industry);
@@ -182,11 +162,31 @@ export function CandidatesSection() {
 
   return (
     <div className="space-y-5">
+      <TemplateMobileFlowSection>
+        <MobileFlowBar
+          backHref={withDemoQuery("/", industry, role)}
+          backLabel="ダッシュボード"
+          pageLabel={profile.labels.candidate}
+          nextHref={withDemoQuery("/documents", industry, role)}
+          nextLabel="次へ"
+        />
+      </TemplateMobileFlowSection>
       <TemplatePageHeader title={profile.labels.candidate} description={headerDescription} />
+      <NextActionCard
+        className="md:hidden"
+        title="次のアクション"
+        reasonTag="書類確認"
+        reasonTone="warning"
+        description="候補者確認後は書類管理へ進み、期限・不備を優先確認します。"
+        actionHref={withDemoQuery("/documents", industry, role)}
+        actionLabel="書類管理へ"
+      />
 
       <PageTagLinks
         label="表示タグ"
         currentId={focus}
+        mobileScrollable
+        stickyOnMobile
         tags={[
           {
             id: "overview",
@@ -206,7 +206,8 @@ export function CandidatesSection() {
         ]}
       />
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+      <div className="sticky top-[7.25rem] z-20 -mx-1 rounded-lg bg-surface/95 px-1 py-2 backdrop-blur sm:static sm:mx-0 sm:bg-transparent sm:px-0 sm:py-0">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted" />
           <Input
@@ -228,56 +229,131 @@ export function CandidatesSection() {
             </option>
           ))}
         </select>
+        </div>
       </div>
 
       {groupOrder.map((group) => {
         const items = grouped.get(group.id) ?? [];
         if (items.length === 0) return null;
+        const open = groupOpen[group.id] ?? false;
         return (
           <section key={group.id} className="space-y-2">
-            <div className="rounded-lg border border-border/70 bg-surface/60 px-3 py-2">
-              <h3 className="text-sm font-semibold text-foreground">{group.label}</h3>
-              <p className="text-xs text-muted">{group.hint}</p>
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-              {items.map((candidate) => (
-                <button
-                  key={candidate.id}
-                  type="button"
-                  onClick={() => openCandidate(candidate)}
-                  className={cn(
-                    "text-left rounded-xl border border-border bg-card p-4 transition-all hover:shadow-md",
-                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
-                  )}
-                >
-                  <div className="flex gap-3">
-                    <Image
-                      src={candidate.photoUrl}
-                      alt=""
-                      width={56}
-                      height={56}
-                      className="rounded-full bg-surface shrink-0"
-                      unoptimized
+            {isMobile ? (
+              <Collapsible
+                open={open}
+                onOpenChange={(next) =>
+                  setGroupOpen((prev) => ({ ...prev, [group.id]: next }))
+                }
+              >
+                <CollapsibleTrigger asChild>
+                  <button
+                    type="button"
+                    className="flex w-full items-center justify-between rounded-lg border border-border/70 bg-surface/60 px-3 py-2 text-left"
+                  >
+                    <span>
+                      <span className="text-sm font-semibold text-foreground">
+                        {group.label}
+                      </span>
+                      <span className="ml-2 text-xs text-muted">{items.length}件</span>
+                    </span>
+                    <ChevronDown
+                      className={cn(
+                        "size-4 text-muted transition-transform",
+                        open && "rotate-180"
+                      )}
                     />
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold">{candidate.displayName}</p>
-                      <p className="text-xs text-muted">
-                        {candidate.nationality} · {candidate.jlpt}
-                      </p>
-                      <div className="mt-2 flex flex-wrap items-center gap-2">
-                        <Badge variant="ai">AI {candidate.aiScore}</Badge>
-                        <Badge variant={statusBadgeVariant(candidate.pipelineStatus)}>
-                          {candidate.pipelineStatusLabelJa}
-                        </Badge>
-                      </div>
-                      {candidate.documentAlertJa ? (
-                        <p className="mt-2 text-xs text-danger">{candidate.documentAlertJa}</p>
-                      ) : null}
-                    </div>
+                  </button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="pt-2">
+                  <div className="space-y-2">
+                    {items.map((candidate) => (
+                      <button
+                        key={candidate.id}
+                        type="button"
+                        onClick={() => openCandidate(candidate)}
+                        className={cn(
+                          "w-full text-left rounded-xl border border-border bg-card p-3 transition-all hover:shadow-md",
+                          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+                        )}
+                      >
+                        <div className="flex items-start gap-3">
+                          <Image
+                            src={candidate.photoUrl}
+                            alt=""
+                            width={44}
+                            height={44}
+                            className="rounded-full bg-surface shrink-0"
+                            unoptimized
+                          />
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-semibold">
+                              {candidate.displayName}
+                            </p>
+                            <p className="mt-0.5 text-xs text-muted">
+                              {candidate.nationality} · {candidate.jlpt}
+                            </p>
+                            <div className="mt-2 flex items-center gap-2">
+                              <Badge variant={statusBadgeVariant(candidate.pipelineStatus)}>
+                                {candidate.pipelineStatusLabelJa}
+                              </Badge>
+                              <span className="text-xs text-muted">
+                                AI {candidate.aiScore}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </button>
+                    ))}
                   </div>
-                </button>
-              ))}
-            </div>
+                </CollapsibleContent>
+              </Collapsible>
+            ) : (
+              <>
+                <div className="rounded-lg border border-border/70 bg-surface/60 px-3 py-2">
+                  <h3 className="text-sm font-semibold text-foreground">{group.label}</h3>
+                  <p className="text-xs text-muted">{group.hint}</p>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                  {items.map((candidate) => (
+                    <button
+                      key={candidate.id}
+                      type="button"
+                      onClick={() => openCandidate(candidate)}
+                      className={cn(
+                        "text-left rounded-xl border border-border bg-card p-4 transition-all hover:shadow-md",
+                        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+                      )}
+                    >
+                      <div className="flex gap-3">
+                        <Image
+                          src={candidate.photoUrl}
+                          alt=""
+                          width={56}
+                          height={56}
+                          className="rounded-full bg-surface shrink-0"
+                          unoptimized
+                        />
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-semibold">{candidate.displayName}</p>
+                          <p className="text-xs text-muted">
+                            {candidate.nationality} · {candidate.jlpt}
+                          </p>
+                          <div className="mt-2 flex flex-wrap items-center gap-2">
+                            <Badge variant="ai">AI {candidate.aiScore}</Badge>
+                            <Badge variant={statusBadgeVariant(candidate.pipelineStatus)}>
+                              {candidate.pipelineStatusLabelJa}
+                            </Badge>
+                          </div>
+                          {candidate.documentAlertJa ? (
+                            <p className="mt-2 text-xs text-danger">{candidate.documentAlertJa}</p>
+                          ) : null}
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
           </section>
         );
       })}
