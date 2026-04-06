@@ -1,11 +1,11 @@
 import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { DashboardKillerCards } from "@/components/dashboard-killer-cards";
 import { DashboardTopCardGrid } from "@/components/dashboard-top-card-grid";
 import { DashboardExtensionRegion } from "@/components/dashboard-extension-region";
 import { TemplateDashboardHeader } from "@/components/templates/layout-primitives";
 import { appTemplateConfig } from "@/lib/app-template-config";
-import { getIndustryPageHints } from "@/lib/industry-page-hints";
 import { getIndustryProfile } from "@/lib/industry-profiles";
 import {
   getIndustryFromSearchParams,
@@ -29,8 +29,6 @@ export default async function DashboardPage({ searchParams }: PageProps) {
     redirect(withDemoQuery("/worker", industry, role));
   }
   const profile = getIndustryProfile(industry);
-  const industryHints = getIndustryPageHints(industry);
-  const homeHints = industryHints.home;
   const isFactoryStaffing = industry === "staffing" && role === "client";
   const data = getIndustryDemoData(industry);
   const factoryClient = isFactoryStaffing
@@ -59,49 +57,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
       />
 
       <DashboardKillerCards industry={industry} role={role} />
-
-      {role === "admin" &&
-        industry === "staffing" &&
-        homeHints.adminDailyStepsJa &&
-        homeHints.adminDailyStepsJa.length > 0 && (
-          <Card className="border-primary/20 bg-primary/[0.04] shadow-sm">
-            <CardHeader className="pb-2 pt-4">
-              <CardTitle className="text-base font-semibold">
-                今日の3ステップ（デモ）
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pb-4 pt-0">
-              <ol className="list-decimal space-y-1.5 pl-5 text-sm text-foreground">
-                {homeHints.adminDailyStepsJa.map((step) => (
-                  <li key={step} className="leading-snug">
-                    {step}
-                  </li>
-                ))}
-              </ol>
-            </CardContent>
-          </Card>
-        )}
-
-      {isFactoryStaffing &&
-        homeHints.clientDailyStepsJa &&
-        homeHints.clientDailyStepsJa.length > 0 && (
-          <Card className="border-primary/20 bg-primary/[0.04] shadow-sm">
-            <CardHeader className="pb-2 pt-4">
-              <CardTitle className="text-base font-semibold">
-                今日の3ステップ（デモ・工場）
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pb-4 pt-0">
-              <ol className="list-decimal space-y-1.5 pl-5 text-sm text-foreground">
-                {homeHints.clientDailyStepsJa.map((step) => (
-                  <li key={step} className="leading-snug">
-                    {step}
-                  </li>
-                ))}
-              </ol>
-            </CardContent>
-          </Card>
-        )}
+      <Separator />
 
       <div className="space-y-4">
         <DashboardTopCardGrid cards={topCards} />

@@ -19,6 +19,7 @@ import { getIndustryPageHints } from "@/lib/industry-page-hints";
 import { getIndustryProfile } from "@/lib/industry-profiles";
 import type { EnabledIndustryKey } from "@/lib/industry-profiles";
 import type { DemoRole } from "@/lib/demo-role";
+import type { Candidate } from "@data/types";
 import { aggregateUpcomingDeadlines } from "@/lib/deadline-aggregator";
 import type { DeadlineRow } from "@/lib/deadline-aggregator";
 import { withDemoQuery } from "@/lib/demo-query";
@@ -110,13 +111,31 @@ export default function DocumentsPage() {
     withinDays: 14,
   });
 
-  const milestoneDeadlines = useMemo(
-    () => upcomingDeadlines.filter((r) => r.kind === "milestone"),
-    [upcomingDeadlines]
-  );
   const documentDeadlines = useMemo(
     () => upcomingDeadlines.filter((r) => r.kind === "document"),
     [upcomingDeadlines]
+  );
+  const preEntryStatuses: Candidate["pipelineStatus"][] = [
+    "interview_coordination",
+    "offer_accepted",
+    "visa_applying",
+    "document_prep",
+    "document_blocked",
+  ];
+  const preEntryCandidates = data.candidates.filter((c) =>
+    preEntryStatuses.includes(c.pipelineStatus)
+  );
+  const postEntryCandidates = data.candidates.filter(
+    (c) =>
+      c.pipelineStatus === "training" ||
+      (c.detailDemo?.dispatchHistory?.some((h) => h.kind === "completed") ?? false)
+  );
+  const storedDocs = data.candidates.flatMap((c) =>
+    (c.detailDemo?.storedDocuments ?? []).map((doc) => ({
+      candidateId: c.id,
+      candidateName: c.displayName,
+      ...doc,
+    }))
   );
 
   const scopeHref = (nextScope: string) =>
@@ -233,14 +252,79 @@ export default function DocumentsPage() {
         </Card>
       </div>
 
-      {(scope === "pre-entry" || scope === "deadlines") && (
+      {scope === "pre-entry" && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">入国前に必要な書類（デモ）</CardTitle>
+            <p className="text-sm text-muted">
+              ビザ・COE・パスポートなど、入国前に整えるべき書類状況を確認します。
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {preEntryCandidates.length === 0 ? (
+              <p className="text-sm text-muted">該当者はいません。</p>
+            ) : (
+              preEntryCandidates.slice(0, 8).map((c) => (
+                <Link
+                  key={c.id}
+                  href={withDemoQuery(`/candidates/${c.id}`, industry, role, {
+                    tab: "docs",
+                  })}
+                  className="block rounded-lg border border-border p-3 text-sm hover:bg-surface"
+                >
+                  <p className="font-medium">{c.displayName}</p>
+                  <p className="text-xs text-muted">
+                    {c.pipelineStatusLabelJa} / パスポート期限 {c.passportExpiry}
+                  </p>
+                  {c.documentAlertJa ? (
+                    <p className="text-xs text-danger">{c.documentAlertJa}</p>
+                  ) : null}
+                </Link>
+              ))
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {scope === "post-entry" && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">入国後・就労関連書類（デモ）</CardTitle>
+            <p className="text-sm text-muted">
+              契約・更新・監理報告など、就労後に必要な書類を確認します。
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {postEntryCandidates.length === 0 ? (
+              <p className="text-sm text-muted">該当者はいません。</p>
+            ) : (
+              postEntryCandidates.slice(0, 8).map((c) => (
+                <Link
+                  key={c.id}
+                  href={withDemoQuery(`/candidates/${c.id}`, industry, role, {
+                    tab: "docs",
+                  })}
+                  className="block rounded-lg border border-border p-3 text-sm hover:bg-surface"
+                >
+                  <p className="font-medium">{c.displayName}</p>
+                  <p className="text-xs text-muted">
+                    {c.pipelineStatusLabelJa} / COE {c.coeStatusJa}
+                  </p>
+                </Link>
+              ))
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {scope === "deadlines" && (
         <Card id="deadline-focus">
         <CardHeader>
           <CardTitle className="text-base">
-            期限が近い手続き（14日以内・デモ）
+            期限・保管（デモ）
           </CardTitle>
           <p className="text-sm text-muted">
-            ミルストーンと書類チェックリストの期限を、候補者ごとに集約しています（派遣スタッフィング業種）。
+            書類期限と保管ファイルを確認し、更新・差替えを進めます。
           </p>
         </CardHeader>
         <CardContent className="space-y-2">
@@ -256,20 +340,6 @@ export default function DocumentsPage() {
             <div className="space-y-4">
               <div className="space-y-2">
                 <h3 className="text-sm font-semibold text-foreground">
-                  面接・日程・連絡（予定）
-                </h3>
-                {milestoneDeadlines.length === 0 ? (
-                  <p className="text-sm text-muted">該当なし</p>
-                ) : (
-                  <DeadlineRowsList
-                    rows={milestoneDeadlines}
-                    industry={industry}
-                    role={role}
-                  />
-                )}
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-sm font-semibold text-foreground">
                   書類・申請
                 </h3>
                 {documentDeadlines.length === 0 ? (
@@ -280,6 +350,23 @@ export default function DocumentsPage() {
                     industry={industry}
                     role={role}
                   />
+                )}
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-sm font-semibold text-foreground">保管ファイル</h3>
+                {storedDocs.length === 0 ? (
+                  <p className="text-sm text-muted">保管ファイルはありません。</p>
+                ) : (
+                  <ul className="space-y-2 text-sm">
+                    {storedDocs.slice(0, 8).map((doc) => (
+                      <li key={doc.id} className="rounded-lg border border-border p-3">
+                        <p className="font-medium">{doc.labelJa}</p>
+                        <p className="text-xs text-muted">
+                          {doc.candidateName} / {doc.categoryJa} / 更新 {doc.updatedAt}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
                 )}
               </div>
             </div>

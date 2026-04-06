@@ -16,8 +16,8 @@ type Props = {
 
 export function PageTagLinks({ label, currentId, tags }: Props) {
   return (
-    <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border/80 bg-card p-3">
-      <Badge variant="outline" className="text-xs">
+    <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border/80 bg-card p-2.5">
+      <Badge variant="outline" className="text-[11px]">
         {label}
       </Badge>
       {tags.map((tag) => {
@@ -27,7 +27,7 @@ export function PageTagLinks({ label, currentId, tags }: Props) {
             key={tag.id}
             href={tag.href}
             className={cn(
-              "rounded-md px-2.5 py-1 text-sm transition-colors",
+              "rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
               active
                 ? "bg-primary text-primary-foreground"
                 : "bg-surface text-muted hover:text-foreground"

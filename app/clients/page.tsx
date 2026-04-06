@@ -73,11 +73,6 @@ export default async function ClientsPage({ searchParams }: PageProps) {
             label: "③-2 候補先",
             href: withDemoQuery("/clients?tag=candidate", industry, role),
           },
-          {
-            id: "conditions",
-            label: "③-3 受入条件",
-            href: withDemoQuery("/clients?tag=conditions", industry, role),
-          },
         ]}
       />
       <div className="flex flex-wrap gap-2">
