@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { ArrowRight, Sparkles } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { DashboardKillerCards } from "@/components/dashboard-killer-cards";
@@ -70,10 +71,37 @@ export default async function DashboardPage({ searchParams }: PageProps) {
                 {card.title}
               </Link>
             ))}
+            <Link
+              href={withDemoQuery("/feature-demos", industry, role)}
+              className="rounded-full border border-primary/30 bg-primary/[0.06] px-3 py-1.5 text-xs font-medium text-primary whitespace-nowrap"
+            >
+              技術・DXデモ
+            </Link>
           </div>
         </div>
 
         <DashboardKillerCards industry={industry} role={role} />
+
+        <Link
+          href={withDemoQuery("/feature-demos", industry, role)}
+          className="group block rounded-xl border-2 border-primary/35 bg-gradient-to-br from-primary/[0.09] to-background p-4 shadow-sm transition-all hover:border-primary/55 hover:shadow-md"
+        >
+          <div className="flex items-start gap-3">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
+              <Sparkles className="size-4" aria-hidden />
+            </span>
+            <div className="min-w-0 flex-1 space-y-1">
+              <p className="text-sm font-bold text-foreground">技術・DXデモ</p>
+              <p className="text-xs leading-relaxed text-muted">
+                OCR・AI・翻訳などを一覧から体験。タップで開きます。
+              </p>
+              <p className="inline-flex items-center gap-1 pt-1 text-xs font-semibold text-primary">
+                一覧へ
+                <ArrowRight className="size-3.5 group-hover:translate-x-0.5 transition-transform" />
+              </p>
+            </div>
+          </div>
+        </Link>
 
         <Card className="border-dashed border-border/80 bg-background/70">
           <CardHeader className="pb-2">
@@ -93,6 +121,45 @@ export default async function DashboardPage({ searchParams }: PageProps) {
         <Separator />
         <div className="space-y-4">
           <DashboardTopCardGrid cards={topCards} />
+        </div>
+
+        <section
+          className="relative z-10 mt-10 border-t border-border pt-8"
+          aria-labelledby="tech-dx-demo-heading"
+        >
+          <Link
+            href={withDemoQuery("/feature-demos", industry, role)}
+            className="group block rounded-xl border-2 border-primary/35 bg-gradient-to-br from-primary/[0.09] via-background to-primary/[0.04] p-5 shadow-sm transition-all hover:border-primary/55 hover:shadow-md md:p-6"
+          >
+            <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between md:gap-8">
+              <div className="min-w-0 space-y-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
+                    <Sparkles className="size-5" aria-hidden />
+                  </span>
+                  <h2
+                    id="tech-dx-demo-heading"
+                    className="text-lg font-bold tracking-tight text-foreground md:text-xl"
+                  >
+                    技術・DXデモ
+                  </h2>
+                </div>
+                <p className="max-w-xl text-sm leading-relaxed text-muted">
+                  OCR・PDF・ナレッジ AI・翻訳・マッチングなど、プロダクトの「技術の見せ場」を一覧から体験できます。運用画面とは切り分けたデモ専用の入口です。
+                </p>
+              </div>
+              <span className="inline-flex h-11 w-full shrink-0 items-center justify-center gap-2 rounded-md bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm transition-colors group-hover:bg-primary/90 md:w-auto md:min-w-[12rem]">
+                デモ一覧を見る
+                <ArrowRight
+                  className="size-4 transition-transform group-hover:translate-x-0.5"
+                  aria-hidden
+                />
+              </span>
+            </div>
+          </Link>
+        </section>
+
+        <div className="space-y-4">
           <Card className="border-dashed border-primary/30 bg-primary/[0.02]">
             <CardHeader className="pb-2">
               <CardTitle className="text-base font-semibold">

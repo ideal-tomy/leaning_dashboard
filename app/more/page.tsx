@@ -3,6 +3,7 @@
 import Link from "next/link";
 import {
   ClipboardList,
+  Cpu,
   FileText,
   MessageSquare,
   Settings,
@@ -17,6 +18,7 @@ import { useDemoRole } from "@/components/demo-role-context";
 import { withDemoQuery } from "@/lib/demo-query";
 
 const links = [
+  { href: "/feature-demos", label: "技術・DXデモ", icon: Cpu, desc: "OCR・AI 一覧から体験" },
   { href: "/messages", label: "メッセージ", icon: MessageSquare, desc: "シンハラ語デモ" },
   { href: "/matching", label: "マッチング", icon: ClipboardList, desc: "案件別提案" },
   { href: "/documents", label: "書類", icon: FileText, desc: "OCR・ステータス" },

@@ -1,15 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { FileText, ScanLine } from "lucide-react";
-import { toast } from "sonner";
+import { FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { TemplatePageHeader, TemplatePageStack } from "@/components/templates/layout-primitives";
 import { TemplateMobileFlowSection } from "@/components/templates/layout-primitives";
 import { PageTagLinks } from "@/components/page-tag-links";
@@ -75,8 +72,6 @@ export default function DocumentsPage() {
   const hints = getIndustryPageHints(industry);
   const docHints = hints.documents;
   const data = getIndustryDemoData(industry);
-  const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
   const alerts = data.countDocumentAlerts();
 
   const highlightDeadlines = urlSearch.get("highlight") === "deadlines";
@@ -95,16 +90,6 @@ export default function DocumentsPage() {
     });
     return () => cancelAnimationFrame(id);
   }, [highlightDeadlines]);
-
-  function runScan() {
-    setOpen(true);
-    setLoading(true);
-    toast.info("OCR 処理中…（デモ）");
-    setTimeout(() => {
-      setLoading(false);
-      toast.success("抽出完了（デモ）");
-    }, 1000);
-  }
 
   const blocked = data.candidates.filter(
     (c) => c.pipelineStatus === "document_blocked"
@@ -214,19 +199,7 @@ export default function DocumentsPage() {
         ]}
       />
 
-      <div className="flex flex-wrap gap-2">
-        <Button onClick={runScan} className="gap-2 min-h-11">
-          <ScanLine className="size-4" />
-          {docHints.ocrButtonLabel}
-        </Button>
-        <Button variant="secondary" asChild className="min-h-11 gap-2">
-          <Link
-            href={withDemoQuery("/documents/visa-draft", industry, role)}
-          >
-            <FileText className="size-4" />
-            ビザ更新・申請書類PDF（デモ）
-          </Link>
-        </Button>
+      <div className="flex flex-wrap items-center gap-2">
         <Button variant="ghost" asChild className="min-h-11">
           <Link
             href={withDemoQuery("/documents/deficiencies", industry, role)}
@@ -235,6 +208,16 @@ export default function DocumentsPage() {
           </Link>
         </Button>
       </div>
+      <p className="text-xs text-muted">
+        パスポート OCR・ビザ申請 PDF などの{" "}
+        <Link
+          href={withDemoQuery("/feature-demos", industry, role)}
+          className="font-medium text-primary underline-offset-4 hover:underline"
+        >
+          技術・DXデモ
+        </Link>
+        は一覧から体験できます。
+      </p>
 
       <div className="grid gap-4 sm:grid-cols-3">
         <Card>
@@ -433,33 +416,6 @@ export default function DocumentsPage() {
           </CardContent>
         </Card>
       )}
-
-      <Sheet
-        open={open}
-        onOpenChange={(o) => {
-          setOpen(o);
-          if (!o) setLoading(false);
-        }}
-      >
-        <SheetContent title={docHints.sheetTitle}>
-          {loading ? (
-            <div className="space-y-3 py-4">
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-[92%]" />
-              <Skeleton className="h-4 w-4/5" />
-            </div>
-          ) : (
-            <div className="space-y-2 text-sm">
-              <p className="font-semibold">{docHints.ocrSampleName}</p>
-              <ul className="list-inside list-disc text-muted">
-                {docHints.ocrSampleLines.map((line) => (
-                  <li key={line}>{line}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </SheetContent>
-      </Sheet>
     </TemplatePageStack>
   );
 }

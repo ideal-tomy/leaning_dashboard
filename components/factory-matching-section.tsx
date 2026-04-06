@@ -1,16 +1,25 @@
 "use client";
 
-import Link from "next/link";
-import { Building2, Sparkles } from "lucide-react";
+import { Building2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useIndustry } from "@/components/industry-context";
 import { DEMO_FACTORY_CLIENT_ID } from "@/lib/demo-factory-client";
 import { buildFactoryScoutBlocks } from "@/lib/demo-factory-scout";
 import { getIndustryDemoData } from "@/lib/demo-data-selector";
-import { withDemoQuery } from "@/lib/demo-query";
 import { useDemoRole } from "@/components/demo-role-context";
-import { LearningComplianceBadge } from "@/components/learning-compliance-badge";
+import { MatchingCandidateRow } from "@/components/matching-candidate-row";
+
+function agencyLeftColumn(labelJa: string) {
+  return (
+    <div className="space-y-1">
+      <p className="text-sm font-semibold text-foreground">{labelJa}</p>
+      <p className="text-xs leading-relaxed text-muted">
+        登録支援機関から公開された候補とのマッチング（デモ）
+      </p>
+    </div>
+  );
+}
 
 export function FactoryMatchingSection() {
   const { industry } = useIndustry();
@@ -87,47 +96,23 @@ export function FactoryMatchingSection() {
                 表示できる候補がありません（デモ）。
               </p>
             ) : (
-              <ul className="space-y-2">
+              <ol className="space-y-3">
                 {block.rows.map(
-                  ({ candidate, pct, reason, learningCompliance }) => (
-                    <li
+                  ({ candidate, pct, reason, learningCompliance }, idx) => (
+                    <MatchingCandidateRow
                       key={candidate.id}
-                      className="rounded-lg border border-border bg-card px-3 py-2.5 text-sm"
-                    >
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <Link
-                          href={withDemoQuery(
-                            `/candidates/${candidate.id}`,
-                            industry,
-                            role
-                          )}
-                          className="font-semibold text-primary hover:underline"
-                        >
-                          {candidate.displayName}
-                        </Link>
-                        <span className="flex flex-wrap items-center gap-1.5">
-                          <Badge variant="outline" className="tabular-nums">
-                            日本語 {candidate.jlpt}
-                          </Badge>
-                          {learningCompliance ? (
-                            <LearningComplianceBadge
-                              status={learningCompliance.status}
-                              labelJa={learningCompliance.labelJa}
-                            />
-                          ) : null}
-                          <Badge variant="ai" className="gap-0.5 text-xs">
-                            <Sparkles className="size-3" />
-                            {pct}%
-                          </Badge>
-                        </span>
-                      </div>
-                      <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-muted">
-                        {reason}
-                      </p>
-                    </li>
+                      left={agencyLeftColumn(block.labelJa)}
+                      pct={pct}
+                      reason={reason}
+                      candidate={candidate}
+                      learningCompliance={learningCompliance}
+                      industry={industry}
+                      role={role}
+                      rowIndex={idx}
+                    />
                   )
                 )}
-              </ul>
+              </ol>
             )}
           </CardContent>
         </Card>

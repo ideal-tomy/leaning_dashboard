@@ -1,11 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { MessageSquare, Send, Sparkles } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import {
   TemplateMobileFlowSection,
   TemplatePageHeader,
@@ -17,51 +15,69 @@ import { withDemoQuery } from "@/lib/demo-query";
 import { useDemoRole } from "@/components/demo-role-context";
 import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
 import { NextActionCard } from "@/components/navigation/next-action-card";
+import { FeatureDemoExplainSection } from "@/components/feature-demos/feature-demo-explain-section";
+import { FeatureDemoSiblingGrid } from "@/components/feature-demos/feature-demo-sibling-grid";
+import { KnowledgeMiniChat } from "@/components/knowledge/knowledge-mini-chat";
+import {
+  KNOWLEDGE_FAQ_BOT_PAIRS,
+  KNOWLEDGE_LANKA_BOT_PAIRS,
+} from "@/lib/knowledge-dual-chat-seeds";
+
+type FlowBack = { href: string; label: string };
 
 type Props = {
   industry: EnabledIndustryKey;
+  /** 未指定時はメッセージへ戻る（従来どおり） */
+  flowBack?: FlowBack;
+  /** 技術デモ下層: 次へ・NextActionCard を出さない */
+  featureDemo?: boolean;
 };
 
-export function KnowledgePageClient({ industry }: Props) {
+const FAQ_FALLBACK =
+  "デモでは、上のよくある質問ボタンと同じ文言を入力すると詳細回答を返します。その他の内容はナレッジ登録後に検索できる想定です。";
+
+const LANKA_FALLBACK =
+  "デモでは登録済みのシード質問と同じ内容でのみ詳細応答します。Other questions: please ask your coordinator（デモ）.";
+
+export function KnowledgePageClient({
+  industry,
+  flowBack,
+  featureDemo = false,
+}: Props) {
   const { role } = useDemoRole();
   const hints = getIndustryPageHints(industry).knowledge;
-  const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<
-    { role: "user" | "assistant"; text: string }[]
-  >([]);
-
-  function send(seed?: string) {
-    const text = (seed ?? input).trim();
-    if (!text) return;
-    setMessages((m) => [
-      ...m,
-      { role: "user", text },
-      { role: "assistant", text: hints.staticReply },
-    ]);
-    setInput("");
-  }
+  const back = flowBack ?? {
+    href: withDemoQuery("/messages", industry, role),
+    label: "メッセージ",
+  };
 
   return (
     <TemplatePageStack>
       <TemplateMobileFlowSection>
         <MobileFlowBar
-          backHref={withDemoQuery("/messages", industry, role)}
-          backLabel="メッセージ"
+          backHref={back.href}
+          backLabel={back.label}
           pageLabel="ナレッジAI"
-          nextHref={withDemoQuery("/matching", industry, role)}
-          nextLabel="次へ"
+          {...(!featureDemo
+            ? {
+                nextHref: withDemoQuery("/matching", industry, role),
+                nextLabel: "次へ",
+              }
+            : {})}
         />
       </TemplateMobileFlowSection>
       <TemplatePageHeader title="ナレッジ AI" description={hints.pageSubtitle} />
-      <NextActionCard
-        className="md:hidden"
-        title="次のアクション"
-        reasonTag="提案理由"
-        reasonTone="ai"
-        description="回答確認後はマッチング理由の確認に進み、説明を一貫させます。"
-        actionHref={withDemoQuery("/matching", industry, role)}
-        actionLabel="マッチングへ"
-      />
+      {!featureDemo ? (
+        <NextActionCard
+          className="md:hidden"
+          title="次のアクション"
+          reasonTag="提案理由"
+          reasonTone="ai"
+          description="回答確認後はマッチング理由の確認に進み、説明を一貫させます。"
+          actionHref={withDemoQuery("/matching", industry, role)}
+          actionLabel="マッチングへ"
+        />
+      ) : null}
 
       <div className="flex flex-wrap gap-2">
         <Button variant="secondary" size="sm" asChild>
@@ -73,6 +89,21 @@ export function KnowledgePageClient({ industry }: Props) {
         <Button variant="secondary" size="sm" asChild>
           <Link href={withDemoQuery("/matching", industry, role)}>マッチング理由</Link>
         </Button>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:items-stretch">
+        <KnowledgeMiniChat
+          title="社内ナレッジ・FAQ ボット（デモ）"
+          description="制度・手続きを日本語で参照するイメージです。"
+          pairs={KNOWLEDGE_FAQ_BOT_PAIRS}
+          fallbackReply={FAQ_FALLBACK}
+        />
+        <KnowledgeMiniChat
+          title="スリランカ人向けサポート（デモ）"
+          description="シンハラ語・タミル語と日本語を組み合わせた案内のイメージです。"
+          pairs={KNOWLEDGE_LANKA_BOT_PAIRS}
+          fallbackReply={LANKA_FALLBACK}
+        />
       </div>
 
       <Card>
@@ -89,67 +120,12 @@ export function KnowledgePageClient({ industry }: Props) {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Sparkles className="size-5 text-primary" />
-            擬似チャット（静的応答）
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-wrap gap-2">
-            {hints.chatSeeds.map((s) => (
-              <Button
-                key={s}
-                type="button"
-                variant="secondary"
-                size="sm"
-                className="text-xs"
-                onClick={() => send(s)}
-              >
-                {s}
-              </Button>
-            ))}
-          </div>
-          <div className="max-h-48 space-y-3 overflow-y-auto rounded-lg border border-border bg-surface/40 p-3 text-sm">
-            {messages.length === 0 ? (
-              <p className="text-muted">質問を入力するか、上のシードをタップしてください。</p>
-            ) : (
-              messages.map((msg, i) => (
-                <div
-                  key={`${i}-${msg.role}`}
-                  className={
-                    msg.role === "user"
-                      ? "ml-4 rounded-lg bg-primary/10 px-3 py-2"
-                      : "mr-4 rounded-lg border border-border bg-card px-3 py-2 text-muted"
-                  }
-                >
-                  {msg.text}
-                </div>
-              ))
-            )}
-          </div>
-          <form
-            className="flex gap-2"
-            onSubmit={(e) => {
-              e.preventDefault();
-              send();
-            }}
-          >
-            <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="質問を入力…"
-              className="min-h-11 flex-1"
-              aria-label="チャット入力"
-            />
-            <Button type="submit" className="shrink-0 gap-1.5">
-              <Send className="size-4" />
-              送信
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+      {featureDemo ? (
+        <>
+          <FeatureDemoExplainSection slug="knowledge-ai" />
+          <FeatureDemoSiblingGrid currentSlug="knowledge-ai" />
+        </>
+      ) : null}
     </TemplatePageStack>
   );
 }

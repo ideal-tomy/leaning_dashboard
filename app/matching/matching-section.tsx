@@ -16,8 +16,8 @@ import type { EnabledIndustryKey } from "@/lib/industry-profiles";
 import { withDemoQuery } from "@/lib/demo-query";
 import { useDemoRole } from "@/components/demo-role-context";
 import { cn } from "@/lib/utils";
-import { LearningComplianceBadge } from "@/components/learning-compliance-badge";
-import type { LearningComplianceSummary } from "@data/types";
+import { MatchingCandidateRow } from "@/components/matching-candidate-row";
+import type { Candidate, ClientCompany, LearningComplianceSummary } from "@data/types";
 
 type Props = {
   industry: EnabledIndustryKey;
@@ -25,18 +25,16 @@ type Props = {
 
 function ClientMatchingCard({
   industry,
-  clientId,
-  tradeNameJa,
+  client,
   top,
   emptyState,
   collapsible,
   defaultOpen,
 }: {
   industry: EnabledIndustryKey;
-  clientId: string;
-  tradeNameJa: string;
+  client: ClientCompany;
   top: {
-    candidate: { id: string; displayName: string };
+    candidate: Candidate;
     pct: number;
     reason: string;
     learningCompliance?: LearningComplianceSummary;
@@ -46,40 +44,64 @@ function ClientMatchingCard({
   defaultOpen: boolean;
 }) {
   const { role } = useDemoRole();
+  const { id: clientId, tradeNameJa } = client;
+  const req = client.learningRequirementsDemo;
+
+  const companyLeft = (
+    <div className="space-y-1.5">
+      <Link
+        href={withDemoQuery(`/clients/${clientId}`, industry, role)}
+        className="text-base font-semibold text-primary hover:underline"
+      >
+        {tradeNameJa}
+      </Link>
+      <p className="text-xs leading-relaxed text-muted">
+        {client.industryJa} · {client.prefectureJa}
+        {client.cityJa ? ` ${client.cityJa}` : ""}
+      </p>
+      <p className="text-xs text-muted">
+        募集枠（デモ）: {client.operations.openSlots}名
+      </p>
+      {req ? (
+        <ul className="space-y-0.5 text-xs leading-relaxed text-muted">
+          <li>
+            <span className="text-muted">日本語（対面認定）: </span>
+            <span className="font-medium text-foreground">
+              {req.minCertifiedJlpt} 以上
+            </span>
+          </li>
+          <li>
+            <span className="text-muted">職場倫理: </span>
+            <span className="font-medium text-foreground">
+              {req.ethicsPassRequired
+                ? "対面確認の合格が必須"
+                : "必須なし（デモ）"}
+            </span>
+          </li>
+          {req.standardLabelJa ? <li>{req.standardLabelJa}</li> : null}
+        </ul>
+      ) : null}
+    </div>
+  );
+
   const inner = (
     <>
       {top.length === 0 ? (
         <p className="py-4 text-center text-sm text-muted">{emptyState}</p>
       ) : (
         <ol className="space-y-3">
-          {top.map(({ candidate, pct, reason, learningCompliance }) => (
-            <li
+          {top.map(({ candidate, pct, reason, learningCompliance }, idx) => (
+            <MatchingCandidateRow
               key={candidate.id}
-              className="rounded-lg border border-border p-3 text-sm"
-            >
-              <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <Link
-                  href={withDemoQuery(
-                    `/candidates/${candidate.id}`,
-                    industry,
-                    role
-                  )}
-                  className="font-medium text-primary"
-                >
-                  {candidate.displayName}
-                </Link>
-                <span className="flex flex-wrap items-center gap-2">
-                  {learningCompliance ? (
-                    <LearningComplianceBadge
-                      status={learningCompliance.status}
-                      labelJa={learningCompliance.labelJa}
-                    />
-                  ) : null}
-                  <span className="font-bold text-primary">{pct}%</span>
-                </span>
-              </div>
-              <p className="mt-1 text-xs leading-relaxed text-muted">{reason}</p>
-            </li>
+              left={companyLeft}
+              pct={pct}
+              reason={reason}
+              candidate={candidate}
+              learningCompliance={learningCompliance}
+              industry={industry}
+              role={role}
+              rowIndex={idx}
+            />
           ))}
         </ol>
       )}
@@ -155,8 +177,7 @@ export function MatchingSection({ industry }: Props) {
           <ClientMatchingCard
             key={cl.id}
             industry={industry}
-            clientId={cl.id}
-            tradeNameJa={cl.tradeNameJa}
+            client={cl}
             top={top}
             emptyState={emptyState}
             collapsible={isMobile}
