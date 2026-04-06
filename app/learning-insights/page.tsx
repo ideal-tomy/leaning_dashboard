@@ -6,6 +6,7 @@ import {
   TemplatePageHeader,
   TemplatePageStack,
 } from "@/components/templates/layout-primitives";
+import { PageTagLinks } from "@/components/page-tag-links";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { candidates as staffingCandidates } from "@/lib/demo-data";
@@ -26,6 +27,8 @@ export default async function LearningInsightsPage({
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const industry = getIndustryFromSearchParams(resolvedSearchParams);
   const role = getRoleFromSearchParams(resolvedSearchParams);
+  const tagRaw = resolvedSearchParams?.tag;
+  const tag = typeof tagRaw === "string" ? tagRaw : "overview";
   const hints = getIndustryPageHints(industry);
   const li = hints.learningInsights;
 
@@ -37,6 +40,27 @@ export default async function LearningInsightsPage({
   return (
     <TemplatePageStack>
       <TemplatePageHeader title={title} description={headerDescription} />
+      <PageTagLinks
+        label="表示タグ"
+        currentId={tag}
+        tags={[
+          {
+            id: "overview",
+            label: "④-1 全体進捗",
+            href: withDemoQuery("/learning-insights?tag=overview", industry, role),
+          },
+          {
+            id: "content",
+            label: "④-2 コンテンツ",
+            href: withDemoQuery("/learning-insights?tag=content", industry, role),
+          },
+          {
+            id: "followup",
+            label: "④-3 遅延フォロー",
+            href: withDemoQuery("/learning-insights?tag=followup", industry, role),
+          },
+        ]}
+      />
 
       <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
         <LearningGrowthChart role={role} chartHeightClass="h-64" />

@@ -6,6 +6,7 @@ import {
   TemplatePageHeader,
   TemplatePageStack,
 } from "@/components/templates/layout-primitives";
+import { PageTagLinks } from "@/components/page-tag-links";
 import { getIndustryPageHints } from "@/lib/industry-page-hints";
 import { getIndustryProfile } from "@/lib/industry-profiles";
 import {
@@ -22,6 +23,8 @@ export default async function OperationsPage({ searchParams }: PageProps) {
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const industry = getIndustryFromSearchParams(resolvedSearchParams);
   const role = getRoleFromSearchParams(resolvedSearchParams);
+  const tagRaw = resolvedSearchParams?.tag;
+  const tag = typeof tagRaw === "string" ? tagRaw : "deploy";
   const profile = getIndustryProfile(industry);
   const hints = getIndustryPageHints(industry).operations;
   const opsDesc = hints.pageIntentJa
@@ -33,6 +36,27 @@ export default async function OperationsPage({ searchParams }: PageProps) {
       <TemplatePageHeader
         title={profile.labels.operations}
         description={opsDesc}
+      />
+      <PageTagLinks
+        label="表示タグ"
+        currentId={tag}
+        tags={[
+          {
+            id: "deploy",
+            label: "⑤-1 配属状況",
+            href: withDemoQuery("/operations?tag=deploy", industry, role),
+          },
+          {
+            id: "settle",
+            label: "⑤-2 定着30日",
+            href: withDemoQuery("/operations?tag=settle", industry, role),
+          },
+          {
+            id: "growth",
+            label: "⑤-3 成長90日",
+            href: withDemoQuery("/operations?tag=growth", industry, role),
+          },
+        ]}
       />
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

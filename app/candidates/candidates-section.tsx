@@ -20,6 +20,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { TemplatePageHeader } from "@/components/templates/layout-primitives";
+import { PageTagLinks } from "@/components/page-tag-links";
 import { useMobile } from "@/hooks/use-mobile";
 import { getIndustryDemoData } from "@/lib/demo-data-selector";
 import { getIndustryPageHints } from "@/lib/industry-page-hints";
@@ -148,6 +149,7 @@ export function CandidatesSection() {
   const followupLearning = searchParams.get("followup") === "learning";
   const industry = getIndustryFromSearchParams(searchParams);
   const pipelineStageParam = searchParams.get("pipelineStage");
+  const focus = searchParams.get("focus") ?? "overview";
   const listFilter = parsePipelineListFilter(pipelineStageParam, industry);
   const stageFilterActive = listFilter !== null;
   const pageHints = getIndustryPageHints(industry);
@@ -222,16 +224,26 @@ export function CandidatesSection() {
     ? learningFollowupOrdered(searchFiltered)
     : searchFiltered;
 
+  const focusFiltered =
+    focus === "risk"
+      ? filtered.filter(
+          (c) =>
+            Boolean(c.documentAlertJa?.trim()) ||
+            (c.learningDemo?.online.jpCourseProgressPct ?? 100) <=
+              FOLLOWUP_JP_THRESHOLD
+        )
+      : filtered;
+
   const pipelineFiltered =
     listFilter?.kind === "document_work"
-      ? filtered.filter(
+      ? focusFiltered.filter(
           (c) =>
             c.pipelineStatus === "document_prep" ||
             c.pipelineStatus === "document_blocked"
         )
       : listFilter?.kind === "status"
-        ? filtered.filter((c) => c.pipelineStatus === listFilter.status)
-        : filtered;
+        ? focusFiltered.filter((c) => c.pipelineStatus === listFilter.status)
+        : focusFiltered;
 
   function buildCandidatesHref(
     updates: Record<string, string | null | undefined>
@@ -351,6 +363,39 @@ export function CandidatesSection() {
           </Button>
         </div>
       )}
+
+      <PageTagLinks
+        label="表示タグ"
+        currentId={focus}
+        tags={[
+          {
+            id: "overview",
+            label: "①-1 一覧",
+            href: buildCandidatesHref({ focus: "overview" }),
+          },
+          {
+            id: "evaluation",
+            label: "①-2 評価・ログ",
+            href: buildCandidatesHref({ focus: "evaluation" }),
+          },
+          {
+            id: "risk",
+            label: "①-3 リスク・要フォロー",
+            href: buildCandidatesHref({ focus: "risk" }),
+          },
+        ]}
+      />
+
+      {focus === "evaluation" ? (
+        <p className="text-sm text-muted">
+          評価・面談ログ確認向けの表示です。候補者詳細で「派遣履歴・評価」タブを確認できます。
+        </p>
+      ) : null}
+      {focus === "risk" ? (
+        <p className="text-sm font-medium text-danger">
+          リスク・要フォロー表示中（書類アラートまたは学習進捗低下を優先表示）。
+        </p>
+      ) : null}
 
       <Tabs
         value={tab}

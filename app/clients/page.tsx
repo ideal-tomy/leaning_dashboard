@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { Building2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageTagLinks } from "@/components/page-tag-links";
 import {
   TemplatePageHeader,
   TemplatePageStack,
@@ -25,6 +26,8 @@ export default async function ClientsPage({ searchParams }: PageProps) {
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const industry = getIndustryFromSearchParams(resolvedSearchParams);
   const role = getRoleFromSearchParams(resolvedSearchParams);
+  const tagRaw = resolvedSearchParams?.tag;
+  const tag = typeof tagRaw === "string" ? tagRaw : "list";
   if (industry === "staffing" && role === "client") {
     redirect(
       withDemoQuery(`/clients/${DEMO_FACTORY_CLIENT_ID}`, industry, role)
@@ -44,6 +47,27 @@ export default async function ClientsPage({ searchParams }: PageProps) {
       <TemplatePageHeader
         title={profile.labels.client}
         description={clientHeaderDesc}
+      />
+      <PageTagLinks
+        label="表示タグ"
+        currentId={tag}
+        tags={[
+          {
+            id: "list",
+            label: "③-1 派遣先一覧",
+            href: withDemoQuery("/clients?tag=list", industry, role),
+          },
+          {
+            id: "candidate",
+            label: "③-2 候補先",
+            href: withDemoQuery("/clients?tag=candidate", industry, role),
+          },
+          {
+            id: "conditions",
+            label: "③-3 受入条件",
+            href: withDemoQuery("/clients?tag=conditions", industry, role),
+          },
+        ]}
       />
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {clients.map((c) => (

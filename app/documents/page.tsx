@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { TemplatePageHeader, TemplatePageStack } from "@/components/templates/layout-primitives";
+import { PageTagLinks } from "@/components/page-tag-links";
 import { useIndustry } from "@/components/industry-context";
 import { useDemoRole } from "@/components/demo-role-context";
 import { getIndustryDemoData } from "@/lib/demo-data-selector";
@@ -74,6 +75,8 @@ export default function DocumentsPage() {
   const alerts = data.countDocumentAlerts();
 
   const highlightDeadlines = urlSearch.get("highlight") === "deadlines";
+  const scope = urlSearch.get("scope") ?? "pre-entry";
+  const isFactoryStaffing = industry === "staffing" && role === "client";
   useEffect(() => {
     if (!highlightDeadlines) return;
     const id = requestAnimationFrame(() => {
@@ -111,6 +114,37 @@ export default function DocumentsPage() {
     [upcomingDeadlines]
   );
 
+  const scopeHref = (nextScope: string) =>
+    withDemoQuery(`/documents?scope=${nextScope}`, industry, role);
+
+  if (isFactoryStaffing) {
+    return (
+      <TemplatePageStack>
+        <TemplatePageHeader
+          title="書類管理（支援機関向け）"
+          description="工場表示ではトップ導線から除外されています。必要時のみ支援機関へ連携してください。"
+        />
+        <Card>
+          <CardContent className="space-y-3 pt-6 text-sm text-muted">
+            <p>この画面は支援機関向けの手続きハブです。</p>
+            <div className="flex flex-wrap gap-2">
+              <Button asChild>
+                <Link href={withDemoQuery("/", industry, role)}>
+                  ダッシュボードへ戻る
+                </Link>
+              </Button>
+              <Button variant="secondary" asChild>
+                <Link href={withDemoQuery("/candidates?view=pipeline", industry, role)}>
+                  就労状態を確認する
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </TemplatePageStack>
+    );
+  }
+
   return (
     <TemplatePageStack>
       <TemplatePageHeader
@@ -120,6 +154,16 @@ export default function DocumentsPage() {
             ? `${docHints.pageIntentJa} ${docHints.pageSubtitle}`
             : docHints.pageSubtitle
         }
+      />
+
+      <PageTagLinks
+        label="表示タグ"
+        currentId={scope}
+        tags={[
+          { id: "pre-entry", label: "②-1 入国前", href: scopeHref("pre-entry") },
+          { id: "post-entry", label: "②-2 入国後", href: scopeHref("post-entry") },
+          { id: "deadlines", label: "②-3 期限・保管", href: scopeHref("deadlines") },
+        ]}
       />
 
       <div className="flex flex-wrap gap-3">
@@ -182,7 +226,8 @@ export default function DocumentsPage() {
         </Card>
       </div>
 
-      <Card id="deadline-focus">
+      {(scope === "pre-entry" || scope === "deadlines") && (
+        <Card id="deadline-focus">
         <CardHeader>
           <CardTitle className="text-base">
             期限が近い手続き（14日以内・デモ）
@@ -233,9 +278,10 @@ export default function DocumentsPage() {
             </div>
           )}
         </CardContent>
-      </Card>
+        </Card>
+      )}
 
-      {blocked.length > 0 && (
+      {(scope === "post-entry" || scope === "deadlines") && blocked.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
