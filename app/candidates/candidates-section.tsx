@@ -29,6 +29,7 @@ import { getIndustryFromSearchParams } from "@/lib/industry-selection";
 import { withDemoQuery } from "@/lib/demo-query";
 import { useDemoRole } from "@/components/demo-role-context";
 import { cn } from "@/lib/utils";
+import { parsePageTag } from "@/lib/page-tag";
 
 const jlptOptions: JlptLevel[] = ["N5", "N4", "N3", "N2", "N1"];
 
@@ -139,7 +140,7 @@ const pipelineCardButtonClass = cn(
 );
 
 const pipelineLensDlClass =
-  "min-h-[9rem] space-y-1.5 rounded-md border border-border/80 bg-muted/30 px-2.5 py-2 text-left";
+  "space-y-1 rounded-md border border-border/80 bg-muted/30 px-2.5 py-2 text-left";
 
 export function CandidatesSection() {
   const router = useRouter();
@@ -149,7 +150,11 @@ export function CandidatesSection() {
   const followupLearning = searchParams.get("followup") === "learning";
   const industry = getIndustryFromSearchParams(searchParams);
   const pipelineStageParam = searchParams.get("pipelineStage");
-  const focus = searchParams.get("focus") ?? "overview";
+  const focus = parsePageTag(
+    searchParams.get("focus"),
+    ["overview", "evaluation", "risk"] as const,
+    "overview"
+  );
   const listFilter = parsePipelineListFilter(pipelineStageParam, industry);
   const stageFilterActive = listFilter !== null;
   const pageHints = getIndustryPageHints(industry);
@@ -338,8 +343,12 @@ export function CandidatesSection() {
       : pageHints.candidates.pageIntentJa;
 
   const headerDescription = [
-    pageIntentPrimary,
-    `${candidates.length} 件のデモデータ。${pageHints.candidates.pageSubtitle} スマホはタップでクイック表示。`,
+    pageIntentPrimary ?? "候補者の状況を確認し、優先対応を決めます。",
+    focus === "risk"
+      ? "要対応対象を優先表示しています。"
+      : focus === "evaluation"
+        ? "評価・履歴確認向けの表示です。"
+        : `${candidates.length}件の対象を表示しています。`,
   ]
     .filter(Boolean)
     .join(" ");
@@ -385,6 +394,13 @@ export function CandidatesSection() {
           },
         ]}
       />
+      <div className="flex flex-wrap gap-2">
+        <Button variant="secondary" asChild>
+          <Link href={withDemoQuery("/documents?scope=deadlines", industry, role)}>
+            期限手続きを確認
+          </Link>
+        </Button>
+      </div>
 
       {focus === "evaluation" ? (
         <p className="text-sm text-muted">
@@ -430,15 +446,15 @@ export function CandidatesSection() {
                 : pipelineDemo.pipelineIntroAdminJa}
             </p>
           ) : null}
-          <div className="space-y-8">
+          <div className="space-y-6">
             {CANDIDATE_PIPELINE_PHASE_GROUPS.map((phase) => (
-              <section key={phase.id} className="space-y-4">
+              <section key={phase.id} className="space-y-3">
                 <div className="relative overflow-hidden rounded-xl border border-primary/25 bg-gradient-to-br from-primary/[0.12] via-primary/[0.05] to-card shadow-sm dark:border-primary/35 dark:from-primary/[0.18] dark:via-primary/[0.08]">
                   <div
                     className="absolute inset-y-0 left-0 w-1 bg-primary"
                     aria-hidden
                   />
-                  <h3 className="px-5 py-4 pl-6 text-lg font-bold leading-snug tracking-tight text-foreground sm:text-xl">
+                  <h3 className="px-5 py-3 pl-6 text-lg font-bold leading-snug tracking-tight text-foreground sm:text-xl">
                     {phase.titleJa}
                   </h3>
                 </div>

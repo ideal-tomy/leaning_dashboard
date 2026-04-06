@@ -24,11 +24,11 @@ function toneBadge(tone: DashboardTopCardDefinition["tone"]): string {
 
 export function DashboardTopCardGrid({ cards }: Props) {
   return (
-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+    <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
       {cards.map((card) => (
         <Link key={card.id} href={card.href} className="group block">
           <Card
-            className={`h-full min-h-[220px] transition-all group-hover:border-primary/35 group-hover:shadow-md ${toneClass(
+            className={`h-full min-h-[190px] transition-all group-hover:border-primary/35 group-hover:shadow-md ${toneClass(
               card.tone
             )}`}
           >
@@ -41,13 +41,13 @@ export function DashboardTopCardGrid({ cards }: Props) {
               </div>
               <p className="text-sm text-muted">{card.subtitle}</p>
             </CardHeader>
-            <CardContent className="flex h-full flex-col gap-3">
+            <CardContent className="flex h-full flex-col gap-2.5">
               <div className="rounded-lg bg-surface px-3 py-2">
                 <p className="text-xs text-muted">{card.kpiLabel}</p>
                 <p className="text-2xl font-bold tabular-nums">{card.kpiValue}</p>
               </div>
               <ul className="space-y-1 text-sm text-muted">
-                {card.highlights.slice(0, 3).map((item) => (
+                {card.highlights.slice(0, 2).map((item) => (
                   <li key={item} className="truncate">
                     ・{item}
                   </li>

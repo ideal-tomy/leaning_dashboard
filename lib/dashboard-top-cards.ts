@@ -61,7 +61,7 @@ export function buildDashboardTopCards(
         highlights: [
           `配属準備中: ${input.trainingCount}名`,
           `入社待ち: ${input.awaitingEntryCount}名`,
-          "詳細はパイプラインで確認",
+          "詳細はパイプラインへ",
         ],
         ctaLabel: "就労状態を確認する",
         href: withDemoQuery("/candidates?view=pipeline", industry, role),
@@ -76,7 +76,7 @@ export function buildDashboardTopCards(
         highlights: [
           `稼働中（デモ）: ${input.activeAssignments}名`,
           `受け入れ拠点: ${input.totalClients}拠点`,
-          "評価・配属調整へ遷移",
+          "評価・配属調整へ",
         ],
         ctaLabel: "就労管理を開く",
         href: withDemoQuery("/operations", industry, role),
@@ -96,7 +96,7 @@ export function buildDashboardTopCards(
         input.docAlerts > 0
           ? `要フォロー（書類・期限）: ${input.docAlerts}件`
           : "要フォロー（書類・期限）: 0件",
-        "評価・面談ログへ遷移",
+          "評価・面談ログへ",
       ],
       ctaLabel: "人材一覧を見る",
       href: withDemoQuery("/candidates", industry, role),
@@ -110,7 +110,7 @@ export function buildDashboardTopCards(
       highlights: [
         "入国前（ビザ・申請）",
         "入国後（契約・更新）",
-        "期限・保管場所を一元確認",
+        "期限・保管を確認",
       ],
       ctaLabel: "手続きハブを開く",
       href: withDemoQuery("/documents?scope=pre-entry", industry, role),
@@ -124,8 +124,8 @@ export function buildDashboardTopCards(
       kpiValue: `${input.totalClients}社`,
       highlights: [
         `未充足枠: ${input.totalOpenSlots}名`,
-        "受け入れ条件・相性メモを確認",
-        "候補先の比較へ遷移",
+        "受け入れ条件を確認",
+        "候補先を比較",
       ],
       ctaLabel: "派遣先一覧を見る",
       href: withDemoQuery("/clients", industry, role),
@@ -138,8 +138,8 @@ export function buildDashboardTopCards(
       kpiValue: `${input.totalCandidates}名`,
       highlights: [
         "全体進捗チャートを確認",
-        "コンテンツ運用へ遷移",
-        "遅延フォロー対象を抽出",
+        "コンテンツ運用へ",
+        "遅延フォローを抽出",
       ],
       ctaLabel: "学習サマリーを見る",
       href: withDemoQuery("/learning-insights", industry, role),
@@ -154,7 +154,7 @@ export function buildDashboardTopCards(
       highlights: [
         `配属準備中: ${input.trainingCount}名`,
         `入社待ち: ${input.awaitingEntryCount}名`,
-        "就労オペレーションへ遷移",
+        "就労オペレーションへ",
       ],
       ctaLabel: "就労管理を開く",
       href: withDemoQuery("/operations", industry, role),

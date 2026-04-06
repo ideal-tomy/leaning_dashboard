@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { candidates as staffingCandidates } from "@/lib/demo-data";
 import { getIndustryPageHints } from "@/lib/industry-page-hints";
+import { parsePageTag } from "@/lib/page-tag";
 import {
   getIndustryFromSearchParams,
   getRoleFromSearchParams,
@@ -27,15 +28,22 @@ export default async function LearningInsightsPage({
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const industry = getIndustryFromSearchParams(resolvedSearchParams);
   const role = getRoleFromSearchParams(resolvedSearchParams);
-  const tagRaw = resolvedSearchParams?.tag;
-  const tag = typeof tagRaw === "string" ? tagRaw : "overview";
+  const tag = parsePageTag(
+    typeof resolvedSearchParams?.tag === "string" ? resolvedSearchParams.tag : null,
+    ["overview", "content", "followup"] as const,
+    "overview"
+  );
   const hints = getIndustryPageHints(industry);
   const li = hints.learningInsights;
 
   const title = li?.pageTitleJa ?? "学習サマリー";
   const subtitle = li?.pageSubtitleJa ?? "学習到達の分布（デモ）";
-  const intent = li?.pageIntentJa;
-  const headerDescription = [intent, subtitle].filter(Boolean).join(" ");
+  const headerDescription =
+    tag === "content"
+      ? "コンテンツ利用状況を確認し、次に改善する教材を決めます。"
+      : tag === "followup"
+        ? "遅延フォロー対象を確認し、優先対応を決めます。"
+        : `${li?.pageIntentJa ?? "学習全体の進捗を確認します。"} ${subtitle}`;
 
   return (
     <TemplatePageStack>
@@ -61,12 +69,21 @@ export default async function LearningInsightsPage({
           },
         ]}
       />
-
-      <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-        <LearningGrowthChart role={role} chartHeightClass="h-64" />
+      <div className="flex flex-wrap gap-2">
+        <Button variant="secondary" asChild>
+          <Link href={withDemoQuery("/candidates?focus=risk", industry, role)}>
+            要フォロー人材を見る
+          </Link>
+        </Button>
       </div>
 
-      {industry === "staffing" ? (
+      {(tag === "overview" || tag === "followup") && (
+        <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+          <LearningGrowthChart role={role} chartHeightClass="h-56" />
+        </div>
+      )}
+
+      {industry === "staffing" && (tag === "overview" || tag === "content") ? (
         <Card>
           <CardHeader>
             <CardTitle className="text-base">週次アクティブ率（デモ）</CardTitle>
@@ -77,7 +94,7 @@ export default async function LearningInsightsPage({
         </Card>
       ) : null}
 
-      {industry === "staffing" ? (
+      {industry === "staffing" && (tag === "overview" || tag === "followup") ? (
         <Card>
           <CardHeader>
             <CardTitle className="text-base">

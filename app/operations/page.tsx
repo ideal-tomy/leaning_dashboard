@@ -9,6 +9,7 @@ import {
 import { PageTagLinks } from "@/components/page-tag-links";
 import { getIndustryPageHints } from "@/lib/industry-page-hints";
 import { getIndustryProfile } from "@/lib/industry-profiles";
+import { parsePageTag } from "@/lib/page-tag";
 import {
   getIndustryFromSearchParams,
   getRoleFromSearchParams,
@@ -19,17 +20,44 @@ type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
+function opsBadgeVariant(label?: string): "danger" | "warning" | "default" | "success" {
+  if (!label) return "default";
+  if (label.includes("要対応") || label.includes("調査")) return "danger";
+  if (label.includes("予定") || label.includes("要確認")) return "warning";
+  if (label.includes("完了")) return "success";
+  return "default";
+}
+
 export default async function OperationsPage({ searchParams }: PageProps) {
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const industry = getIndustryFromSearchParams(resolvedSearchParams);
   const role = getRoleFromSearchParams(resolvedSearchParams);
-  const tagRaw = resolvedSearchParams?.tag;
-  const tag = typeof tagRaw === "string" ? tagRaw : "deploy";
+  const tag = parsePageTag(
+    typeof resolvedSearchParams?.tag === "string" ? resolvedSearchParams.tag : null,
+    ["deploy", "settle", "growth"] as const,
+    "deploy"
+  );
   const profile = getIndustryProfile(industry);
   const hints = getIndustryPageHints(industry).operations;
-  const opsDesc = hints.pageIntentJa
-    ? `${hints.pageIntentJa} ${profile.operationsDescription}`
-    : profile.operationsDescription;
+  const opsDesc =
+    tag === "settle"
+      ? "初期定着の未対応タスクを確認し、フォロー順を決めます。"
+      : tag === "growth"
+        ? "成長確認に必要な運用情報を確認し、改善アクションへ繋げます。"
+        : "配属・稼働の運用状況を確認し、今日の優先対応を決めます。";
+
+  const kpiTiles =
+    tag === "growth"
+      ? hints.kpiTiles.slice(1, 4)
+      : tag === "settle"
+        ? hints.kpiTiles.slice(0, 3)
+        : hints.kpiTiles;
+  const timelineRows =
+    tag === "growth"
+      ? hints.timeline.slice(1)
+      : tag === "settle"
+        ? hints.timeline.slice(0, 2)
+        : hints.timeline;
 
   return (
     <TemplatePageStack>
@@ -58,9 +86,17 @@ export default async function OperationsPage({ searchParams }: PageProps) {
           },
         ]}
       />
+      <div className="flex flex-wrap gap-2">
+        <Link href={withDemoQuery("/candidates?focus=risk", industry, role)} className="inline-flex">
+          <Badge variant="danger" className="px-3 py-1">要対応人材へ</Badge>
+        </Link>
+        <Link href={withDemoQuery("/clients?tag=conditions", industry, role)} className="inline-flex">
+          <Badge variant="warning" className="px-3 py-1">受入条件を確認</Badge>
+        </Link>
+      </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {hints.kpiTiles.map((k) => (
+        {kpiTiles.map((k) => (
           <Card key={k.label}>
             <CardHeader className="pb-2">
               <CardTitle className="text-xs font-medium text-muted">{k.label}</CardTitle>
@@ -75,6 +111,7 @@ export default async function OperationsPage({ searchParams }: PageProps) {
         ))}
       </div>
 
+      {(tag === "deploy" || tag === "settle") && (
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
@@ -83,7 +120,7 @@ export default async function OperationsPage({ searchParams }: PageProps) {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          {hints.timeline.map((row) => (
+          {timelineRows.map((row) => (
             <div
               key={row.title}
               className="flex flex-col gap-1 rounded-lg border border-border/80 p-3 sm:flex-row sm:items-center sm:justify-between"
@@ -93,7 +130,7 @@ export default async function OperationsPage({ searchParams }: PageProps) {
                 <p className="text-xs text-muted">{row.time}</p>
               </div>
               {row.badge ? (
-                <Badge variant="secondary" className="w-fit shrink-0">
+                <Badge variant={opsBadgeVariant(row.badge)} className="w-fit shrink-0">
                   {row.badge}
                 </Badge>
               ) : null}
@@ -102,7 +139,9 @@ export default async function OperationsPage({ searchParams }: PageProps) {
           <p className="text-xs text-muted">{hints.csvHint}</p>
         </CardContent>
       </Card>
+      )}
 
+      {(tag === "settle" || tag === "growth") && (
       <div className="grid gap-4 sm:grid-cols-2">
         <Link href={withDemoQuery("/documents", industry, role)} className="block">
           <Card className="h-full min-h-[100px] transition-all hover:border-primary/30 hover:shadow-md">
@@ -131,6 +170,7 @@ export default async function OperationsPage({ searchParams }: PageProps) {
           </Card>
         </Link>
       </div>
+      )}
     </TemplatePageStack>
   );
 }

@@ -22,6 +22,7 @@ import type { DemoRole } from "@/lib/demo-role";
 import { aggregateUpcomingDeadlines } from "@/lib/deadline-aggregator";
 import type { DeadlineRow } from "@/lib/deadline-aggregator";
 import { withDemoQuery } from "@/lib/demo-query";
+import { parsePageTag } from "@/lib/page-tag";
 
 function DeadlineRowsList({
   rows,
@@ -75,7 +76,11 @@ export default function DocumentsPage() {
   const alerts = data.countDocumentAlerts();
 
   const highlightDeadlines = urlSearch.get("highlight") === "deadlines";
-  const scope = urlSearch.get("scope") ?? "pre-entry";
+  const scope = parsePageTag(
+    urlSearch.get("scope"),
+    ["pre-entry", "post-entry", "deadlines"] as const,
+    "pre-entry"
+  );
   const isFactoryStaffing = industry === "staffing" && role === "client";
   useEffect(() => {
     if (!highlightDeadlines) return;
@@ -150,9 +155,11 @@ export default function DocumentsPage() {
       <TemplatePageHeader
         title={`${profile.labels.documents}管理`}
         description={
-          docHints.pageIntentJa
-            ? `${docHints.pageIntentJa} ${docHints.pageSubtitle}`
-            : docHints.pageSubtitle
+          scope === "post-entry"
+            ? "入国後・就労関連書類の状態を確認し、未完了を処理します。"
+            : scope === "deadlines"
+              ? "期限・更新が必要な項目を確認し、優先順に対応します。"
+              : "入国前手続きを確認し、差戻しや未提出を解消します。"
         }
       />
 
@@ -166,7 +173,7 @@ export default function DocumentsPage() {
         ]}
       />
 
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-2">
         <Button onClick={runScan} className="gap-2 min-h-11">
           <ScanLine className="size-4" />
           {docHints.ocrButtonLabel}
@@ -179,7 +186,7 @@ export default function DocumentsPage() {
             ビザ更新・申請書類PDF（デモ）
           </Link>
         </Button>
-        <Button variant="secondary" asChild className="min-h-11">
+        <Button variant="ghost" asChild className="min-h-11">
           <Link
             href={withDemoQuery("/documents/deficiencies", industry, role)}
           >
@@ -246,7 +253,7 @@ export default function DocumentsPage() {
               14日以内の期限はありません（基準日: デモバンドルに準拠）。
             </p>
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-4">
               <div className="space-y-2">
                 <h3 className="text-sm font-semibold text-foreground">
                   面接・日程・連絡（予定）

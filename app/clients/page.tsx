@@ -8,10 +8,12 @@ import {
   TemplatePageHeader,
   TemplatePageStack,
 } from "@/components/templates/layout-primitives";
+import { Button } from "@/components/ui/button";
 import { getIndustryDemoData } from "@/lib/demo-data-selector";
 import { getIndustryPageHints } from "@/lib/industry-page-hints";
 import { getIndustryProfile } from "@/lib/industry-profiles";
 import { DEMO_FACTORY_CLIENT_ID } from "@/lib/demo-factory-client";
+import { parsePageTag } from "@/lib/page-tag";
 import {
   getIndustryFromSearchParams,
   getRoleFromSearchParams,
@@ -26,8 +28,11 @@ export default async function ClientsPage({ searchParams }: PageProps) {
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const industry = getIndustryFromSearchParams(resolvedSearchParams);
   const role = getRoleFromSearchParams(resolvedSearchParams);
-  const tagRaw = resolvedSearchParams?.tag;
-  const tag = typeof tagRaw === "string" ? tagRaw : "list";
+  const tag = parsePageTag(
+    typeof resolvedSearchParams?.tag === "string" ? resolvedSearchParams.tag : null,
+    ["list", "candidate", "conditions"] as const,
+    "list"
+  );
   if (industry === "staffing" && role === "client") {
     redirect(
       withDemoQuery(`/clients/${DEMO_FACTORY_CLIENT_ID}`, industry, role)
@@ -37,16 +42,22 @@ export default async function ClientsPage({ searchParams }: PageProps) {
   const clients = getIndustryDemoData(industry).clients;
   const clientHints = getIndustryPageHints(industry).clients;
   const emphasis = clientHints.listCardEmphasis;
-  const clientDesc = `${clients.length} 件のデモデータ。一覧から詳細・AI 候補へ進めます。`;
-  const clientHeaderDesc = clientHints.pageIntentJa
-    ? `${clientHints.pageIntentJa} ${clientDesc}`
-    : clientDesc;
+  const clientHeaderDesc =
+    tag === "candidate"
+      ? "候補先を比較し、優先提案先を決めます。"
+      : tag === "conditions"
+        ? "受入条件と空き枠を確認し、先方調整に進みます。"
+        : "派遣先の一覧を確認し、次に対応する先を決めます。";
+  const sortedClients =
+    tag === "candidate"
+      ? [...clients].sort((a, b) => b.operations.openSlots - a.operations.openSlots)
+      : clients;
 
   return (
     <TemplatePageStack>
       <TemplatePageHeader
         title={profile.labels.client}
-        description={clientHeaderDesc}
+        description={`${clientHeaderDesc} ${clients.length}件のデモデータを表示しています。`}
       />
       <PageTagLinks
         label="表示タグ"
@@ -69,8 +80,20 @@ export default async function ClientsPage({ searchParams }: PageProps) {
           },
         ]}
       />
+      <div className="flex flex-wrap gap-2">
+        <Button asChild>
+          <Link href={withDemoQuery("/matching", industry, role)}>
+            人材提案を確認する
+          </Link>
+        </Button>
+        <Button variant="secondary" asChild>
+          <Link href={withDemoQuery("/operations", industry, role)}>
+            クライアント要望を確認する
+          </Link>
+        </Button>
+      </div>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {clients.map((c) => (
+        {sortedClients.map((c) => (
           <Link
             key={c.id}
             href={withDemoQuery(`/clients/${c.id}`, industry, role)}
@@ -102,7 +125,7 @@ export default async function ClientsPage({ searchParams }: PageProps) {
                 {emphasis === "openSlots" ? (
                   <>
                     <div className="flex flex-wrap gap-2">
-                      <Badge variant="warning">空き {c.operations.openSlots}</Badge>
+                      <Badge variant="outline">空き {c.operations.openSlots}</Badge>
                       <Badge variant="secondary">
                         稼働 {c.operations.currentAssignees}
                       </Badge>
@@ -115,7 +138,7 @@ export default async function ClientsPage({ searchParams }: PageProps) {
                       {c.cultureJa}
                     </p>
                     <div className="flex flex-wrap gap-2">
-                      <Badge variant="warning">空き {c.operations.openSlots}</Badge>
+                      <Badge variant="outline">空き {c.operations.openSlots}</Badge>
                       <Badge variant="secondary">
                         稼働 {c.operations.currentAssignees}
                       </Badge>
@@ -125,13 +148,18 @@ export default async function ClientsPage({ searchParams }: PageProps) {
                   <>
                     <p className="line-clamp-2 text-sm text-muted">{c.cultureJa}</p>
                     <div className="flex flex-wrap gap-2">
-                      <Badge variant="warning">空き {c.operations.openSlots}</Badge>
+                      <Badge variant="outline">空き {c.operations.openSlots}</Badge>
                       <Badge variant="secondary">
                         稼働 {c.operations.currentAssignees}
                       </Badge>
                     </div>
                   </>
                 )}
+                {tag === "conditions" ? (
+                  <p className="text-xs text-muted">
+                    受入条件メモ: {c.cultureJa}
+                  </p>
+                ) : null}
               </CardContent>
             </Card>
           </Link>
