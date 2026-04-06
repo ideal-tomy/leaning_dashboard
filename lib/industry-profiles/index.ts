@@ -178,7 +178,7 @@ const baseProfiles: Record<EnabledIndustryKey, IndustryProfile> = {
       matching: "マッチング",
       documents: "書類",
       revenue: "収益",
-      operations: "実務・収益",
+      operations: "実務",
       knowledge: "ナレッジ",
       pipeline: "選考・ビザ進捗",
     },
@@ -190,7 +190,7 @@ const baseProfiles: Record<EnabledIndustryKey, IndustryProfile> = {
     },
     statusLabels: staffingStatus,
     matchingDescription: "案件ごとの上位候補と AI 理由（デモロジック）",
-    operationsDescription: "書類・数値へのショートカット（デモ）",
+    operationsDescription: "実務オペレーションと書類へのショートカット（デモ）",
   },
   "real-estate": {
     key: "real-estate",

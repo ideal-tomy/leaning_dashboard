@@ -3,7 +3,6 @@ import { Badge } from "@/components/ui/badge";
 import { demoWorkers } from "@/lib/demo-workers";
 import { TemplateMobileFlowSection, TemplatePageStack } from "@/components/templates/layout-primitives";
 import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
-import { NextActionCard } from "@/components/navigation/next-action-card";
 
 const DEMO_WORKER_ID = "w-kasun";
 
@@ -17,8 +16,6 @@ export default function WorkerHomePage() {
           backHref="/"
           backLabel="ホーム"
           pageLabel="マイホーム"
-          nextHref="/worker/learn"
-          nextLabel="次へ"
         />
       </TemplateMobileFlowSection>
       <div>
@@ -30,15 +27,6 @@ export default function WorkerHomePage() {
           {me.displayNameEn} さん、本日の学習と期限をここから確認できます。
         </p>
       </div>
-      <NextActionCard
-        className="md:hidden"
-        title="次のアクション"
-        reasonTag="学習継続"
-        reasonTone="success"
-        description="今日の進捗を確認したら、学習モジュールを続けて進めます。"
-        actionHref="/worker/learn"
-        actionLabel="学習モジュールへ"
-      />
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-base">今日のステータス</CardTitle>

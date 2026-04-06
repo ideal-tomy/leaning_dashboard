@@ -14,7 +14,11 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { appTemplateConfig } from "@/lib/app-template-config";
+import {
+  appTemplateConfig,
+  type TemplateNavItem,
+} from "@/lib/app-template-config";
+import type { EnabledIndustryKey } from "@/lib/industry-profiles";
 import { unreadDemoMessageCount } from "@/lib/demo-messages";
 import { DemoFab } from "@/components/demo-fab";
 import { templateNavIcons } from "@/components/template-nav-icons";
@@ -35,6 +39,82 @@ const workerNavItems: { href: string; label: string; Icon: LucideIcon }[] = [
   { href: "/worker/alerts", label: "期限", Icon: Bell },
   { href: "/worker/support", label: "相談", Icon: Headphones },
 ];
+
+function AdminMobileNavRow({
+  items,
+  pathname,
+  industry,
+  role,
+  labelByHref,
+}: {
+  items: readonly TemplateNavItem[];
+  pathname: string;
+  industry: EnabledIndustryKey;
+  role: DemoRole;
+  labelByHref: Record<string, string>;
+}) {
+  return (
+    <div className="mx-auto flex max-w-7xl items-stretch overflow-x-auto overscroll-x-contain">
+      {items.map(({ href, label, icon }) => {
+        const Icon = templateNavIcons[icon];
+        const active =
+          href === "/"
+            ? pathname === "/"
+            : pathname === href || pathname.startsWith(href + "/");
+        return (
+          <Link
+            key={href}
+            href={withDemoQuery(href, industry, role)}
+            className={cn(
+              "flex min-w-[4.25rem] shrink-0 flex-col items-center gap-0.5 px-1 py-2 text-[10px] font-medium leading-tight sm:min-w-[4.5rem]",
+              active ? "text-primary" : "text-muted"
+            )}
+          >
+            <Icon className="size-5 shrink-0" />
+            <span className="line-clamp-2 text-center">
+              {labelByHref[href] ?? label}
+            </span>
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
+
+function WorkerMobileNavRow({
+  pathname,
+  industry,
+  role,
+}: {
+  pathname: string;
+  industry: EnabledIndustryKey;
+  role: DemoRole;
+}) {
+  return (
+    <div className="mx-auto flex max-w-lg items-stretch justify-around">
+      {workerNavItems.map((item) => {
+        const { href, label, Icon } = item;
+        const active =
+          href === "/worker"
+            ? pathname === "/worker"
+            : pathname === href || pathname.startsWith(href + "/");
+        return (
+          <Link
+            key={href}
+            href={withDemoQuery(href, industry, role)}
+            className={cn(
+              "flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-medium",
+              active ? "text-primary" : "text-muted"
+            )}
+          >
+            <Icon className="size-5" />
+            {label}
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -66,26 +146,41 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     "/candidates": profile.labels.candidate,
     "/clients": profile.labels.client,
     "/operations": profile.labels.operations,
+    "/revenue": profile.labels.revenue,
     "/knowledge": profile.labels.knowledge,
   };
   const bottomNavLabelByHref: Record<string, string> = {
-    "/": "Home",
+    "/": "ホーム",
     "/candidates": profile.labels.candidate,
     "/clients": profile.labels.client,
+    "/operations": profile.labels.operations,
     "/revenue": profile.labels.revenue,
-    "/more": "その他",
+    "/knowledge": profile.labels.knowledge,
+    "/messages": "メッセージ",
+    "/matching": profile.labels.matching,
+    "/documents": profile.labels.documents,
   };
 
   const isWorker = role === "worker";
   const isClient = role === "client";
 
   const adminTopNavItems = shell.topNav.filter(
-    (item) => !(isClient && item.href === "/operations")
+    (item) =>
+      !(isClient && (item.href === "/operations" || item.href === "/revenue"))
   );
 
-  const adminBottomNavItems = shell.bottomNav.filter(
-    (item) => !(isClient && item.href === "/revenue")
-  );
+  /** クライアントは収益を非表示。派遣スタッフィングのクライアントは「その他」ページと同様に実務・書類も除外 */
+  const adminBottomNavItems = shell.bottomNav.filter((item) => {
+    if (!isClient) return true;
+    if (item.href === "/revenue") return false;
+    if (
+      industry === "staffing" &&
+      (item.href === "/operations" || item.href === "/documents")
+    ) {
+      return false;
+    }
+    return true;
+  });
 
   return (
     <div className="flex min-h-full flex-col">
@@ -198,56 +293,56 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           )}
         </div>
         <div className="h-0.5 w-full bg-primary" aria-hidden />
+        {isWorker ? (
+          <nav
+            className="md:hidden border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80"
+            aria-label="メインナビゲーション（上部）"
+          >
+            <WorkerMobileNavRow
+              pathname={pathname}
+              industry={industry}
+              role={role}
+            />
+          </nav>
+        ) : (
+          <nav
+            className="md:hidden border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80"
+            aria-label="メインナビゲーション（上部）"
+          >
+            <AdminMobileNavRow
+              items={adminBottomNavItems}
+              pathname={pathname}
+              industry={industry}
+              role={role}
+              labelByHref={bottomNavLabelByHref}
+            />
+          </nav>
+        )}
       </header>
 
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 pb-24 pt-6 md:pb-8">
         {children}
       </main>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-background/95 pb-safe backdrop-blur md:hidden">
-        <div className="mx-auto flex max-w-lg items-stretch justify-around">
-          {isWorker
-            ? workerNavItems.map((item) => {
-                const { href, label, Icon } = item;
-                const active =
-                  href === "/worker"
-                    ? pathname === "/worker"
-                    : pathname === href || pathname.startsWith(href + "/");
-                return (
-                  <Link
-                    key={href}
-                    href={withDemoQuery(href, industry, role)}
-                    className={cn(
-                      "flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-medium",
-                      active ? "text-primary" : "text-muted"
-                    )}
-                  >
-                    <Icon className="size-5" />
-                    {label}
-                  </Link>
-                );
-              })
-            : adminBottomNavItems.map(({ href, label, icon }) => {
-                const Icon = templateNavIcons[icon];
-                const active =
-                  href === "/"
-                    ? pathname === "/"
-                    : pathname === href || pathname.startsWith(href + "/");
-                return (
-                  <Link
-                    key={href}
-                    href={withDemoQuery(href, industry, role)}
-                    className={cn(
-                      "flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-medium",
-                      active ? "text-primary" : "text-muted"
-                    )}
-                  >
-                    <Icon className="size-5" />
-                    {bottomNavLabelByHref[href] ?? label}
-                  </Link>
-                );
-              })}
-        </div>
+      <nav
+        className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-background/95 pb-safe backdrop-blur md:hidden"
+        aria-label="メインナビゲーション（下部）"
+      >
+        {isWorker ? (
+          <WorkerMobileNavRow
+            pathname={pathname}
+            industry={industry}
+            role={role}
+          />
+        ) : (
+          <AdminMobileNavRow
+            items={adminBottomNavItems}
+            pathname={pathname}
+            industry={industry}
+            role={role}
+            labelByHref={bottomNavLabelByHref}
+          />
+        )}
       </nav>
 
       {shell.showDemoFab ? <DemoFab /> : null}

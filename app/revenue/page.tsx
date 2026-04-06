@@ -25,7 +25,6 @@ import {
   TemplateTwoColumnGrid,
 } from "@/components/templates/layout-primitives";
 import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
-import { NextActionCard } from "@/components/navigation/next-action-card";
 import { getCacDemo, getBreakevenSeries, getReferralRecoveryDemo, getRefundRiskDemo, getRevenueSummaryKpis, getRevenueTrendForChart } from "@/lib/revenue-demo";
 import { getIndustryPageHints } from "@/lib/industry-page-hints";
 import { getIndustryProfile } from "@/lib/industry-profiles";
@@ -87,16 +86,6 @@ export default async function RevenuePage({ searchParams }: PageProps) {
         title={profile.labels.revenue}
         description={revenueHeaderDesc}
       />
-      <NextActionCard
-        className="md:hidden"
-        title="次のアクション"
-        reasonTag="回収対応"
-        reasonTone="warning"
-        description="収益状況を確認したら、未対応要望へ進んで回収と対応を前倒しします。"
-        actionHref={withDemoQuery("/client-requests", industry, role)}
-        actionLabel="未対応要望へ"
-      />
-
       <TemplateKpiGrid>
         <Card>
           <CardHeader className="pb-2">

@@ -11,6 +11,12 @@ const defaultProfile = getIndustryProfile(defaultIndustryKey);
  * 派遣デモの文言・ナビはここを編集するか、別ファイルにコピーして import を差し替える。
  */
 
+/**
+ * トップ導線の対応（監査用・PC/スマホ同一ルート）:
+ * - KPI カード: lib/dashboard-top-cards.ts の href（人材→候補者、就労状態→pipeline、就労管理→/operations）
+ * - 拡張枠: 下記 extensionSlots の path（勤怠→/attendance-billing、連携→/integrations など）
+ */
+
 /** ナビで使う Lucide アイコン名（components/template-nav-icons.tsx と一致させる） */
 export type TemplateNavIconName =
   | "LayoutDashboard"
@@ -59,14 +65,14 @@ export const appTemplateConfig = {
       {
         id: "attendanceBilling",
         enabled: true,
-        path: "/operations",
+        path: "/attendance-billing",
         icon: "Clock",
         title: "勤怠・請求",
         subtitle: "勤怠情報から経費計算連携",
         desktopTitle: "勤怠・請求（拡張枠）",
         desktopBody:
-          "CSV 取込イメージ。今回はプレースホルダ — 実務・収益ハブへ",
-        desktopCta: "開く",
+          "CSV 取込と集計プレビューのダミー（デモ）。実務オペレーションとは別画面で扱います。",
+        desktopCta: "勤怠・請求デモへ",
       },
       {
         id: "knowledgeAi",
@@ -95,14 +101,14 @@ export const appTemplateConfig = {
       {
         id: "customInsight",
         enabled: true,
-        path: "/more",
+        path: "/integrations",
         icon: "LayoutGrid",
         title: "連携・カスタム",
         subtitle: "外部連携と追加ウィジェット（デモ）",
         desktopTitle: "連携・アラート（拡張枠）",
         desktopBody:
-          "外部システム・承認キュー・任意 KPI を載せられる想定のスロット。「その他」へのショートカット。",
-        desktopCta: "その他へ",
+          "外部システム・承認キュー・任意 KPI を載せる想定の連携ダッシュ（デモ）。設定やその他メニューは本文内から。",
+        desktopCta: "連携ダッシュへ",
       },
     ] satisfies DashboardExtensionSlotBase[],
   },
@@ -113,15 +119,24 @@ export const appTemplateConfig = {
       { href: "/", label: "ダッシュボード", icon: "LayoutDashboard" },
       { href: "/candidates", label: "候補者", icon: "Users" },
       { href: "/clients", label: "案件", icon: "Building2" },
-      { href: "/operations", label: "実務・収益", icon: "TrendingUp" },
+      { href: "/operations", label: "実務", icon: "ClipboardList" },
+      { href: "/revenue", label: "収益", icon: "TrendingUp" },
       { href: "/knowledge", label: "ナレッジ", icon: "Sparkles" },
     ] satisfies TemplateNavItem[],
+    /**
+     * スマホ下部タブ（md 未満）。PC の topNav と同一の並びに、
+     * 「その他」にあったメッセージ・マッチング・書類を続けて並べる（横スクロール）。
+     */
     bottomNav: [
       { href: "/", label: "Home", icon: "Home" },
       { href: "/candidates", label: "候補者", icon: "Users" },
       { href: "/clients", label: "案件", icon: "Building2" },
+      { href: "/operations", label: "実務", icon: "ClipboardList" },
       { href: "/revenue", label: "収益", icon: "TrendingUp" },
-      { href: "/more", label: "その他", icon: "MoreHorizontal" },
+      { href: "/knowledge", label: "ナレッジ", icon: "Sparkles" },
+      { href: "/messages", label: "メッセージ", icon: "MessageSquare" },
+      { href: "/matching", label: "マッチング", icon: "GitBranch" },
+      { href: "/documents", label: "書類", icon: "FileText" },
     ] satisfies TemplateNavItem[],
     /** メッセージ（ベル）リンク */
     showMessagesLink: true,

@@ -6,6 +6,7 @@ import {
   RefreshCw,
   Users,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import type { ActivityEvent, ActivityEventKind } from "@data/types";
 import { cn } from "@/lib/utils";
 import {
@@ -16,20 +17,13 @@ import {
 
 const INITIAL_VISIBLE = 7;
 
-function kindIcon(kind: ActivityEventKind) {
-  switch (kind) {
-    case "interview":
-      return Users;
-    case "learning":
-      return BookOpen;
-    case "document":
-      return FileText;
-    case "status":
-      return RefreshCw;
-    default:
-      return ClipboardList;
-  }
-}
+const KIND_ICONS: Record<ActivityEventKind, LucideIcon> = {
+  interview: Users,
+  learning: BookOpen,
+  document: FileText,
+  status: RefreshCw,
+  other: ClipboardList,
+};
 
 function kindAccent(kind: ActivityEventKind): string {
   switch (kind) {
@@ -124,7 +118,7 @@ function TimelineRow({
   referenceDateIso: string;
   isLast: boolean;
 }) {
-  const Icon = kindIcon(ev.kind);
+  const Icon = KIND_ICONS[ev.kind];
   const datePart = ev.at.slice(0, 10);
   const days = daysUntilDateIso(datePart, referenceDateIso);
   const rel =

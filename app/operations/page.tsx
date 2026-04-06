@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CalendarClock, FileText, TrendingUp } from "lucide-react";
+import { CalendarClock, FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -8,7 +8,6 @@ import {
   TemplatePageStack,
 } from "@/components/templates/layout-primitives";
 import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
-import { NextActionCard } from "@/components/navigation/next-action-card";
 import { PageTagLinks } from "@/components/page-tag-links";
 import { getIndustryPageHints } from "@/lib/industry-page-hints";
 import { getIndustryProfile } from "@/lib/industry-profiles";
@@ -46,7 +45,7 @@ export default async function OperationsPage({ searchParams }: PageProps) {
     tag === "settle"
       ? "初期定着の未対応タスクを確認し、フォロー順を決めます。"
       : tag === "growth"
-        ? "成長確認に必要な運用情報を確認し、改善アクションへ繋げます。"
+        ? "成長確認に必要な運用情報と書類を中心に確認します。収益の詳細は収益ダッシュで見てください。"
         : "配属・稼働の運用状況を確認し、今日の優先対応を決めます。";
 
   const kpiTiles =
@@ -76,15 +75,6 @@ export default async function OperationsPage({ searchParams }: PageProps) {
       <TemplatePageHeader
         title={profile.labels.operations}
         description={opsDesc}
-      />
-      <NextActionCard
-        className="md:hidden"
-        title="次のアクション"
-        reasonTag={tag === "deploy" ? "要対応" : "先方連携"}
-        reasonTone={tag === "deploy" ? "danger" : "warning"}
-        description="未対応クライアント要望を確認し、優先順で一次対応を進めます。"
-        actionHref={withDemoQuery("/client-requests", industry, role)}
-        actionLabel="未対応要望へ"
       />
       <PageTagLinks
         label="表示タグ"
@@ -163,34 +153,31 @@ export default async function OperationsPage({ searchParams }: PageProps) {
       )}
 
       {(tag === "settle" || tag === "growth") && (
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Link href={withDemoQuery("/documents", industry, role)} className="block">
-          <Card className="h-full min-h-[100px] transition-all hover:border-primary/30 hover:shadow-md">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <FileText className="size-6 text-primary" />
-                {profile.labels.documents}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm text-muted">
-              生成ステータス、不備候補、OCR デモへ
-            </CardContent>
-          </Card>
-        </Link>
-        <Link href={withDemoQuery("/revenue", industry, role)} className="block">
-          <Card className="h-full min-h-[100px] transition-all hover:border-primary/30 hover:shadow-md">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <TrendingUp className="size-6 text-primary" />
-                {profile.labels.revenue}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm text-muted">
-              月次グラフ、回収・リスクのダミー表示へ
-            </CardContent>
-          </Card>
-        </Link>
-      </div>
+        <div className="space-y-3">
+          <Link href={withDemoQuery("/documents", industry, role)} className="block">
+            <Card className="h-full min-h-[100px] transition-all hover:border-primary/30 hover:shadow-md">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <FileText className="size-6 text-primary" />
+                  {profile.labels.documents}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-sm text-muted">
+                生成ステータス、不備候補、OCR デモへ
+              </CardContent>
+            </Card>
+          </Link>
+          <p className="flex flex-wrap items-center gap-x-1 text-sm text-muted">
+            <span>収益分析・回収状況は</span>
+            <Link
+              href={withDemoQuery("/revenue", industry, role)}
+              className="font-medium text-primary underline-offset-4 hover:underline"
+            >
+              {profile.labels.revenue}ダッシュ
+            </Link>
+            <span>へ。</span>
+          </p>
+        </div>
       )}
     </TemplatePageStack>
   );

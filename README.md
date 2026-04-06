@@ -71,6 +71,8 @@ npm start
 
 新しいアイコン名をナビに使う場合は、`TemplateNavIconName` と `templateNavIcons` の両方に追加してください。
 
+**レスポンシブ:** PC とスマホは同じ `app/**/page.tsx` の URL を共有し、差分はレイアウト密度・ランチャー・表の横スクロール・sticky など UI のみです。
+
 ## データ
 
 - 型定義: [`data/types.ts`](data/types.ts)

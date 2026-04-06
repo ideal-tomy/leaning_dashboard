@@ -45,7 +45,9 @@ export function resolveDashboardExtensionSlots(
         : baseOverride;
     if (o?.enabled === false) continue;
 
-    const { enabled: _e, ...restOverride } = o ?? {};
+    const layer = o ?? {};
+    const { enabled: _omitEnabled, ...restOverride } = layer;
+    void _omitEnabled;
     const merged: DashboardExtensionSlotBase = {
       ...base,
       ...restOverride,

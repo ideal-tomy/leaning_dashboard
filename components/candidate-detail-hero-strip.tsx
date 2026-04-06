@@ -6,7 +6,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import type { DemoRole } from "@/lib/demo-role";
 import {
   DEMO_REFERENCE_DATE_ISO,
-  daysSinceDateIso,
   daysUntilDateIso,
   sortMilestonesByDate,
 } from "@/lib/candidate-detail-helpers";

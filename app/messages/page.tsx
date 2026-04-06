@@ -7,7 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TemplateMobileFlowSection, TemplatePageStack } from "@/components/templates/layout-primitives";
 import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
-import { NextActionCard } from "@/components/navigation/next-action-card";
+import { useIndustry } from "@/components/industry-context";
+import { useDemoRole } from "@/components/demo-role-context";
+import { withDemoQuery } from "@/lib/demo-query";
 import type { DemoMessage } from "@/lib/demo-messages";
 import { demoMessages } from "@/lib/demo-messages";
 import { cn } from "@/lib/utils";
@@ -19,6 +21,8 @@ function sentimentBadge(s?: DemoMessage["sentiment"]) {
 }
 
 export default function MessagesPage() {
+  const { industry } = useIndustry();
+  const { role } = useDemoRole();
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
 
   function toggle(id: string) {
@@ -29,11 +33,9 @@ export default function MessagesPage() {
     <TemplatePageStack>
       <TemplateMobileFlowSection>
         <MobileFlowBar
-          backHref="/more"
+          backHref={withDemoQuery("/more", industry, role)}
           backLabel="その他"
           pageLabel="ワーカーメッセージ"
-          nextHref="/knowledge"
-          nextLabel="次へ"
         />
       </TemplateMobileFlowSection>
       <div>
@@ -46,16 +48,6 @@ export default function MessagesPage() {
           に追記してください。
         </p>
       </div>
-      <NextActionCard
-        className="md:hidden"
-        title="次のアクション"
-        reasonTag="対応判断"
-        reasonTone="warning"
-        description="翻訳確認後はナレッジAIで返答方針を確認できます。"
-        actionHref="/knowledge"
-        actionLabel="ナレッジAIへ"
-      />
-
       <ul className="space-y-3">
         {demoMessages.map((m) => (
           <li key={m.id}>

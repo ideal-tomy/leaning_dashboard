@@ -2,7 +2,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TemplateMobileFlowSection, TemplatePageStack } from "@/components/templates/layout-primitives";
 import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
-import { NextActionCard } from "@/components/navigation/next-action-card";
 
 const modules = [
   { titleJa: "職場のあいさつ", titleSi: "කාර්ය ස්ථානයේ ආචාර", done: true },
@@ -29,15 +28,6 @@ export default function WorkerLearnPage() {
           ඉගෙනුම් මොඩියුල — デモ用の並びです。
         </p>
       </div>
-      <NextActionCard
-        className="md:hidden"
-        title="次のアクション"
-        reasonTag="進捗確認"
-        reasonTone="warning"
-        description="学習後は進捗画面で到達率を確認すると次の学習が決めやすくなります。"
-        actionHref="/worker/progress"
-        actionLabel="進捗へ"
-      />
       <ul className="space-y-2">
         {modules.map((m) => (
           <li key={m.titleJa}>
