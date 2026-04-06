@@ -60,7 +60,9 @@ function ClientMatchingCard({
         {client.cityJa ? ` ${client.cityJa}` : ""}
       </p>
       <p className="text-xs text-muted">
-        募集枠（デモ）: {client.operations.openSlots}名
+        {industry === "logistics"
+          ? `未配車枠（デモ）: ${client.operations.openSlots}枠`
+          : `募集枠（デモ）: ${client.operations.openSlots}名`}
       </p>
       {req ? (
         <ul className="space-y-0.5 text-xs leading-relaxed text-muted">
@@ -79,6 +81,24 @@ function ClientMatchingCard({
             </span>
           </li>
           {req.standardLabelJa ? <li>{req.standardLabelJa}</li> : null}
+        </ul>
+      ) : industry === "logistics" ? (
+        <ul className="space-y-0.5 text-xs leading-relaxed text-muted">
+          <li>
+            <span className="text-muted">時間帯: </span>
+            <span className="font-medium text-foreground">
+              {client.logisticsListDemo?.deliveryWindowJa ?? "—"}
+            </span>
+          </li>
+          <li>
+            <span className="text-muted">便・現場要件: </span>
+            <span className="font-medium text-foreground">
+              {client.matchingHintTags.join("・")}
+            </span>
+          </li>
+          {client.logisticsListDemo?.loadConditionsJa ? (
+            <li className="line-clamp-2">{client.logisticsListDemo.loadConditionsJa}</li>
+          ) : null}
         </ul>
       ) : null}
     </div>

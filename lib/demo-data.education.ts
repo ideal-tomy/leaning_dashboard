@@ -1,4 +1,5 @@
 import type { Candidate, CandidatePipelineStatus, ClientCompany, DemoDataBundle } from "@data/types";
+import { learningDemoForEducationCandidate } from "@/lib/demo-learning-factory";
 
 function avatar(seed: string) { return `https://api.dicebear.com/7.x/notionists/svg?seed=${encodeURIComponent(seed)}`; }
 function scoreOrder(j: Candidate["jlpt"]): number { const o: Record<string, number> = { N5: 1, N4: 2, N3: 3, N2: 4, N1: 5 }; return o[j] ?? 0; }
@@ -12,7 +13,12 @@ export const clients: ClientCompany[] = [
 ];
 
 function cand(partial: Omit<Candidate, "contact" | "registeredAt"> & { contact?: Partial<Candidate["contact"]> }): Candidate {
-  return { ...partial, contact: { email: "student@example.jp", phone: "03-0000-6600", ...partial.contact }, registeredAt: "2026-04-03" };
+  return {
+    ...partial,
+    learningDemo: learningDemoForEducationCandidate(partial.id, partial.jlpt),
+    contact: { email: "student@example.jp", phone: "03-0000-6600", ...partial.contact },
+    registeredAt: "2026-04-03",
+  };
 }
 function statusMap(label: string): { pipelineStatus: CandidatePipelineStatus; pipelineStatusLabelJa: string } {
   const m: Record<string, { pipelineStatus: CandidatePipelineStatus; pipelineStatusLabelJa: string }> = {

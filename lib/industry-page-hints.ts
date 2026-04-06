@@ -729,7 +729,8 @@ const hints: Record<EnabledIndustryKey, IndustryPageHints> = {
       sheetOrder: "alertFirst",
     },
     documents: {
-      pageSubtitle: "申請書類・証憑のレビュー状況とスキャン検証デモ",
+      pageSubtitle:
+        "申請書類・証憑のレビュー、差戻し理由と再提出フロー、スキャン検証デモまでを一覧イメージで確認します。",
       kpiComplete: 15,
       kpiReview: 5,
       ocrButtonLabel: "証憑スキャン OCR（デモ）",
@@ -759,11 +760,16 @@ const hints: Record<EnabledIndustryKey, IndustryPageHints> = {
       ],
     },
     knowledge: {
-      pageSubtitle: "法令改正・判例メモを RAG で引ける想定（デモは FAQ のみ）",
+      pageSubtitle:
+        "必要証憑・提出期限・要件該当性を中心に、法令改正・判例メモを RAG で引ける想定（デモは FAQ のみ）。",
       faqs: [
         { q: "電子帳簿保存法の対象判断は？", a: "取引形態と金額規模でスキーム分岐するチェックリストを想定。" },
         { q: "顧問先への報告頻度テンプレは？", a: "四半期・月次の 2 種をナレッジから選択するイメージ。" },
         { q: "証憑不備時のクライアント文面は？", a: "不足項目を列挙した定型メールを生成する想定です。" },
+        {
+          q: "行政庁からの差戻し後の再提出期限はどう管理する？",
+          a: "差戻し理由タグと再提出予定日を案件に紐付け、書類画面でアラート表示する運用を想定。",
+        },
       ],
       chatSeeds: ["電子帳簿の保存期間は？", "証憑不足の催促文を出して"],
       staticReply:
@@ -817,6 +823,8 @@ const hints: Record<EnabledIndustryKey, IndustryPageHints> = {
     },
     documents: {
       pageSubtitle: "入場許可・安全書類のステータスと現場スキャン検証デモ",
+      pageIntentJa:
+        "足場・高所・重機・KY など現場別の提出物と期限を一覧し、OCR で資格証照合のイメージを確認します。",
       kpiComplete: 11,
       kpiReview: 2,
       ocrButtonLabel: "資格証・保険証 OCR（デモ）",
@@ -830,8 +838,12 @@ const hints: Record<EnabledIndustryKey, IndustryPageHints> = {
     },
     matching: {
       emptyState: "現場案件に紐づく配員候補がまだありません（デモ）",
+      pageIntentJa:
+        "資格・安全教育・現場経験を踏まえ、現場案件ごとの配員整合度を提示します。",
     },
     operations: {
+      pageIntentJa:
+        "当日の入場調整・欠員補充・現場報告の流れをデモ KPI とタイムラインで確認します。",
       csvHint: "現場日報 CSV 取込は次期（デモ）",
       kpiTiles: [
         { label: "本日の現場数", value: "23", sub: "件" },
@@ -851,6 +863,7 @@ const hints: Record<EnabledIndustryKey, IndustryPageHints> = {
         { q: "熱中症対策の必須項目は？", a: "作業計画書への休息計画と給水スポットの記載を想定。" },
         { q: "足場の点検頻度は？", a: "組立時・変更時・定期の 3 種をナレッジに紐付け。" },
         { q: "外国人技能実習生の入場手続きは？", a: "在留カードと監理報告の突合フロー（デモ文）。" },
+        { q: "元請けルールと提出期限がズレたときは？", a: "厳しい側を採用し、ナレッジに版管理で残す運用を想定。" },
       ],
       chatSeeds: ["足場点検の記録様式は？", "入場許可に必要な書類は？"],
       staticReply:
@@ -862,7 +875,11 @@ const hints: Record<EnabledIndustryKey, IndustryPageHints> = {
       matchingDesktopReason: "「重機オペ免許保有者を未充足現場に優先配分」— ルール例（デモ）",
       documentsMobileSubtitle: "入場・安全書類",
     },
-    clients: { listCardEmphasis: "openSlots" },
+    clients: {
+      listCardEmphasis: "openSlots",
+      pageIntentJa:
+        "工期・必須資格・入場条件と空き枠を一覧し、次の配員判断材料にします。",
+    },
     clientDetail: {
       quickLinks: [
         { label: "安全書類", path: "documents" },
@@ -893,6 +910,10 @@ const hints: Record<EnabledIndustryKey, IndustryPageHints> = {
       aiFooterNote:
         "ヒヤリハット要約・安全教育アラートは本番 AI 連携で拡張予定（デモは静的テキスト）。",
       showJlptBadge: true,
+    },
+    revenue: {
+      pageIntentJa:
+        "現場別の請求見込みと粗利イメージをテンプレ表示で確認します（デモ）。",
     },
     dashboardExtensionOverrides: {
       fieldReports: {
@@ -945,17 +966,39 @@ const hints: Record<EnabledIndustryKey, IndustryPageHints> = {
     knowledge: {
       pageSubtitle: "マニュアル・過去インシデントを RAG で参照する想定（デモは静的）",
       faqs: [
-        { q: "ナイトシフトの最低人数は？", a: "施設別の基準をナレッジに保持しアラート連動する想定。" },
-        { q: "記録不備の典型パターンは？", a: "時刻抜け・サイン漏れ・版数違いなど（デモ文）。" },
-        { q: "新人オリエンの必須コンテンツは？", a: "感染・跌倒・緊急時連絡の 3 モジュールを想定。" },
+        {
+          q: "施設内の感染対策で必須の手順は？",
+          a: "標準予防と飛沫・接触に応じた追加策をナレッジに保持し、申し送りと連動する想定。",
+        },
+        {
+          q: "ヒヤリハット報告の提出タイミングは？",
+          a: "発見当日〜翌営業日の運用例。重大度でエスカレーションを分岐（デモ文）。",
+        },
+        {
+          q: "家族への説明で避けるべき表現は？",
+          a: "断定的診断・確約は避け、用語集に沿った説明ガイドを表示する想定。",
+        },
+        {
+          q: "記録不備の典型パターンは？",
+          a: "時刻抜け・サイン漏れ・版数違いなど。チェックリストで先回り（デモ文）。",
+        },
+        {
+          q: "事故・インシデントの初動連絡先は？",
+          a: "職種別の一次連絡表をナレッジに保持し、画面から参照する想定。",
+        },
       ],
-      chatSeeds: ["夜勤の最低人数ルールは？", "記録不備のチェックリストは？"],
+      chatSeeds: [
+        "感染対策の手順を要約して",
+        "ヒヤリハットの記載例は？",
+        "家族への説明で注意することは？",
+      ],
       staticReply:
         "デモ応答: 該当プロトコルは「記録書類」テンプレとリンクする想定です。",
     },
     home: {
       matchingMobileSubtitle: "拠点別の配置提案",
-      matchingDesktopTeaser: "拠点ごとに、即戦力のスタッフ候補と配置理由を表示します。",
+      matchingDesktopTeaser:
+        "拠点ごとに、資格・経験に見合うスタッフと配置理由を表示します。",
       matchingDesktopReason: "「夜勤枠逼迫時は経験年数長めを優先」— シフトルール例（デモ）",
       documentsMobileSubtitle: "記録・同意",
     },
@@ -991,11 +1034,29 @@ const hints: Record<EnabledIndustryKey, IndustryPageHints> = {
         "記録不備検知・シフト最適化は本番 AI 連携で拡張予定（デモは静的テキスト）。",
       showJlptBadge: true,
     },
+    dashboardExtensionOverrides: {
+      knowledgeAi: {
+        title: "ケアナレッジ",
+        subtitle: "感染対策・記録ルールを参照",
+        desktopTitle: "ケアナレッジ AI（拡張枠）",
+        desktopBody:
+          "介護記録・感染対策・ヒヤリハット・家族対応の FAQ をチャットで引く想定です。デモでは静的応答のみです。",
+        desktopCta: "ナレッジへ",
+      },
+      fieldReports: {
+        title: "申し送り・記録",
+        subtitle: "当日引継ぎと記録確認（デモ）",
+        desktopTitle: "申し送り・記録ハブ（拡張枠）",
+        desktopBody:
+          "夜勤引継ぎ・記録未完了・重点対応の申し送りを一覧化する想定です。緊急確認の導線に接続できます。",
+        desktopCta: "開く",
+      },
+    },
   },
   sales: {
     candidates: {
       pageSubtitle:
-        "リードから受注までの商談ステージを追跡。要修正・資料準備のボトルネックを見える化。",
+        "見込み顧客の業種・検討度・主要課題を比較し、要フォローと次回接点を優先表示します。",
       defaultTab: "pipeline",
       sheetOrder: "statusFirst",
     },
@@ -1013,7 +1074,7 @@ const hints: Record<EnabledIndustryKey, IndustryPageHints> = {
       ],
     },
     matching: {
-      emptyState: "商談に紐づく提案優先度がまだありません（デモ）",
+      emptyState: "提案案件に紐づく優先度がまだありません（デモ）",
     },
     operations: {
       csvHint: "SFA エクスポート取込は次期（デモ）",
@@ -1030,19 +1091,27 @@ const hints: Record<EnabledIndustryKey, IndustryPageHints> = {
       ],
     },
     knowledge: {
-      pageSubtitle: "製品仕様・競合比較を営業がチャットで引く想定（デモは静的）",
+      pageSubtitle:
+        "競合との差分・提案時の想定質問・断り文句への返しを、営業がチャットで引く想定（デモは静的）",
       faqs: [
+        { q: "競合 X と我々の差分は一言で？", a: "SLA・実装支援・国内サポート窓口を軸に比較表で提示。" },
+        { q: "「今期は見送り」の断りにどう返す？", a: "次期予算タイミングと小規模 PoC の選択肢を提案。" },
+        { q: "決裁者がよく聞く ROI の聞き方は？", a: "コスト削減・リスク低減のどちらを優先するかを切り分け。" },
         { q: "価格表の改定履歴はどこ？", a: "版管理された PDF をナレッジに取り込む想定。" },
+        { q: "NDA 前に見せられる資料は？", a: "公開概要・機能一覧のみ。個別見積は NDA 後に限定。" },
         { q: "失注理由の典型分類は？", a: "価格・機能・タイミングの 3 軸でタグ付け。" },
-        { q: "NDA 締結前に見せられる資料は？", a: "公開概要のみに限定するガイドを表示。" },
       ],
-      chatSeeds: ["競合 X との差分を要約して", "NDA 前に送れる資料は？"],
+      chatSeeds: [
+        "競合 X との差分を要約して",
+        "予算がないときの切り返し例は？",
+        "NDA 前に送れる資料は？",
+      ],
       staticReply:
-        "デモ応答: 公開可能な比較表は「提案資料」テンプレにあります（本番は RAG 検索）。",
+        "デモ応答: 公開比較表と断り文句のトーク例はナレッジにあります。詳細は「提案資料」テンプレへ（本番は RAG）。",
     },
     home: {
-      matchingMobileSubtitle: "商談別の提案優先度",
-      matchingDesktopTeaser: "商談ごとに、受注に効く提案順と AI 理由を表示します。",
+      matchingMobileSubtitle: "提案案件別の優先度",
+      matchingDesktopTeaser: "提案案件ごとに、受注に効く順序と顧客課題との一致理由を表示します。",
       matchingDesktopReason: "「決裁者が CFO の案件は ROI 試算を最優先」— 営業ルール例（デモ）",
       documentsMobileSubtitle: "提案・見積",
     },
@@ -1060,9 +1129,9 @@ const hints: Record<EnabledIndustryKey, IndustryPageHints> = {
       tabDocs: "提案資料",
       tabHistory: "商談・案件履歴",
       tabAi: "AI 分析",
-      profileCardTitle: "リード情報",
+      profileCardTitle: "見込み顧客情報",
       docsCardTitle: "提案・法務チェック（デモ）",
-      docsPrimaryLabel: "社内リードID",
+      docsPrimaryLabel: "社内顧客ID",
       docsSecondaryLabel: "提案・見積ステータス",
       docsExpiryLabel: "次回フォロー期限（デモ）",
       docsOcrNote:
@@ -1073,7 +1142,7 @@ const hints: Record<EnabledIndustryKey, IndustryPageHints> = {
       plannedAssignmentSalaryLabel: "受注目標（想定粗利／月）",
       aiCardTitle: "AI 提案示唆",
       aiEmptyAssignment:
-        "メイン商談の紐付けが未設定です。商談別の優先度は次のリンクから確認できます。",
+        "メイン提案案件の紐付けが未設定です。案件別の優先度は次のリンクから確認できます。",
       aiMatchingLinkLabel: "提案優先度を見る",
       aiFooterNote:
         "メール要約・競合ウォッチは本番 AI 連携で拡張予定（デモは静的テキスト）。",
@@ -1088,7 +1157,10 @@ const hints: Record<EnabledIndustryKey, IndustryPageHints> = {
       sheetOrder: "statusFirst",
     },
     documents: {
-      pageSubtitle: "作業・入構書類のステータスと免許証等の OCR デモ",
+      pageSubtitle:
+        "入構・配車前に止まる書類を最優先。免許・誓約・配送関連と OCR デモをまとめて確認。",
+      pageIntentJa:
+        "入構前に不足がある書類を最優先で潰し、配車を止めないためのビューです。",
       kpiComplete: 10,
       kpiReview: 4,
       ocrButtonLabel: "免許・作業票 OCR（デモ）",
@@ -1118,13 +1190,20 @@ const hints: Record<EnabledIndustryKey, IndustryPageHints> = {
       ],
     },
     knowledge: {
-      pageSubtitle: "倉庫マニュアル・荷扱い注意を RAG で参照する想定（デモは静的）",
+      pageSubtitle:
+        "温度帯・危険物・遅延連絡・事故時対応を RAG で参照する想定（デモは静的）",
       faqs: [
         { q: "危険物 B 類の積載ルールは？", a: "車両区分と混載禁止表をナレッジに保持する想定。" },
         { q: "配送遅延の顧客向け定型文は？", a: "原因コード別にテンプレを選択。" },
+        { q: "冷凍・冷蔵の温度逸脱時は？", a: "記録・廃棄判断・顧客連絡の分岐をマニュアル化（デモ文）。" },
+        { q: "現場事故（物損）の初動は？", a: "安全担当・保険・警察連絡のチェックリストを参照（デモ文）。" },
         { q: "アルコールチェック記録の保存期間は？", a: "社内規程に従い 3 年保管など（デモ文）。" },
       ],
-      chatSeeds: ["危険物の積載ルールは？", "遅延の顧客向けメールを出して"],
+      chatSeeds: [
+        "冷凍の温度逸脱時の手順は？",
+        "危険物の積載ルールは？",
+        "遅延の顧客向けメールを出して",
+      ],
       staticReply:
         "デモ応答: 該当マニュアルは「作業書類」テンプレ集にリンクする想定です。",
     },
@@ -1164,7 +1243,7 @@ const hints: Record<EnabledIndustryKey, IndustryPageHints> = {
       aiMatchingLinkLabel: "配置最適化を見る",
       aiFooterNote:
         "遅延予測・荷量予測は本番 AI 連携で拡張予定（デモは静的テキスト）。",
-      showJlptBadge: true,
+      showJlptBadge: false,
     },
   },
   education: {
@@ -1173,9 +1252,142 @@ const hints: Record<EnabledIndustryKey, IndustryPageHints> = {
         "受講者の進捗と提出物ステータスを一覧化。到達度と提出不備を追うデモです。",
       defaultTab: "list",
       sheetOrder: "alertFirst",
+      pageIntentJa:
+        "次にフォローする受講者を決め、詳細で受講履歴・提出物・学習示唆を確認する。",
+      pipelineDemo: {
+        pipelineIntroAdminJa:
+          "申込から受講・修了まで、ステージ別の人数で滞留とフォロー優先を俯瞰します。カードを押すと該当者だけ一覧に絞り込みます（デモ）。",
+        pipelineIntroClientJa:
+          "受講の見通しをステージ別に参照できます。運営が手続きを進めます。カードから該当者一覧に絞り込めます（デモ）。",
+        pipelineStageHints: {
+          interview_coordination: {
+            adminJa: "初回面談・学習目標のすり合わせ。日程が空くと開講が遅延しやすい。",
+            clientJa: "面談日程調整中。講座側は枠・教材の準備イメージを共有（デモ）。",
+            lensAdmin: {
+              situationJa: "受講可否とカリキュラム適合を確認する段階。次は案内送付と教材準備。",
+              impactJa: "ここが詰まると開講日がずれ、定員調整と講師アサインに影響する。",
+              ownerJa: "運営（カウンセリング・事務）。講座側は日程・教室枠の回答。",
+            },
+            lensClient: {
+              situationJa: "まだ正式な受講確定前。ニーズとレベルの確認中（デモ）。",
+              impactJa: "面談遅延は開講キャンセルや空席発生に直結しうる。",
+              ownerJa: "運営が窓口。講座は空席とカリキュラムの照合に協力。",
+            },
+            pipelineCardSubMetricLabelsJa: ["面談・調整中", "要注意（アラート）"],
+          },
+          offer_accepted: {
+            adminJa: "受講確定後フォロー。案内送付・決済・教材配送へつなぐ。",
+            clientJa: "受講が決まった段階。開講日と事前課題の共有イメージ（デモ）。",
+            lensAdmin: {
+              situationJa: "受講枠は確保済み。次は案内メール・事前課題・入門オリエン。",
+              impactJa: "確定後の離脱はキャンセル処理と空席埋め直しのコストになる。",
+              ownerJa: "運営（事務・サポート）。講座はロールコールと教室準備。",
+            },
+            lensClient: {
+              situationJa: "確定受講者がいる状態。もうすぐクラスに乗る前（デモ）。",
+              impactJa: "事前課題の未着手は初回の進度に影響。",
+              ownerJa: "運営が連絡主。講座は初日の進行を準備。",
+            },
+            pipelineCardSubMetricLabelsJa: ["確定フォロー中", "要注意（アラート）"],
+          },
+          visa_applying: {
+            adminJa: "案内・教材送付の進捗。未着・未読を追う。",
+            clientJa: "案内送付中。受講者の受領は運営に確認（デモ）。",
+            lensAdmin: {
+              situationJa: "メール・郵送・LMS 登録など、受講開始前のインプット段階。",
+              impactJa: "未到達は初回欠席や提出遅延の温床になる。",
+              ownerJa: "運営（配信・問い合わせ対応）。講座はコンテンツ公開の確認。",
+            },
+            lensClient: {
+              situationJa: "受講者が教材・案内を受け取る前後（デモ）。",
+              impactJa: "遅延すると初回のキャッチアップが必要になる。",
+              ownerJa: "運営主導。講座はスケジュール共有の参照。",
+            },
+            pipelineCardSubMetricLabelsJa: ["案内・配布中", "要注意（アラート）"],
+          },
+          awaiting_entry: {
+            adminJa: "開講直前の最終確認。欠席連絡・振替の段取り。",
+            clientJa: "もうすぐ受講開始。教室・オンライン URL の最終案内（デモ）。",
+            lensAdmin: {
+              situationJa: "初回前日〜当日。出欠・環境チェックが焦点。",
+              impactJa: "連絡漏れはノーショーと満足度低下に直結。",
+              ownerJa: "運営＋講師サポート。講座は当日運営。",
+            },
+            lensClient: {
+              situationJa: "初回を控えた受講者がいる段階（デモ）。",
+              impactJa: "欠席連絡の遅れは振替工数を増やす。",
+              ownerJa: "運営が連絡。講座は受入と席の確保。",
+            },
+            pipelineCardSubMetricLabelsJa: ["開講準備中", "要注意（アラート）"],
+          },
+          training: {
+            adminJa: "受講中フォロー。課題・理解度・継続意向のモニタ。",
+            clientJa: "受講実施中。脱落サインは一覧で把握（デモ）。",
+            lensAdmin: {
+              situationJa: "カリキュラム進行中。中間面談・課題フィードバックが主戦場。",
+              impactJa: "放置すると修了率・NPS が落ち、クレームに繋がる。",
+              ownerJa: "運営＋講師。講座は評価と補習の判断。",
+            },
+            lensClient: {
+              situationJa: "クラスが進行中。個別のつまずきに注意（デモ）。",
+              impactJa: "中間の遅れは修了不可や再受講増に影響。",
+              ownerJa: "講師・チューターが主。運営は事務フォロー。",
+            },
+            pipelineCardSubMetricLabelsJa: ["受講実施中", "要注意（アラート）"],
+          },
+          document_prep: {
+            adminJa: "教材・課題の準備・配布前。OCR デモと連動しやすい。",
+            clientJa: "教材準備中。提出期限は運営から案内（デモ）。",
+            lensAdmin: {
+              situationJa: "プリント・データ教材を組み立て、提出フォーマットを統一中。",
+              impactJa: "準備の手戻りは初週の提出率を下げる。",
+              ownerJa: "運営（教材オペ）。講座は内容レビュー。",
+            },
+            lensClient: {
+              situationJa: "まだ課題提出の火種に至っていない準備段階（デモ）。",
+              impactJa: "遅延はスケジュール全体の後ろ倒しに波及しうる。",
+              ownerJa: "運営主導。講座は必要資料の提供。",
+            },
+            pipelineCardSubMetricLabelsJa: ["教材・課題準備中", "要注意（アラート）"],
+          },
+          document_blocked: {
+            adminJa: "提出不備・再提出。最優先でフォローして進行を戻す。",
+            clientJa: "提出に遅延・不備あり。詳細は受講者画面で把握（デモ）。",
+            lensAdmin: {
+              situationJa: "課題・同意書などの差戻しで学習が止まっている状態。",
+              impactJa: "放置すると修了要件を満たせず、継続率に直撃する。",
+              ownerJa: "運営が最優先対応。講座は評価基準の再説明。",
+            },
+            lensClient: {
+              situationJa: "提出物で手続きが止まっている可能性（参考情報・デモ）。",
+              impactJa: "解消まで修了見込みが不確定。",
+              ownerJa: "運営が対応。講座は状況共有の確認。",
+            },
+            pipelineCardSubMetricLabelsJa: ["差戻し・再提出中", "要注意（アラート）"],
+          },
+        },
+        pipelineDocumentWorkMerged: {
+          titleJa: "提出物（準備・不備）",
+          adminJa:
+            "準備中は配布前チェック、不備は差戻し対応。同一ビューで人数と優先度を俯瞰し、一覧から個別に潰す。",
+          clientJa: "教材・課題の準備または修正が進行中。期限は運営に確認（デモ）。",
+          lensAdmin: {
+            situationJa: "課題パッケージの作成・配布前と、不備による差戻しが混在するゾーン。",
+            impactJa: "準備の手戻りは初週の提出率を下げ、不備の放置は修了に影響する。",
+            ownerJa: "運営が主担当（教材・連絡）。講座は内容確認と再説明。",
+          },
+          lensClient: {
+            situationJa: "受講確定前後で、教材・課題の準備または修正が走っている状態（デモ）。",
+            impactJa: "解消遅れはスケジュールの後ろ倒しに繋がりうる。",
+            ownerJa: "手続きの実行は運営。講座は依頼があれば資料協力。",
+          },
+        },
+      },
     },
     documents: {
       pageSubtitle: "提出物・教材 PDF のレビュー状況とスキャン検証デモ",
+      pageIntentJa:
+        "申込・同意・課題の期限と不備を洗い出し、OCR デモで次アクションをイメージする。",
       kpiComplete: 20,
       kpiReview: 1,
       ocrButtonLabel: "提出物スキャン OCR（デモ）",
@@ -1188,7 +1400,9 @@ const hints: Record<EnabledIndustryKey, IndustryPageHints> = {
       ],
     },
     matching: {
-      emptyState: "講座案件に紐づく受講提案がまだありません（デモ）",
+      emptyState: "講座に紐づく受講提案がまだありません（デモ）",
+      pageIntentJa:
+        "講座ごとに推奨受講者と理由を比較し、フォロー優先度のたたき台にする。",
     },
     operations: {
       csvHint: "LMS 受講ログ CSV は次期（デモ）",
@@ -1203,25 +1417,48 @@ const hints: Record<EnabledIndustryKey, IndustryPageHints> = {
         { title: "キャリア講座 — 面談スロット公開", time: "昨日", badge: "完了" },
         { title: "教材 PDF v2 の差し替え", time: "来週", badge: "予定" },
       ],
+      pageIntentJa:
+        "開講準備・提出確認・リマインドのタイムラインで、今日の運営タスクの着手点を把握する。",
     },
     knowledge: {
       pageSubtitle: "FAQ・過去 Q&A を RAG で検索する想定（デモは静的）",
       faqs: [
+        { q: "欠席・遅刻の連絡はいつまでに必要？", a: "開講24時間前までにアプリまたはメールで連絡するルール（デモ文）。" },
         { q: "再受講の割引ルールは？", a: "同一講座は 12 ヶ月以内 1 回までなど（デモ文）。" },
-        { q: "提出遅延のペナルティは？", a: "講座ポリシーに沿って自動メールを送る想定。" },
-        { q: "法人契約の一括請求は？", a: "部門コード別に集計するフローを想定。" },
+        { q: "提出遅延のペナルティは？", a: "講座ポリシーに沿って自動リマインドし、回数に応じて面談を挟む想定。" },
+        { q: "保護者向けの進捗共有は？", a: "週次サマリーメールとポータル閲覧を想定（デモ文）。" },
       ],
-      chatSeeds: ["再受講の割引は？", "提出遅延のポリシーは？"],
+      chatSeeds: ["欠席の連絡期限は？", "再受講の割引は？", "提出遅延のポリシーは？"],
       staticReply:
         "デモ応答: 該当ポリシーは「提出書類」画面のガイドにまとめる想定です。",
     },
     home: {
       matchingMobileSubtitle: "講座別の受講提案",
-      matchingDesktopTeaser: "講座案件ごとに、到達度の高い受講者候補とフォロー理由を表示します。",
+      matchingDesktopTeaser: "講座ごとに、到達度の高い受講者候補とフォロー理由を表示します。",
       matchingDesktopReason: "「脱落リスク高にはメンター割当を推奨」— 学習分析例（デモ）",
       documentsMobileSubtitle: "提出・教材",
+      adminDailyStepsJa: [
+        "未提出・不備の受講者を開き、フォロー優先度をつける。",
+        "提出期限が近い課題を書類ハブで確認する。",
+        "学習サマリーで遅延傾向を見て、講座側と共有する。",
+      ],
     },
-    clients: { listCardEmphasis: "culture" },
+    clients: {
+      listCardEmphasis: "culture",
+      pageIntentJa:
+        "講座の空席・対象者・満足度を一覧で比較し、次に募集・案内する講座を決める。",
+    },
+    learningInsights: {
+      pageTitleJa: "学習サマリー",
+      pageSubtitleJa:
+        "受講者全体のオンライン進捗とフォロー優先の分布（デモデータ）。",
+      pageIntentJa:
+        "学習の遅れを俯瞰し、継続率向上と運営負荷軽減のたたき台にする。",
+    },
+    revenue: {
+      pageIntentJa:
+        "講座別売上・継続をざっくり把握し、募集と価格の検討材料にする（デモ）。",
+    },
     clientDetail: {
       quickLinks: [
         { label: "提出書類", path: "documents" },
@@ -1251,7 +1488,7 @@ const hints: Record<EnabledIndustryKey, IndustryPageHints> = {
       aiMatchingLinkLabel: "受講提案を見る",
       aiFooterNote:
         "学習脱落予測・教材推薦は本番 AI 連携で拡張予定（デモは静的テキスト）。",
-      showJlptBadge: true,
+      showJlptBadge: false,
     },
   },
 };

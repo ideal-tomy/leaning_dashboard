@@ -12,8 +12,9 @@ import { NextActionCard } from "@/components/navigation/next-action-card";
 import { PageTagLinks } from "@/components/page-tag-links";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { candidates as staffingCandidates } from "@/lib/demo-data";
+import { getIndustryDemoData } from "@/lib/demo-data-selector";
 import { getIndustryPageHints } from "@/lib/industry-page-hints";
+import { getIndustryProfile } from "@/lib/industry-profiles";
 import { parsePageTag } from "@/lib/page-tag";
 import {
   getIndustryFromSearchParams,
@@ -37,7 +38,13 @@ export default async function LearningInsightsPage({
     "overview"
   );
   const hints = getIndustryPageHints(industry);
+  const profile = getIndustryProfile(industry);
   const li = hints.learningInsights;
+  const showLearningDetail =
+    industry === "staffing" || industry === "education";
+  const learningCandidates = getIndustryDemoData(industry).candidates.filter(
+    (c) => c.learningDemo
+  );
 
   const title = li?.pageTitleJa ?? "学習サマリー";
   const subtitle = li?.pageSubtitleJa ?? "学習到達の分布（デモ）";
@@ -65,9 +72,17 @@ export default async function LearningInsightsPage({
         title="次のアクション"
         reasonTag="遅延フォロー"
         reasonTone="warning"
-        description="学習遅延候補者に移動して、優先フォロー対象を確定します。"
+        description={
+          industry === "education"
+            ? "学習遅れの受講者一覧へ移動し、優先フォローを確定します。"
+            : "学習遅延候補者に移動して、優先フォロー対象を確定します。"
+        }
         actionHref={withDemoQuery("/candidates", industry, role, { followup: "learning" })}
-        actionLabel="フォロー対象候補者へ"
+        actionLabel={
+          industry === "education"
+            ? `フォロー対象${profile.labels.candidate}へ`
+            : "フォロー対象候補者へ"
+        }
       />
       <PageTagLinks
         label="表示タグ"
@@ -93,7 +108,9 @@ export default async function LearningInsightsPage({
       <div className="flex flex-wrap gap-2">
         <Button variant="secondary" asChild>
           <Link href={withDemoQuery("/candidates?focus=risk", industry, role)}>
-            要フォロー人材を見る
+            {industry === "education"
+              ? `要フォロー${profile.labels.candidate}を見る`
+              : "要フォロー人材を見る"}
           </Link>
         </Button>
       </div>
@@ -104,7 +121,7 @@ export default async function LearningInsightsPage({
         </div>
       )}
 
-      {industry === "staffing" && (tag === "overview" || tag === "content") ? (
+      {showLearningDetail && (tag === "overview" || tag === "content") ? (
         <Card>
           <CardHeader>
             <CardTitle className="text-base">週次アクティブ率（デモ）</CardTitle>
@@ -115,11 +132,11 @@ export default async function LearningInsightsPage({
         </Card>
       ) : null}
 
-      {industry === "staffing" && (tag === "overview" || tag === "followup") ? (
+      {showLearningDetail && (tag === "overview" || tag === "followup") ? (
         <Card>
           <CardHeader>
             <CardTitle className="text-base">
-              候補者別・学習サマリー（一覧）
+              {profile.labels.candidate}別・学習サマリー（一覧）
             </CardTitle>
             <p className="text-sm text-muted">
               行から「学習タブへ」で個別の学習・認定にジャンプできます（デモ）。
@@ -127,17 +144,17 @@ export default async function LearningInsightsPage({
           </CardHeader>
           <CardContent>
             <LearningCandidateSummaryTable
-              candidates={staffingCandidates}
+              candidates={learningCandidates}
               industry={industry}
               role={role}
             />
           </CardContent>
         </Card>
-      ) : (
+      ) : !showLearningDetail ? (
         <p className="text-sm text-muted">
-          候補者別サマリーは派遣スタッフィング業種で表示します。
+          候補者別サマリーは派遣スタッフィング・教育デモで表示します。
         </p>
-      )}
+      ) : null}
 
       <div className="flex flex-wrap gap-2">
         <Button variant="secondary" asChild>
@@ -146,7 +163,9 @@ export default async function LearningInsightsPage({
               followup: "learning",
             })}
           >
-            フォロー対象の候補者へ
+            {industry === "education"
+              ? `フォロー対象の${profile.labels.candidate}へ`
+              : "フォロー対象の候補者へ"}
           </Link>
         </Button>
         <Button variant="ghost" asChild>

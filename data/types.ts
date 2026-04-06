@@ -253,6 +253,12 @@ export interface Candidate {
   learningDemo?: CandidateLearningDemo;
   /** 詳細ページのヘッダー・タイムライン等（デモ） */
   detailDemo?: CandidateDetailDemo;
+  /** 営業デモ: 見込み顧客一覧カードの副題用（任意） */
+  salesCandidateListDemo?: {
+    sectorJa: string;
+    interestJa: string;
+    keyChallengeJa: string;
+  };
 }
 
 export interface ClientCompany {
@@ -286,8 +292,50 @@ export interface ClientCompany {
     contactPersonJa: string;
   };
   matchingHintTags: string[];
+  /** 建設デモ: 現場一覧カード用の工期・資格・入場条件（任意） */
+  constructionListDemo?: {
+    scheduleJa: string;
+    requiredCertsJa: string;
+    entryConditionsJa?: string;
+    /** 三次請負の入場を許可するか（取引先照合デモ） */
+    allowTertiarySubcontractors?: boolean;
+    /** 協力会社のグリーンカード（建設業許可のイメージ）登録を必須にするか */
+    requireGreenCardOnSite?: boolean;
+  };
+  /** 物流デモ: 案件一覧カード用の時間帯・積載・優先度（任意） */
+  logisticsListDemo?: {
+    deliveryWindowJa: string;
+    loadConditionsJa: string;
+    priorityJa: string;
+  };
+  /** 営業デモ: 提案案件一覧カード用（任意） */
+  salesListDemo?: {
+    proposalThemeJa: string;
+    winProbabilityJa: string;
+    nextActionJa: string;
+    dealValueManYenDemo?: number;
+    competitorJa?: string;
+  };
   /** 案件が求める対面認定ベースの日本語・倫理（デモ） */
   learningRequirementsDemo?: ClientLearningRequirementsDemo;
+}
+
+/** 建設デモ: 取引先・協力会社（現場案件 ClientCompany とは別マスタ） */
+export type ConstructionPartnerTier = "prime" | "primary" | "secondary" | "tertiary";
+
+export interface ConstructionPartnerDemo {
+  id: string;
+  tradeNameJa: string;
+  tier: ConstructionPartnerTier;
+  /** 表示用（元請・一次・二次・三次） */
+  tierLabelJa: string;
+  /** 人員ハブ「関係企業」に出すか（下請・協力） */
+  isSubcontractor: boolean;
+  greenCardRegistered: boolean;
+  greenCardValidUntilIso?: string;
+  notesJa?: string;
+  linkedSiteIds?: string[];
+  contact: { email: string; phone: string; contactPersonJa: string };
 }
 
 /** クライアント側の学習・認定要件（マッチング照合用デモ） */

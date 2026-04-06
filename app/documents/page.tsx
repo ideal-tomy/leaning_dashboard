@@ -81,6 +81,8 @@ export default function DocumentsPage() {
     "pre-entry"
   );
   const isFactoryStaffing = industry === "staffing" && role === "client";
+  const isConstruction = industry === "construction";
+  const isLogistics = industry === "logistics";
   useEffect(() => {
     if (!highlightDeadlines) return;
     const id = requestAnimationFrame(() => {
@@ -171,11 +173,27 @@ export default function DocumentsPage() {
       <TemplatePageHeader
         title={`${profile.labels.documents}管理`}
         description={
-          scope === "post-entry"
-            ? "入国後・就労関連書類の状態を確認し、未完了を処理します。"
-            : scope === "deadlines"
-              ? "期限・更新が必要な項目を確認し、優先順に対応します。"
-              : "入国前手続きを確認し、差戻しや未提出を解消します。"
+          isConstruction
+            ? `${docHints.pageIntentJa ? `${docHints.pageIntentJa} ` : ""}${
+                scope === "post-entry"
+                  ? "入場後の契約・保険・監理報告と、現場稼働中の提出物を確認します。"
+                  : scope === "deadlines"
+                    ? "特別教育・資格証の期限とアラートを優先順に対応します。"
+                    : "入場許可・本人確認・入場前の安全書類パックを確認し、差戻しを解消します。"
+              }`
+            : isLogistics
+              ? `${docHints.pageIntentJa ? `${docHints.pageIntentJa} ` : ""}${
+                  scope === "post-entry"
+                    ? "契約・配送関連・運行記録の提出状況を確認します。"
+                    : scope === "deadlines"
+                      ? "免許・資格・車検・教育記録の期限とアラートを優先順に対応します。"
+                      : "入構申請・誓約・本人確認を最優先し、配車前に止まる差戻しを解消します。"
+                }`
+              : scope === "post-entry"
+                ? "入国後・就労関連書類の状態を確認し、未完了を処理します。"
+                : scope === "deadlines"
+                  ? "期限・更新が必要な項目を確認し、優先順に対応します。"
+                  : "入国前手続きを確認し、差戻しや未提出を解消します。"
         }
       />
 
@@ -193,9 +211,33 @@ export default function DocumentsPage() {
         label="表示タグ"
         currentId={scope}
         tags={[
-          { id: "pre-entry", label: "②-1 入国前", href: scopeHref("pre-entry") },
-          { id: "post-entry", label: "②-2 入国後", href: scopeHref("post-entry") },
-          { id: "deadlines", label: "②-3 期限・保管", href: scopeHref("deadlines") },
+          {
+            id: "pre-entry",
+            label: isConstruction
+              ? "②-1 入場前"
+              : isLogistics
+                ? "②-1 入構前"
+                : "②-1 入国前",
+            href: scopeHref("pre-entry"),
+          },
+          {
+            id: "post-entry",
+            label: isConstruction
+              ? "②-2 入場後"
+              : isLogistics
+                ? "②-2 入構後"
+                : "②-2 入国後",
+            href: scopeHref("post-entry"),
+          },
+          {
+            id: "deadlines",
+            label: isConstruction
+              ? "②-3 期限・特別教育"
+              : isLogistics
+                ? "②-3 期限・免許・教育"
+                : "②-3 期限・保管",
+            href: scopeHref("deadlines"),
+          },
         ]}
       />
 
@@ -209,7 +251,9 @@ export default function DocumentsPage() {
         </Button>
       </div>
       <p className="text-xs text-muted">
-        パスポート OCR・ビザ申請 PDF などの{" "}
+        {isConstruction || isLogistics
+          ? "資格証 OCR・翻訳・PDF などの "
+          : "パスポート OCR・ビザ申請 PDF などの "}
         <Link
           href={withDemoQuery("/feature-demos", industry, role)}
           className="font-medium text-primary underline-offset-4 hover:underline"
@@ -260,9 +304,19 @@ export default function DocumentsPage() {
       {scope === "pre-entry" && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">入国前に必要な書類（デモ）</CardTitle>
+            <CardTitle className="text-base">
+              {isConstruction
+                ? "入場前に揃える書類（デモ）"
+                : isLogistics
+                  ? "入構・配車前に揃える書類（デモ）"
+                  : "入国前に必要な書類（デモ）"}
+            </CardTitle>
             <p className="text-sm text-muted">
-              ビザ・COE・パスポートなど、入国前に整えるべき書類状況を確認します。
+              {isConstruction
+                ? "入場許可・本人確認・安全書類パックの状況を確認します。"
+                : isLogistics
+                  ? "入構申請・誓約・免許・配送関連書類の状況を確認します。不足があると配車が止まります。"
+                  : "ビザ・COE・パスポートなど、入国前に整えるべき書類状況を確認します。"}
             </p>
           </CardHeader>
           <CardContent className="space-y-2">
@@ -294,9 +348,19 @@ export default function DocumentsPage() {
       {scope === "post-entry" && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">入国後・就労関連書類（デモ）</CardTitle>
+            <CardTitle className="text-base">
+              {isConstruction
+                ? "入場後・現場稼働中の書類（デモ）"
+                : isLogistics
+                  ? "入構後・稼働中の書類（デモ）"
+                  : "入国後・就労関連書類（デモ）"}
+            </CardTitle>
             <p className="text-sm text-muted">
-              契約・更新・監理報告など、就労後に必要な書類を確認します。
+              {isConstruction
+                ? "契約・保険・監理報告・現場別提出物を確認します。"
+                : isLogistics
+                  ? "雇用契約・配送記録・アルコールチェック等の提出物を確認します。"
+                  : "契約・更新・監理報告など、就労後に必要な書類を確認します。"}
             </p>
           </CardHeader>
           <CardContent className="space-y-2">

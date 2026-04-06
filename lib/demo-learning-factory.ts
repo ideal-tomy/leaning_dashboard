@@ -219,3 +219,87 @@ export function learningDemoForStaffingCandidate(
       return defaultForJlpt(jlpt);
   }
 }
+
+const EDU_LEARNING_FOOTNOTE =
+  "オンライン進捗は継続率フォローの参考です。修了には課題提出と面談が必要です（デモ）。";
+
+/** 教育テンプレの受講者 ID に応じた学習デモ（LMS 進捗のばらつき） */
+export function learningDemoForEducationCandidate(
+  id: string,
+  jlpt: JlptLevel
+): CandidateLearningDemo {
+  const baseEthics = { ethicsModulesTotal: 6 as const, lastStudyAt: "2026-04-02" };
+  switch (id) {
+    case "edu-student-1":
+      return makeLearningDemo({
+        ...baseEthics,
+        jpCourseProgressPct: 88,
+        jpTrackLabelJa: "受験対策 LMS（デモ）",
+        ethicsModulesCompleted: 5,
+        jpInPerson: {
+          status: "passed",
+          certifiedJlptEquivalent: jlpt,
+          examAt: "2026-03-01",
+        },
+        ethicsInPerson: { status: "passed", resultLabelJa: "基準クリア", examAt: "2026-03-05" },
+        cohortComparisonJa: "同コース平均より進捗がやや上（デモ）。",
+        footnoteJa: EDU_LEARNING_FOOTNOTE,
+      });
+    case "edu-student-2":
+      return makeLearningDemo({
+        ...baseEthics,
+        jpCourseProgressPct: 71,
+        jpTrackLabelJa: "IT 基礎トラック（デモ）",
+        ethicsModulesCompleted: 4,
+        jpInPerson: { status: "passed", certifiedJlptEquivalent: jlpt, examAt: "2026-02-10" },
+        ethicsInPerson: { status: "scheduled" },
+        footnoteJa: EDU_LEARNING_FOOTNOTE,
+      });
+    case "edu-student-3":
+      return makeLearningDemo({
+        ...baseEthics,
+        jpCourseProgressPct: 52,
+        jpTrackLabelJa: "管理職研修 eラーニング（デモ）",
+        ethicsModulesCompleted: 3,
+        jpModules: [
+          { labelJa: "リーダーシップ基礎", progressPct: 100 },
+          { labelJa: "1on1 の進め方", progressPct: 45, stalled: true },
+        ],
+        jpInPerson: { status: "scheduled", certifiedJlptEquivalent: null },
+        ethicsInPerson: { status: "none" },
+        footnoteJa: EDU_LEARNING_FOOTNOTE,
+      });
+    case "edu-student-4":
+      return makeLearningDemo({
+        ...baseEthics,
+        jpCourseProgressPct: 36,
+        jpTrackLabelJa: "語学継続コース（デモ）",
+        ethicsModulesCompleted: 2,
+        jpModules: [{ labelJa: "復習ドリル", progressPct: 36, stalled: true }],
+        jpInPerson: { status: "none", certifiedJlptEquivalent: null },
+        ethicsInPerson: { status: "none" },
+        footnoteJa: EDU_LEARNING_FOOTNOTE,
+      });
+    case "edu-student-5":
+      return makeLearningDemo({
+        ...baseEthics,
+        jpCourseProgressPct: 58,
+        jpTrackLabelJa: "DX ブートキャンプ（デモ）",
+        ethicsModulesCompleted: 4,
+        jpInPerson: { status: "passed", certifiedJlptEquivalent: jlpt, examAt: "2026-03-12" },
+        ethicsInPerson: { status: "passed", resultLabelJa: "基準クリア", examAt: "2026-03-14" },
+        footnoteJa: EDU_LEARNING_FOOTNOTE,
+      });
+    default: {
+      const d = defaultForJlpt(jlpt);
+      return {
+        ...d,
+        footnoteJa: EDU_LEARNING_FOOTNOTE,
+        online: {
+          ...d.online,
+          jpTrackLabelJa: `LMS 共通教材（${jlpt} 帯・デモ）`,
+        },
+      };
+    }
+  }
+}

@@ -51,6 +51,7 @@ export default async function ClientDetailPage({ params, searchParams }: Props) 
   const quickLinksFiltered = isFactoryClientDetail
     ? quickLinks.filter((q) => q.path !== "documents")
     : quickLinks;
+  const isSales = industry === "sales";
 
   const locationLine = `${client.industryJa} · ${client.prefectureJa}${
     client.cityJa ? ` ${client.cityJa}` : ""
@@ -68,7 +69,7 @@ export default async function ClientDetailPage({ params, searchParams }: Props) 
         <MobileFlowBar
           backHref={backHref}
           backLabel={isFactoryClientDetail ? "ダッシュボード" : `${profile.labels.client}一覧`}
-          pageLabel="派遣先詳細"
+          pageLabel={isSales ? `${profile.labels.client}詳細` : "派遣先詳細"}
           nextHref={nextHref}
           nextLabel="次へ"
         />
@@ -89,15 +90,27 @@ export default async function ClientDetailPage({ params, searchParams }: Props) 
       <NextActionCard
         className="md:hidden"
         title="次のアクション"
-        reasonTag={client.operations.openSlots > 0 ? "欠員対応" : "提案候補"}
+        reasonTag={
+          isSales
+            ? client.operations.openSlots > 0
+              ? "並行商談"
+              : "提案フォロー"
+            : client.operations.openSlots > 0
+              ? "欠員対応"
+              : "提案候補"
+        }
         reasonTone={client.operations.openSlots > 0 ? "warning" : "ai"}
         description={
-          client.operations.openSlots > 0
-            ? "未充足枠を埋めるため、優先して候補者検索へ進みます。"
-            : "追加で提案候補を確認し、次の打診先を決めます。"
+          isSales
+            ? client.operations.openSlots > 0
+              ? "複数ラインの商談があります。提案優先度で次の一手を整理します。"
+              : "マッチングで見込み顧客との一致理由を確認します。"
+            : client.operations.openSlots > 0
+              ? "未充足枠を埋めるため、優先して候補者検索へ進みます。"
+              : "追加で提案候補を確認し、次の打診先を決めます。"
         }
         actionHref={nextHref}
-        actionLabel="マッチングへ"
+        actionLabel={isSales ? "提案優先度へ" : "マッチングへ"}
       />
 
       <TemplatePageHeader
@@ -289,7 +302,9 @@ export default async function ClientDetailPage({ params, searchParams }: Props) 
           <div className="grid gap-4 lg:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">社風・環境</CardTitle>
+                <CardTitle className="text-base">
+                  {isSales ? "重視点・商談環境" : "社風・環境"}
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 text-sm">
                 <p>{client.cultureJa}</p>
@@ -309,20 +324,45 @@ export default async function ClientDetailPage({ params, searchParams }: Props) 
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">募集・稼働</CardTitle>
+                <CardTitle className="text-base">
+                  {isSales ? "案件規模・指標" : "募集・稼働"}
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2 text-sm">
                 <p>{client.recruitmentJa}</p>
+                {isSales && client.salesListDemo ? (
+                  <div className="space-y-2 rounded-md border border-border/60 bg-surface/40 p-3 text-sm">
+                    <p>
+                      <span className="font-medium text-foreground">提案テーマ: </span>
+                      <span className="text-muted">{client.salesListDemo.proposalThemeJa}</span>
+                    </p>
+                    <p>
+                      <span className="font-medium text-foreground">受注確度: </span>
+                      <span className="text-muted">{client.salesListDemo.winProbabilityJa}</span>
+                    </p>
+                    <p>
+                      <span className="font-medium text-foreground">次回アクション: </span>
+                      <span className="text-muted">{client.salesListDemo.nextActionJa}</span>
+                    </p>
+                    {client.salesListDemo.competitorJa ? (
+                      <p className="text-xs text-muted">
+                        競合: {client.salesListDemo.competitorJa}
+                      </p>
+                    ) : null}
+                  </div>
+                ) : null}
                 <Separator />
                 <dl className="grid grid-cols-2 gap-2">
                   <div>
-                    <dt className="text-muted text-xs">稼働中</dt>
+                    <dt className="text-muted text-xs">
+                      {isSales ? "並行接触" : "稼働中"}
+                    </dt>
                     <dd className="font-semibold">
                       {client.operations.currentAssignees} 名
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-muted text-xs">欠員枠</dt>
+                    <dt className="text-muted text-xs">{isSales ? "フォロー枠" : "欠員枠"}</dt>
                     <dd className="font-semibold text-warning">
                       {client.operations.openSlots} 名
                     </dd>

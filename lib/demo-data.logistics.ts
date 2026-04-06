@@ -30,6 +30,11 @@ export const clients: ClientCompany[] = [
     ltMonthlyProfitPerHeadJpy: 53000,
     contact: { email: "logi1@example.jp", phone: "03-7000-0101", contactPersonJa: "運行 鈴木" },
     matchingHintTags: ["早朝", "仕分け", "規律"],
+    logisticsListDemo: {
+      deliveryWindowJa: "4:00–11:00 朝便 / 13:00–20:00 遅番",
+      loadConditionsJa: "常温・混載可。20kg まで手積み。",
+      priorityJa: "A（遅延コスト大）",
+    },
   },
   {
     id: "logi-client-2",
@@ -46,6 +51,11 @@ export const clients: ClientCompany[] = [
     ltMonthlyProfitPerHeadJpy: 47000,
     contact: { email: "logi2@example.jp", phone: "047-800-0102", contactPersonJa: "倉庫長 田村" },
     matchingHintTags: ["検品", "安全", "改善"],
+    logisticsListDemo: {
+      deliveryWindowJa: "8:00–17:00（昼休憩固定）",
+      loadConditionsJa: "リーチ必須エリアあり。危険物なし。",
+      priorityJa: "B",
+    },
   },
   {
     id: "logi-client-3",
@@ -62,6 +72,11 @@ export const clients: ClientCompany[] = [
     ltMonthlyProfitPerHeadJpy: 59000,
     contact: { email: "logi3@example.jp", phone: "0586-90-0103", contactPersonJa: "主任 井上" },
     matchingHintTags: ["低温", "体力", "ルール遵守"],
+    logisticsListDemo: {
+      deliveryWindowJa: "6:00–14:00 冷凍ピック",
+      loadConditionsJa: "冷凍 -25℃ 入出庫。衛生講習済み必須。",
+      priorityJa: "A（温度帯厳守）",
+    },
   },
   {
     id: "logi-client-4",
@@ -78,6 +93,11 @@ export const clients: ClientCompany[] = [
     ltMonthlyProfitPerHeadJpy: 50000,
     contact: { email: "logi4@example.jp", phone: "06-7777-0104", contactPersonJa: "拠点長 藤田" },
     matchingHintTags: ["段取り", "配送", "顧客対応"],
+    logisticsListDemo: {
+      deliveryWindowJa: "9:00–18:00 ルート配送",
+      loadConditionsJa: "軽四・助手同乗可。顧客窓口あり。",
+      priorityJa: "B",
+    },
   },
   {
     id: "logi-client-5",
@@ -94,6 +114,11 @@ export const clients: ClientCompany[] = [
     ltMonthlyProfitPerHeadJpy: 46000,
     contact: { email: "logi5@example.jp", phone: "011-777-0105", contactPersonJa: "管理 佐々木" },
     matchingHintTags: ["シフト", "仕分け", "チーム"],
+    logisticsListDemo: {
+      deliveryWindowJa: "シフト制（早番・遅番・夜勤）",
+      loadConditionsJa: "繁忙期は残業・増便。3PL 複数荷主。",
+      priorityJa: "C（柔軟シフト優先）",
+    },
   },
 ];
 
@@ -143,7 +168,7 @@ export const candidates: Candidate[] = [
     tokuteiGinoFoodManufacturing: false,
     driversLicenseLk: true,
     aiScore: 90,
-    aiScoreRationale: "繁忙シフトでも安定稼働が期待できる。",
+    aiScoreRationale: "早朝帯の仕分け実績があり、大型免許と時間厳守が案件に合致。",
     ...statusMap("配車確定"),
     passportNumber: "NA",
     passportExpiry: "NA",
@@ -169,11 +194,12 @@ export const candidates: Candidate[] = [
     tokuteiGinoFoodManufacturing: false,
     driversLicenseLk: false,
     aiScore: 84,
-    aiScoreRationale: "精度が高く、改善活動に向いている。",
+    aiScoreRationale: "検品タグと現場の安全・改善要件が一致。シフト確定待ち。",
     ...statusMap("シフト調整"),
     passportNumber: "NA",
     passportExpiry: "NA",
     coeStatusJa: "配属日調整中",
+    documentAlertJa: "入構誓約書の署名欄が未記入。",
     photoUrl: avatar("worker-b"),
   }),
   cand({
@@ -194,7 +220,7 @@ export const candidates: Candidate[] = [
     tokuteiGinoFoodManufacturing: false,
     driversLicenseLk: true,
     aiScore: 81,
-    aiScoreRationale: "低温現場適性が高い。",
+    aiScoreRationale: "冷凍帯の経験と免許があり、衛生・ルール遵守が評価できる。",
     ...statusMap("契約調整中"),
     passportNumber: "NA",
     passportExpiry: "NA",
@@ -328,7 +354,10 @@ export function scoreCandidateForClient(
     client.matchingHintTags.some((h) => h.includes(t) || t.includes(h))
   ).length;
   const pct = Math.min(97, 55 + hit * 8 + Math.floor((candidate.aiScore - 60) / 3));
-  const reason = `${client.tradeNameJa}の重視点（${client.matchingHintTags.slice(0, 2).join("・")}）と、${candidate.displayName}の特性（${candidate.skillTags.slice(0, 3).join("・")}）が一致しています。`;
+  const windowHint = client.logisticsListDemo?.deliveryWindowJa?.slice(0, 24) ?? "";
+  const reason = windowHint
+    ? `${client.tradeNameJa}の時間帯（${windowHint}…）と積載条件に対し、${candidate.displayName}の資格・スキル（${candidate.skillTags.slice(0, 3).join("・")}${candidate.driversLicenseLk ? "・免許可" : ""}）が適合します。`
+    : `${client.tradeNameJa}の重視点（${client.matchingHintTags.slice(0, 2).join("・")}）と、${candidate.displayName}の特性（${candidate.skillTags.slice(0, 3).join("・")}）が一致しています。`;
   return { pct, reason };
 }
 

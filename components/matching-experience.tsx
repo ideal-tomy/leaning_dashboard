@@ -42,7 +42,11 @@ export function MatchingExperience({
   const backHref = featureDemo
     ? withDemoQuery("/feature-demos", industry, role)
     : withDemoQuery("/clients", industry, role);
-  const backLabel = featureDemo ? "技術デモ一覧" : "派遣先一覧";
+  const backLabel = featureDemo
+    ? "技術デモ一覧"
+    : industry === "construction" || industry === "education"
+      ? `${profile.labels.client}一覧`
+      : "派遣先一覧";
 
   return (
     <TemplatePageStack>
@@ -67,11 +71,19 @@ export function MatchingExperience({
         <NextActionCard
           className="md:hidden"
           title="次のアクション"
-          reasonTag="実務連携"
+          reasonTag={industry === "education" ? "運営連携" : "実務連携"}
           reasonTone="success"
-          description="提案候補を確認したら、運用画面で配属・定着の進捗へ繋げます。"
+          description={
+            industry === "education"
+              ? "受講提案を確認したら、講座運営で開講準備・提出確認へ繋げます。"
+              : "提案候補を確認したら、運用画面で配属・定着の進捗へ繋げます。"
+          }
           actionHref={withDemoQuery("/operations", industry, role)}
-          actionLabel="実務画面へ"
+          actionLabel={
+            industry === "education"
+              ? `${profile.labels.operations}へ`
+              : "実務画面へ"
+          }
         />
       ) : null}
       {industry === "staffing" && role === "client" ? (

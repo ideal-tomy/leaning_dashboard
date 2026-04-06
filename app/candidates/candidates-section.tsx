@@ -18,7 +18,8 @@ import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
 import { NextActionCard } from "@/components/navigation/next-action-card";
 import { useMobile } from "@/hooks/use-mobile";
 import { getIndustryDemoData } from "@/lib/demo-data-selector";
-import { getIndustryProfile } from "@/lib/industry-profiles";
+import { getIndustryPageHints } from "@/lib/industry-page-hints";
+import { getIndustryProfile, type EnabledIndustryKey } from "@/lib/industry-profiles";
 import { getIndustryFromSearchParams } from "@/lib/industry-selection";
 import { withDemoQuery } from "@/lib/demo-query";
 import { useDemoRole } from "@/components/demo-role-context";
@@ -27,11 +28,86 @@ import { parsePageTag } from "@/lib/page-tag";
 
 const jlptOptions: JlptLevel[] = ["N5", "N4", "N3", "N2", "N1"];
 
-type CandidateGroupId = "pre_entry" | "post_entry";
+type CandidateGroupId =
+  | "pre_entry"
+  | "post_entry"
+  | "construction_docs"
+  | "construction_ops"
+  | "logistics_docs"
+  | "logistics_ops"
+  | "medical_docs"
+  | "medical_ops"
+  | "professional_evidence"
+  | "professional_matter";
 
-const groupOrder: Array<{ id: CandidateGroupId; label: string; hint: string }> = [
+const groupOrderStaffing: Array<{ id: CandidateGroupId; label: string; hint: string }> = [
   { id: "pre_entry", label: "入国前", hint: "ビザ・書類・入国前の準備段階" },
   { id: "post_entry", label: "入国後", hint: "研修・配属・定着フォロー段階" },
+];
+
+const groupOrderConstruction: Array<{ id: CandidateGroupId; label: string; hint: string }> = [
+  {
+    id: "construction_docs",
+    label: "書類・安全教育",
+    hint: "安全書類・入場準備・安全教育の段階",
+  },
+  {
+    id: "construction_ops",
+    label: "配員・工程",
+    hint: "面談・配員確定・工程調整・手配待ち",
+  },
+];
+
+const groupOrderEducation: Array<{ id: CandidateGroupId; label: string; hint: string }> = [
+  {
+    id: "pre_entry",
+    label: "受講前・手続き",
+    hint: "面談・申込・案内・教材準備・提出物の段階",
+  },
+  {
+    id: "post_entry",
+    label: "受講中・フォロー",
+    hint: "受講実施と修了に向けたフォロー",
+  },
+];
+
+const groupOrderLogistics: Array<{ id: CandidateGroupId; label: string; hint: string }> = [
+  {
+    id: "logistics_docs",
+    label: "入構・資格・書類",
+    hint: "入構申請・免許・誓約・配送関連で止まりやすい段階",
+  },
+  {
+    id: "logistics_ops",
+    label: "シフト・配車・稼働",
+    hint: "シフト調整・配車確定・現場稼働の段階",
+  },
+];
+
+const groupOrderMedical: Array<{ id: CandidateGroupId; label: string; hint: string }> = [
+  {
+    id: "medical_docs",
+    label: "記録・研修",
+    hint: "記録不備・同意・院内研修・書類準備の段階",
+  },
+  {
+    id: "medical_ops",
+    label: "配置・勤務",
+    hint: "面談・配置確定・勤務調整・配属待ち",
+  },
+];
+
+const groupOrderProfessional: Array<{ id: CandidateGroupId; label: string; hint: string }> = [
+  {
+    id: "professional_evidence",
+    label: "証憑・申請準備",
+    hint: "不足証憑・差戻し・申請書ドラフトの段階",
+  },
+  {
+    id: "professional_matter",
+    label: "相談・手続・受任",
+    hint: "初回相談・論点整理・受任見込み・申請手続の段階",
+  },
 ];
 
 function statusBadgeVariant(
@@ -43,7 +119,48 @@ function statusBadgeVariant(
   return "default";
 }
 
-function resolveGroup(candidate: Candidate): CandidateGroupId {
+function resolveGroup(
+  candidate: Candidate,
+  industry: EnabledIndustryKey
+): CandidateGroupId {
+  if (industry === "construction") {
+    const docs: Candidate["pipelineStatus"][] = [
+      "document_blocked",
+      "document_prep",
+      "training",
+    ];
+    return docs.includes(candidate.pipelineStatus)
+      ? "construction_docs"
+      : "construction_ops";
+  }
+  if (industry === "education") {
+    return candidate.pipelineStatus === "training" ? "post_entry" : "pre_entry";
+  }
+  if (industry === "logistics") {
+    const docs: Candidate["pipelineStatus"][] = [
+      "document_blocked",
+      "document_prep",
+      "training",
+    ];
+    return docs.includes(candidate.pipelineStatus) ? "logistics_docs" : "logistics_ops";
+  }
+  if (industry === "medical") {
+    const docs: Candidate["pipelineStatus"][] = [
+      "document_blocked",
+      "document_prep",
+      "training",
+    ];
+    return docs.includes(candidate.pipelineStatus) ? "medical_docs" : "medical_ops";
+  }
+  if (industry === "professional") {
+    if (
+      candidate.pipelineStatus === "document_blocked" ||
+      candidate.pipelineStatus === "document_prep"
+    ) {
+      return "professional_evidence";
+    }
+    return "professional_matter";
+  }
   const preEntryStatuses: Candidate["pipelineStatus"][] = [
     "interview_coordination",
     "offer_accepted",
@@ -54,6 +171,75 @@ function resolveGroup(candidate: Candidate): CandidateGroupId {
   ];
   if (preEntryStatuses.includes(candidate.pipelineStatus)) return "pre_entry";
   return "post_entry";
+}
+
+function candidateJobLine(candidate: Candidate): string {
+  const job = candidate.plannedAssignment?.jobTitleJa?.trim();
+  if (job) return job;
+  const tags = candidate.skillTags.slice(0, 2).join("・");
+  return tags || "工種未設定";
+}
+
+function candidateListSubtitle(
+  candidate: Candidate,
+  industry: EnabledIndustryKey
+): string {
+  if (industry === "construction") {
+    return `${candidateJobLine(candidate)} · ${candidate.jlpt}`;
+  }
+  if (industry === "education") {
+    const tags = candidate.skillTags.slice(0, 3).join("・");
+    if (tags) return tags;
+    const sum = candidate.backgroundSummary.trim();
+    return sum.length > 42 ? `${sum.slice(0, 42)}…` : sum || "—";
+  }
+  if (industry === "logistics") {
+    const tags = candidate.skillTags.slice(0, 2).join("・") || "—";
+    const lic = candidate.driversLicenseLk ? "免許·可" : "免許·要確認";
+    const job = candidate.plannedAssignment?.jobTitleJa?.trim();
+    return job ? `${tags} · ${lic} · ${job}` : `${tags} · ${lic}`;
+  }
+  if (industry === "medical") {
+    const job = candidate.plannedAssignment?.jobTitleJa?.trim();
+    const tags = candidate.skillTags.slice(0, 3).join("・");
+    const sum = candidate.backgroundSummary.trim();
+    const core =
+      [job, tags].filter(Boolean).join(" · ") ||
+      (sum.length > 48 ? `${sum.slice(0, 48)}…` : sum) ||
+      "—";
+    return `${core} · ${candidate.jlpt}`;
+  }
+  if (industry === "professional") {
+    const job = candidate.plannedAssignment?.jobTitleJa?.trim();
+    const tags = candidate.skillTags.slice(0, 3).join("・");
+    const status = candidate.coeStatusJa?.trim();
+    const alert = candidate.documentAlertJa?.trim();
+    const parts = [
+      job,
+      tags,
+      status && (status.length > 36 ? `${status.slice(0, 36)}…` : status),
+      alert && (alert.length > 32 ? `${alert.slice(0, 32)}…` : alert),
+    ].filter(Boolean);
+    if (parts.length) return parts.join(" · ");
+    const sum = candidate.backgroundSummary.trim();
+    return sum.length > 52 ? `${sum.slice(0, 52)}…` : sum || "—";
+  }
+  if (industry === "sales") {
+    const d = candidate.salesCandidateListDemo;
+    if (d) {
+      const ch =
+        d.keyChallengeJa.length > 32
+          ? `${d.keyChallengeJa.slice(0, 32)}…`
+          : d.keyChallengeJa;
+      return `${d.sectorJa} · ${d.interestJa} · ${ch}`;
+    }
+    const sum = candidate.backgroundSummary.trim();
+    const stage = candidate.pipelineStatusLabelJa;
+    return sum
+      ? `${stage} · ${sum.length > 36 ? `${sum.slice(0, 36)}…` : sum}`
+      : stage;
+  }
+  return `${candidate.nationality} · ${candidate.jlpt}`;
 }
 
 export function CandidatesSection() {
@@ -74,18 +260,74 @@ export function CandidatesSection() {
   const [groupOpen, setGroupOpen] = useState<Record<CandidateGroupId, boolean>>({
     pre_entry: true,
     post_entry: false,
+    construction_docs: true,
+    construction_ops: false,
+    logistics_docs: true,
+    logistics_ops: false,
+    medical_docs: true,
+    medical_ops: false,
+    professional_evidence: true,
+    professional_matter: false,
   });
   const isMobile = useMobile();
   const profile = getIndustryProfile(industry);
   const data = getIndustryDemoData(industry);
   const candidates = data.candidates;
+  const isConstruction = industry === "construction";
+  const isEducation = industry === "education";
+  const isLogistics = industry === "logistics";
+  const isMedical = industry === "medical";
+  const isProfessional = industry === "professional";
+  const pageHints = getIndustryPageHints(industry);
+  const candHints = pageHints.candidates;
+  const showJlptFilter = pageHints.candidateDetail.showJlptBadge;
+  const groupOrder = isConstruction
+    ? groupOrderConstruction
+    : isEducation
+      ? groupOrderEducation
+      : isLogistics
+        ? groupOrderLogistics
+        : isMedical
+          ? groupOrderMedical
+          : isProfessional
+            ? groupOrderProfessional
+            : groupOrderStaffing;
 
-  const headerDescription =
-    focus === "risk"
-      ? "要対応候補者を優先表示し、すぐに対応へ進みます。"
+  const headerDescription = isConstruction
+    ? focus === "risk"
+      ? "安全書類不備・入場リスクを優先表示し、すぐに対応へ進みます。"
       : focus === "evaluation"
-        ? "評価・履歴の確認対象を中心に表示します。"
-        : "候補者をカテゴリ別に確認し、対応優先度を判断します。";
+        ? "現場実績・配属予定がある作業員を中心に表示します。"
+        : "工種と安全教育・書類の段階で優先度を判断します。"
+    : isEducation
+      ? focus === "risk"
+        ? "提出物不備・学習遅れを優先表示し、すぐにフォローへ進みます。"
+        : focus === "evaluation"
+          ? "受講履歴・割当講座がある受講者を中心に表示します。"
+          : candHints.pageSubtitle
+      : isLogistics
+        ? focus === "risk"
+          ? "入構・免許・書類の不備を優先表示し、配車前の止まりどころを潰します。"
+          : focus === "evaluation"
+            ? "配車実績・担当便のある作業員を中心に表示します。"
+            : candHints.pageSubtitle
+        : isMedical
+          ? focus === "risk"
+            ? "記録不備・同意漏れを優先表示し、すぐに記録書類へ進みます。"
+            : focus === "evaluation"
+              ? "配置予定・勤務履歴のあるスタッフを中心に表示します。"
+              : candHints.pageSubtitle
+          : isProfessional
+            ? focus === "risk"
+              ? "証憑不足・申請期限を優先表示し、書類・次対応へ進みます。"
+              : focus === "evaluation"
+                ? "受任見込み・申請中の案件を中心に表示します。"
+                : candHints.pageSubtitle
+            : focus === "risk"
+              ? "要対応候補者を優先表示し、すぐに対応へ進みます。"
+              : focus === "evaluation"
+                ? "評価・履歴の確認対象を中心に表示します。"
+                : "候補者をカテゴリ別に確認し、対応優先度を判断します。";
 
   function buildCandidatesHref(updates: Record<string, string | null | undefined>) {
     const p = new URLSearchParams(searchParams.toString());
@@ -111,7 +353,7 @@ export function CandidatesSection() {
     const keyword = q.trim().toLowerCase();
     const followupThreshold = 55;
     let list = candidates.filter((candidate) => {
-      if (jlpt !== "all" && candidate.jlpt !== jlpt) return false;
+      if (showJlptFilter && jlpt !== "all" && candidate.jlpt !== jlpt) return false;
       if (!keyword) return true;
       const hay = [
         candidate.displayName,
@@ -125,21 +367,49 @@ export function CandidatesSection() {
     });
 
     if (followupLearning) {
-      list = list
-        .filter((candidate) => candidate.learningDemo)
-        .sort(
-          (a, b) =>
-            (a.learningDemo?.online.jpCourseProgressPct ?? 100) -
-            (b.learningDemo?.online.jpCourseProgressPct ?? 100)
-        );
+      if (isConstruction || isLogistics || isMedical) {
+        list = list
+          .filter(
+            (candidate) =>
+              candidate.pipelineStatus === "training" ||
+              candidate.pipelineStatus === "document_prep" ||
+              Boolean(candidate.documentAlertJa?.trim())
+          )
+          .sort((a, b) => a.aiScore - b.aiScore);
+      } else {
+        list = list
+          .filter((candidate) => candidate.learningDemo)
+          .sort(
+            (a, b) =>
+              (a.learningDemo?.online.jpCourseProgressPct ?? 100) -
+              (b.learningDemo?.online.jpCourseProgressPct ?? 100)
+          );
+      }
     }
 
     if (focus === "risk") {
-      list = list.filter(
-        (candidate) =>
-          Boolean(candidate.documentAlertJa?.trim()) ||
-          (candidate.learningDemo?.online.jpCourseProgressPct ?? 100) <= followupThreshold
-      );
+      if (isConstruction || isLogistics || isMedical || isProfessional) {
+        list = list.filter(
+          (candidate) =>
+            Boolean(candidate.documentAlertJa?.trim()) ||
+            candidate.pipelineStatus === "document_blocked" ||
+            candidate.pipelineStatus === "document_prep"
+        );
+      } else if (isEducation) {
+        list = list.filter(
+          (candidate) =>
+            Boolean(candidate.documentAlertJa?.trim()) ||
+            candidate.pipelineStatus === "document_blocked" ||
+            candidate.pipelineStatus === "document_prep" ||
+            (candidate.learningDemo?.online.jpCourseProgressPct ?? 100) <= followupThreshold
+        );
+      } else {
+        list = list.filter(
+          (candidate) =>
+            Boolean(candidate.documentAlertJa?.trim()) ||
+            (candidate.learningDemo?.online.jpCourseProgressPct ?? 100) <= followupThreshold
+        );
+      }
     }
 
     if (focus === "evaluation") {
@@ -148,6 +418,21 @@ export function CandidatesSection() {
         return hasHistory || Boolean(candidate.plannedAssignment);
       });
     }
+
+    if (isProfessional) {
+      const rank = (c: Candidate) =>
+        c.pipelineStatus === "document_blocked"
+          ? 0
+          : Boolean(c.documentAlertJa?.trim())
+            ? 1
+            : c.pipelineStatus === "document_prep"
+              ? 2
+              : c.pipelineStatus === "visa_applying"
+                ? 3
+                : 4;
+      list = [...list].sort((a, b) => rank(a) - rank(b) || b.aiScore - a.aiScore);
+    }
+
     return list;
   })();
 
@@ -155,7 +440,7 @@ export function CandidatesSection() {
     const map = new Map<CandidateGroupId, Candidate[]>();
     for (const g of groupOrder) map.set(g.id, []);
     for (const candidate of filtered) {
-      map.get(resolveGroup(candidate))?.push(candidate);
+      map.get(resolveGroup(candidate, industry))?.push(candidate);
     }
     return map;
   })();
@@ -175,11 +460,43 @@ export function CandidatesSection() {
       <NextActionCard
         className="md:hidden"
         title="次のアクション"
-        reasonTag="書類確認"
+        reasonTag={
+          isConstruction
+            ? "安全書類"
+            : isEducation
+              ? "提出確認"
+              : isLogistics
+                ? "入構書類"
+                : isMedical
+                  ? "記録書類"
+                  : isProfessional
+                    ? "申請書類"
+                    : "書類確認"
+        }
         reasonTone="warning"
-        description="候補者確認後は書類管理へ進み、期限・不備を優先確認します。"
+        description={
+          isConstruction
+            ? "作業員確認後は安全書類へ進み、期限・不備を優先確認します。"
+            : isEducation
+              ? "受講者確認後は提出書類へ進み、期限・不備を優先確認します。"
+              : isLogistics
+                ? "作業員確認後は入構・配送書類へ進み、配車前の不備を潰します。"
+                : isMedical
+                  ? "スタッフ確認後は記録書類へ進み、同意・記録の不備を優先確認します。"
+                  : isProfessional
+                    ? "案件確認後は申請書類へ進み、証憑・差戻し・期限を優先確認します。"
+                    : "候補者確認後は書類管理へ進み、期限・不備を優先確認します。"
+        }
         actionHref={withDemoQuery("/documents", industry, role)}
-        actionLabel="書類管理へ"
+        actionLabel={
+          isConstruction ||
+          isEducation ||
+          isLogistics ||
+          isMedical ||
+          isProfessional
+            ? `${profile.labels.documents}へ`
+            : "書類管理へ"
+        }
       />
 
       <PageTagLinks
@@ -190,17 +507,47 @@ export function CandidatesSection() {
         tags={[
           {
             id: "overview",
-            label: "①-1 一覧",
+            label: isConstruction
+              ? "①-1 現場手配一覧"
+              : isEducation
+                ? "①-1 受講者一覧"
+                : isLogistics
+                  ? "①-1 手配一覧"
+                  : isMedical
+                    ? "①-1 スタッフ一覧"
+                    : isProfessional
+                      ? "①-1 相談案件一覧"
+                      : "①-1 一覧",
             href: buildCandidatesHref({ focus: "overview" }),
           },
           {
             id: "evaluation",
-            label: "①-2 評価・ログ",
+            label: isConstruction
+              ? "①-2 実績・配属"
+              : isEducation
+                ? "①-2 受講・割当"
+                : isLogistics
+                  ? "①-2 稼働・配車"
+                  : isMedical
+                    ? "①-2 配置・実績"
+                    : isProfessional
+                      ? "①-2 申請・受任"
+                      : "①-2 評価・ログ",
             href: buildCandidatesHref({ focus: "evaluation" }),
           },
           {
             id: "risk",
-            label: "①-3 リスク・要フォロー",
+            label: isConstruction
+              ? "①-3 書類・リスク"
+              : isEducation
+                ? "①-3 提出・遅延"
+                : isLogistics
+                  ? "①-3 書類・リスク"
+                  : isMedical
+                    ? "①-3 記録・リスク"
+                    : isProfessional
+                      ? "①-3 証憑・期限"
+                      : "①-3 リスク・要フォロー",
             href: buildCandidatesHref({ focus: "risk" }),
           },
         ]}
@@ -217,18 +564,28 @@ export function CandidatesSection() {
             onChange={(e) => setQ(e.target.value)}
           />
         </div>
-        <select
-          className="h-10 rounded-lg border border-border bg-background px-3 text-sm"
-          value={jlpt}
-          onChange={(e) => setJlpt(e.target.value as JlptLevel | "all")}
-        >
-          <option value="all">JLPT すべて</option>
-          {jlptOptions.map((j) => (
-            <option key={j} value={j}>
-              {j}
+        {showJlptFilter ? (
+          <select
+            className="h-10 rounded-lg border border-border bg-background px-3 text-sm"
+            value={jlpt}
+            onChange={(e) => setJlpt(e.target.value as JlptLevel | "all")}
+          >
+            <option value="all">
+              {isConstruction
+                ? "JLPT（参考）すべて"
+                : isLogistics
+                  ? "JLPT（参考）すべて"
+                  : isMedical
+                    ? "JLPT（参考）すべて"
+                    : "JLPT すべて"}
             </option>
-          ))}
-        </select>
+            {jlptOptions.map((j) => (
+              <option key={j} value={j}>
+                {j}
+              </option>
+            ))}
+          </select>
+        ) : null}
         </div>
       </div>
 
@@ -290,7 +647,7 @@ export function CandidatesSection() {
                               {candidate.displayName}
                             </p>
                             <p className="mt-0.5 text-xs text-muted">
-                              {candidate.nationality} · {candidate.jlpt}
+                              {candidateListSubtitle(candidate, industry)}
                             </p>
                             <div className="mt-2 flex items-center gap-2">
                               <Badge variant={statusBadgeVariant(candidate.pipelineStatus)}>
@@ -336,7 +693,7 @@ export function CandidatesSection() {
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-sm font-semibold">{candidate.displayName}</p>
                           <p className="text-xs text-muted">
-                            {candidate.nationality} · {candidate.jlpt}
+                            {candidateListSubtitle(candidate, industry)}
                           </p>
                           <div className="mt-2 flex flex-wrap items-center gap-2">
                             <Badge variant="ai">AI {candidate.aiScore}</Badge>
@@ -359,7 +716,15 @@ export function CandidatesSection() {
       })}
 
       {filtered.length === 0 ? (
-        <p className="py-8 text-center text-sm text-muted">条件に一致する候補者がありません。</p>
+        <p className="py-8 text-center text-sm text-muted">
+          {isConstruction || isLogistics
+            ? "条件に一致する作業員がありません。"
+            : isEducation
+              ? "条件に一致する受講者がありません。"
+              : isMedical
+                ? "条件に一致するスタッフがありません。"
+                : "条件に一致する候補者がありません。"}
+        </p>
       ) : null}
 
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
@@ -378,7 +743,7 @@ export function CandidatesSection() {
                 <div className="min-w-0">
                   <p className="text-lg font-semibold">{preview.displayName}</p>
                   <p className="text-sm text-muted">
-                    {preview.nationality} · {preview.jlpt}
+                    {candidateListSubtitle(preview, industry)}
                   </p>
                   <div className="mt-2 flex flex-wrap gap-2">
                     <Badge variant="ai">AI {preview.aiScore}</Badge>

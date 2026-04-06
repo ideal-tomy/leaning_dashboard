@@ -151,6 +151,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   };
   const bottomNavLabelByHref: Record<string, string> = {
     "/": "ホーム",
+    "/personnel-hub": "人員・関係",
+    "/partners": "取引先",
     "/candidates": profile.labels.candidate,
     "/clients": profile.labels.client,
     "/operations": profile.labels.operations,
@@ -170,7 +172,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   );
 
   /** クライアントは収益を非表示。派遣スタッフィングのクライアントは「その他」ページと同様に実務・書類も除外 */
-  const adminBottomNavItems = shell.bottomNav.filter((item) => {
+  const adminBottomNavItemsBase = shell.bottomNav.filter((item) => {
     if (!isClient) return true;
     if (item.href === "/revenue") return false;
     if (
@@ -181,6 +183,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     }
     return true;
   });
+
+  const constructionHubNav: TemplateNavItem[] = [
+    { href: "/personnel-hub", label: "人員・関係", icon: "Users" },
+    { href: "/partners", label: "取引先", icon: "Building2" },
+  ];
+
+  const adminBottomNavItems =
+    industry === "construction" && !isClient
+      ? [
+          adminBottomNavItemsBase[0]!,
+          ...constructionHubNav,
+          ...adminBottomNavItemsBase.slice(1),
+        ]
+      : adminBottomNavItemsBase;
 
   return (
     <div className="flex min-h-full flex-col">

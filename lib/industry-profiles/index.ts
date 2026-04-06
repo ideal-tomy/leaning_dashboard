@@ -229,7 +229,7 @@ const baseProfiles: Record<EnabledIndustryKey, IndustryProfile> = {
     metadataDescription: "相談・受任・申請進捗のテンプレート",
     dashboardTitle: "士業ダッシュボード",
     dashboardSubtitle:
-      "相談から受任・申請までを一元管理するテンプレート表示です。",
+      "未回収証憑と対応期限を先に見せ、相談から受任・申請までを一元管理するテンプレートです。",
     labels: {
       candidate: "相談案件",
       client: "顧問先",
@@ -242,8 +242,8 @@ const baseProfiles: Record<EnabledIndustryKey, IndustryProfile> = {
     },
     kpiLabels: {
       totalCountUnit: "件",
-      proficiencyLabel: "受任優先度",
-      openSlotsLabel: "未着手案件",
+      proficiencyLabel: "期限7日以内（要返答）",
+      openSlotsLabel: "未着手・要アサイン",
       openSlotsUnit: "件",
     },
     statusLabels: professionalStatus,
@@ -258,7 +258,7 @@ const baseProfiles: Record<EnabledIndustryKey, IndustryProfile> = {
     metadataDescription: "現場配員・安全書類・請求管理のテンプレート",
     dashboardTitle: "現場ダッシュボード",
     dashboardSubtitle:
-      "配員・工程・安全書類を統合して確認できるテンプレート表示です。",
+      "工期・配員・安全書類を横断して確認し、現場を止めない手配判断を支えるテンプレート表示です。",
     labels: {
       candidate: "作業員",
       client: "現場案件",
@@ -276,8 +276,10 @@ const baseProfiles: Record<EnabledIndustryKey, IndustryProfile> = {
       openSlotsUnit: "件",
     },
     statusLabels: constructionStatus,
-    matchingDescription: "現場案件ごとの配員候補と AI 理由（テスト表示）",
-    operationsDescription: "安全書類・請求へのショートカット（テスト）",
+    matchingDescription:
+      "現場案件ごとの配員候補と、資格・安全教育・経験に基づく AI 理由（テスト表示）",
+    operationsDescription:
+      "当日の入場調整・現場日報・請求までのショートカット（テスト）",
   },
   medical: {
     key: "medical",
@@ -287,7 +289,7 @@ const baseProfiles: Record<EnabledIndustryKey, IndustryProfile> = {
     metadataDescription: "配置・記録・請求管理のテンプレート",
     dashboardTitle: "医療・介護ダッシュボード",
     dashboardSubtitle:
-      "スタッフ配置と記録・請求を統合管理するテンプレート表示です。",
+      "配置・記録・研修を横断し、現場の安心感と運営精度を支えるテンプレート表示です。",
     labels: {
       candidate: "スタッフ",
       client: "拠点案件",
@@ -300,26 +302,27 @@ const baseProfiles: Record<EnabledIndustryKey, IndustryProfile> = {
     },
     kpiLabels: {
       totalCountUnit: "名",
-      proficiencyLabel: "即戦力度",
+      proficiencyLabel: "資格・経験",
       openSlotsLabel: "不足シフト",
       openSlotsUnit: "枠",
     },
     statusLabels: medicalStatus,
     matchingDescription: "拠点ごとの配置候補と AI 理由（テスト表示）",
-    operationsDescription: "記録・請求へのショートカット（テスト）",
+    operationsDescription:
+      "当日の引継ぎ・記録確認から請求までのショートカット（テスト）",
   },
   sales: {
     key: "sales",
     productName: "営業パイプライン テンプレート",
     badgeLabel: "AI テスト",
     metadataTitle: "営業管理ダッシュボード（テンプレート）",
-    metadataDescription: "リード・商談・受注管理のテンプレート",
+    metadataDescription: "見込み顧客・提案案件・受注管理のテンプレート",
     dashboardTitle: "営業ダッシュボード",
     dashboardSubtitle:
-      "リードから受注までの進捗を可視化するテンプレート表示です。",
+      "商談進行・提案先優先度・受注見込みを整理し、次の一手が分かるテンプレ表示です。",
     labels: {
-      candidate: "リード",
-      client: "商談",
+      candidate: "見込み顧客",
+      client: "提案案件",
       matching: "提案優先度",
       documents: "提案資料",
       revenue: "売上見込み",
@@ -334,8 +337,9 @@ const baseProfiles: Record<EnabledIndustryKey, IndustryProfile> = {
       openSlotsUnit: "件",
     },
     statusLabels: salesStatus,
-    matchingDescription: "商談ごとの提案優先度と AI 理由（テスト表示）",
-    operationsDescription: "提案資料・売上指標へのショートカット（テスト）",
+    matchingDescription:
+      "提案案件ごとの優先順位と、顧客課題との一致理由（AI 理由はテスト表示）",
+    operationsDescription: "提案資料・売上指標・当日フォローへのショートカット（テスト）",
   },
   logistics: {
     key: "logistics",
@@ -345,7 +349,7 @@ const baseProfiles: Record<EnabledIndustryKey, IndustryProfile> = {
     metadataDescription: "配車・入出庫・稼働管理のテンプレート",
     dashboardTitle: "物流ダッシュボード",
     dashboardSubtitle:
-      "配属・配車・稼働状況を一画面で確認できるテンプレート表示です。",
+      "本日の出荷・遅延注意・未配車枠・入構書類の要点を一画面で確認するテンプレート表示です。",
     labels: {
       candidate: "作業員",
       client: "配送案件",
@@ -359,7 +363,7 @@ const baseProfiles: Record<EnabledIndustryKey, IndustryProfile> = {
     kpiLabels: {
       totalCountUnit: "名",
       proficiencyLabel: "即戦力レベル",
-      openSlotsLabel: "未充足枠",
+      openSlotsLabel: "未配車枠",
       openSlotsUnit: "枠",
     },
     statusLabels: logisticsStatus,
@@ -377,7 +381,7 @@ const baseProfiles: Record<EnabledIndustryKey, IndustryProfile> = {
       "受講者進捗と提出物・売上を一体で把握するテンプレート表示です。",
     labels: {
       candidate: "受講者",
-      client: "講座案件",
+      client: "講座",
       matching: "受講提案",
       documents: "提出書類",
       revenue: "売上",
@@ -392,7 +396,7 @@ const baseProfiles: Record<EnabledIndustryKey, IndustryProfile> = {
       openSlotsUnit: "名",
     },
     statusLabels: educationStatus,
-    matchingDescription: "講座案件ごとの推奨候補と AI 理由（テスト表示）",
+    matchingDescription: "講座ごとの推奨受講者と AI 理由（テスト表示）",
     operationsDescription: "講座運営と売上確認への導線（テスト）",
   },
 };

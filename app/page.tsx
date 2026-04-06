@@ -49,6 +49,8 @@ export default async function DashboardPage({ searchParams }: PageProps) {
     trainingCount: pipeline.training,
     awaitingEntryCount: pipeline.awaiting_entry,
     activeAssignments: factoryClient?.operations.currentAssignees ?? 0,
+    pipelineOfferAccepted: pipeline.offer_accepted,
+    pipelineStalledSales: pipeline.document_blocked + pipeline.document_prep,
   });
   const { dashboard } = appTemplateConfig;
 
@@ -110,8 +112,22 @@ export default async function DashboardPage({ searchParams }: PageProps) {
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0 text-xs text-muted">
-            要対応書類 {docAlerts}件 / 未充足枠 {openSlotCount}名 / 研修中{" "}
-            {pipeline.training}名
+            {industry === "logistics" ? (
+              <>
+                本日出荷（デモ）142件 / 遅延注意 3便 / 入構・要対応書類 {docAlerts}
+                件 / 未配車枠 {openSlotCount}枠
+              </>
+            ) : industry === "medical" ? (
+              <>
+                不足シフト {openSlotCount}枠 / 記録・同意の要確認 {docAlerts}件 / 院内研修中{" "}
+                {pipeline.training}名
+              </>
+            ) : (
+              <>
+                要対応書類 {docAlerts}件 / 未充足枠 {openSlotCount}名 / 研修中{" "}
+                {pipeline.training}名
+              </>
+            )}
           </CardContent>
         </Card>
       </div>
