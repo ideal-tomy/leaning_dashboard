@@ -4,11 +4,8 @@ import { LearningGrowthChart } from "@/components/learning-growth-chart";
 import { LearningWeeklyActiveChart } from "@/components/learning-weekly-active-chart";
 import {
   TemplatePageHeader,
-  TemplateMobileFlowSection,
   TemplatePageStack,
 } from "@/components/templates/layout-primitives";
-import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
-import { NextActionCard } from "@/components/navigation/next-action-card";
 import { PageTagLinks } from "@/components/page-tag-links";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -57,36 +54,12 @@ export default async function LearningInsightsPage({
 
   return (
     <TemplatePageStack>
-      <TemplateMobileFlowSection>
-        <MobileFlowBar
-          backHref={withDemoQuery("/", industry, role)}
-          backLabel="ダッシュボード"
-          pageLabel={title}
-          nextHref={withDemoQuery("/candidates", industry, role, { followup: "learning" })}
-          nextLabel="次へ"
-        />
-      </TemplateMobileFlowSection>
-      <TemplatePageHeader title={title} description={headerDescription} />
-      <NextActionCard
-        className="md:hidden"
-        title="次のアクション"
-        reasonTag="遅延フォロー"
-        reasonTone="warning"
-        description={
-          industry === "education"
-            ? "学習遅れの受講者一覧へ移動し、優先フォローを確定します。"
-            : "学習遅延候補者に移動して、優先フォロー対象を確定します。"
-        }
-        actionHref={withDemoQuery("/candidates", industry, role, { followup: "learning" })}
-        actionLabel={
-          industry === "education"
-            ? `フォロー対象${profile.labels.candidate}へ`
-            : "フォロー対象候補者へ"
-        }
-      />
       <PageTagLinks
         label="表示タグ"
         currentId={tag}
+        mobileScrollable
+        stickyOnMobile
+        mobileTopClassName="top-[7rem]"
         tags={[
           {
             id: "overview",
@@ -105,6 +78,7 @@ export default async function LearningInsightsPage({
           },
         ]}
       />
+      <TemplatePageHeader title={title} description={headerDescription} />
       <div className="flex flex-wrap gap-2">
         <Button variant="secondary" asChild>
           <Link href={withDemoQuery("/candidates?focus=risk", industry, role)}>

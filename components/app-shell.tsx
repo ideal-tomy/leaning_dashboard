@@ -6,6 +6,7 @@ import { useRef, useState } from "react";
 import {
   Bell,
   BookOpen,
+  CircleHelp,
   Headphones,
   Home,
   MessageSquare,
@@ -26,6 +27,7 @@ import { getIndustryProfile } from "@/lib/industry-profiles";
 import { useIndustry } from "@/components/industry-context";
 import { useDemoRole } from "@/components/demo-role-context";
 import { IndustrySecretModal } from "@/components/industry-secret-modal";
+import { GuideShellOverlay } from "@/components/guide/guide-shell-overlay";
 import { withDemoQuery } from "@/lib/demo-query";
 import { demoRoleLabelJa, demoRoles, type DemoRole } from "@/lib/demo-role";
 
@@ -238,6 +240,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 </option>
               ))}
             </select>
+            <Link
+              href={withDemoQuery("/guide", industry, role)}
+              className="inline-flex items-center gap-1 rounded-md border border-primary/30 bg-primary/[0.06] px-2.5 py-1.5 text-xs font-semibold text-primary hover:bg-primary/[0.1] md:text-sm"
+              aria-label="はじめてガイド"
+            >
+              <CircleHelp className="size-4" />
+              ガイド
+            </Link>
           </div>
 
           <nav className="hidden md:flex flex-1 items-center justify-center gap-1 overflow-x-auto min-w-0">
@@ -252,6 +262,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     <Link
                       key={href}
                       href={withDemoQuery(href, industry, role)}
+                      data-guide-target={href === "/candidates" ? "top-nav-candidates" : undefined}
                       className={cn(
                         "flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors",
                         active
@@ -294,6 +305,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 industry,
                 role
               )}
+              data-guide-target="messages-link"
               className="relative flex items-center gap-1 rounded-lg p-2 text-muted hover:bg-surface hover:text-foreground shrink-0"
               aria-label="メッセージ"
             >
@@ -362,6 +374,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </nav>
 
       {shell.showDemoFab ? <DemoFab /> : null}
+
+      <GuideShellOverlay />
 
       <IndustrySecretModal
         key={secretModalKey}

@@ -6,11 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageTagLinks } from "@/components/page-tag-links";
 import {
   TemplatePageHeader,
-  TemplateMobileFlowSection,
   TemplatePageStack,
 } from "@/components/templates/layout-primitives";
-import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
-import { NextActionCard } from "@/components/navigation/next-action-card";
 import { Button } from "@/components/ui/button";
 import { getIndustryDemoData } from "@/lib/demo-data-selector";
 import { getIndustryPageHints } from "@/lib/industry-page-hints";
@@ -107,67 +104,12 @@ export default async function ClientsPage({ searchParams }: PageProps) {
 
   return (
     <TemplatePageStack>
-      <TemplateMobileFlowSection>
-        <MobileFlowBar
-          backHref={withDemoQuery("/", industry, role)}
-          backLabel="ダッシュボード"
-          pageLabel={profile.labels.client}
-          nextHref={withDemoQuery("/matching", industry, role)}
-          nextLabel="次へ"
-        />
-      </TemplateMobileFlowSection>
-      <TemplatePageHeader
-        title={profile.labels.client}
-        description={`${clientHeaderDesc} ${clients.length}件のデモデータを表示しています。`}
-      />
-      <NextActionCard
-        className="md:hidden"
-        title="次のアクション"
-        reasonTag={
-          isConstruction
-            ? "配員確認"
-            : isEducation
-              ? "受講提案"
-              : isLogistics
-                ? "配車確認"
-                : isProfessional
-                  ? "優先度確認"
-                  : isSales
-                    ? "商談準備"
-                    : "提案準備"
-        }
-        reasonTone="ai"
-        description={
-          isConstruction
-            ? "現場を選んだら配員最適化で候補と理由を比較します。"
-            : isEducation
-              ? "講座を選んだら受講提案で候補と理由を比較します。"
-              : isLogistics
-                ? "案件を選んだら配置最適化で候補と理由（資格・時間帯）を比較します。"
-                : isProfessional
-                  ? "顧問先を選んだら、案件優先度で次に扱う案件と理由を比較します。"
-                  : isSales
-                    ? "案件を選んだら、提案優先度で顧客課題との一致理由を比較します。"
-                    : "候補先を見たら、マッチングで提案候補の比較に進みます。"
-        }
-        actionHref={withDemoQuery("/matching", industry, role)}
-        actionLabel={
-          isConstruction
-            ? "配員最適化へ"
-            : isEducation
-              ? "受講提案へ"
-              : isLogistics
-                ? "配置最適化へ"
-                : isProfessional
-                  ? "案件優先度へ"
-                  : isSales
-                    ? "提案優先度へ"
-                    : "マッチングへ"
-        }
-      />
       <PageTagLinks
         label="表示タグ"
         currentId={tag}
+        mobileScrollable
+        stickyOnMobile
+        mobileTopClassName="top-[7rem]"
         tags={[
           {
             id: "list",
@@ -214,6 +156,10 @@ export default async function ClientsPage({ searchParams }: PageProps) {
               ]
             : []),
         ]}
+      />
+      <TemplatePageHeader
+        title={profile.labels.client}
+        description={`${clientHeaderDesc} ${clients.length}件のデモデータを表示しています。`}
       />
       <div className="flex flex-wrap gap-2">
         <Button asChild>

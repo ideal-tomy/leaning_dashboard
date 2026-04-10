@@ -1,8 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { getDemoAlerts } from "@/lib/demo-workers";
-import { TemplateMobileFlowSection, TemplatePageStack } from "@/components/templates/layout-primitives";
-import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
+import { TemplatePageStack } from "@/components/templates/layout-primitives";
+import { MobileParentBackLink } from "@/components/navigation/mobile-parent-back-link";
 
 const DEMO_WORKER_ID = "w-kasun";
 
@@ -11,13 +11,7 @@ export default function WorkerAlertsPage() {
 
   return (
     <TemplatePageStack className="space-y-4">
-      <TemplateMobileFlowSection>
-        <MobileFlowBar
-          backHref="/worker/progress"
-          backLabel="進捗"
-          pageLabel="お知らせ・期限"
-        />
-      </TemplateMobileFlowSection>
+      <MobileParentBackLink href="/worker" label="マイホーム" />
       <div>
         <h1 className="text-xl font-semibold text-primary-alt">お知らせ・期限</h1>
         <p className="mt-1 text-xs text-muted">

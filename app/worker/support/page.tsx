@@ -1,20 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { TemplateMobileFlowSection, TemplatePageStack } from "@/components/templates/layout-primitives";
-import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
+import { TemplatePageStack } from "@/components/templates/layout-primitives";
+import { MobileParentBackLink } from "@/components/navigation/mobile-parent-back-link";
 
 export default function WorkerSupportPage() {
   return (
     <TemplatePageStack className="space-y-4">
-      <TemplateMobileFlowSection>
-        <MobileFlowBar
-          backHref="/worker/alerts"
-          backLabel="期限"
-          pageLabel="サポート"
-          nextHref="/worker"
-          nextLabel="次へ"
-        />
-      </TemplateMobileFlowSection>
+      <MobileParentBackLink href="/worker" label="マイホーム" />
       <div>
         <h1 className="text-xl font-semibold text-primary-alt">サポート</h1>
         <p className="mt-1 text-xs text-muted">

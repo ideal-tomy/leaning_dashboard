@@ -3,11 +3,9 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageTagLinks } from "@/components/page-tag-links";
 import {
-  TemplateMobileFlowSection,
   TemplatePageHeader,
   TemplatePageStack,
 } from "@/components/templates/layout-primitives";
-import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
 import { getIndustryProfile } from "@/lib/industry-profiles";
 import { parsePageTag } from "@/lib/page-tag";
 import {
@@ -44,13 +42,20 @@ export default async function AttendanceBillingPage({ searchParams }: PageProps)
 
   return (
     <TemplatePageStack>
-      <TemplateMobileFlowSection>
-        <MobileFlowBar
-          backHref={withDemoQuery("/", industry, role)}
-          backLabel="ダッシュボード"
-          pageLabel={isConstruction ? "勤怠" : "勤怠・請求（デモ）"}
-        />
-      </TemplateMobileFlowSection>
+      <PageTagLinks
+        label="表示タグ"
+        currentId={tag}
+        mobileScrollable
+        stickyOnMobile
+        mobileTopClassName="top-[7rem]"
+        tags={[
+          { id: "import", label: "CSV取込", href: tagHref("import") },
+          { id: "summary", label: "稼働集計", href: tagHref("summary") },
+          { id: "billing", label: "請求プレビュー", href: tagHref("billing") },
+          { id: "ops", label: "実務突合", href: tagHref("ops") },
+        ]}
+      />
+
       <TemplatePageHeader
         title={isConstruction ? "勤怠（デモ）" : "勤怠・請求（デモ）"}
         description={
@@ -58,17 +63,6 @@ export default async function AttendanceBillingPage({ searchParams }: PageProps)
             ? "勤怠 CSV の取込・集計・請求プレビューのイメージです。現場日報との突合は実務画面から（デモ）。"
             : "勤怠 CSV の取込イメージと、請求向けの集計プレビュー（ダミー）です。本番では外部システムと連携します。"
         }
-      />
-
-      <PageTagLinks
-        label="表示タグ"
-        currentId={tag}
-        tags={[
-          { id: "import", label: "CSV取込", href: tagHref("import") },
-          { id: "summary", label: "稼働集計", href: tagHref("summary") },
-          { id: "billing", label: "請求プレビュー", href: tagHref("billing") },
-          { id: "ops", label: "実務突合", href: tagHref("ops") },
-        ]}
       />
 
       {tag === "import" ? (

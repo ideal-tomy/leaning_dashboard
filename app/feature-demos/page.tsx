@@ -2,11 +2,9 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  TemplateMobileFlowSection,
   TemplatePageHeader,
   TemplatePageStack,
 } from "@/components/templates/layout-primitives";
-import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
 import {
   FEATURE_DEMOS,
   filterFeatureDemosForRole,
@@ -29,13 +27,6 @@ export default async function FeatureDemosHubPage({ searchParams }: PageProps) {
 
   return (
     <TemplatePageStack>
-      <TemplateMobileFlowSection>
-        <MobileFlowBar
-          backHref={withDemoQuery("/", industry, role)}
-          backLabel="ダッシュボード"
-          pageLabel="技術・DXデモ"
-        />
-      </TemplateMobileFlowSection>
       <TemplatePageHeader
         title="技術・DXデモ"
         description="OCR・PDF・AI チャット・翻訳・マッチングなど、プロダクトの技術的な見せ場を一覧から体験できます。運用の書類管理画面とは役割を分けています。"

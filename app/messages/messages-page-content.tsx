@@ -5,11 +5,8 @@ import { Languages } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  TemplateMobileFlowSection,
-  TemplatePageStack,
-} from "@/components/templates/layout-primitives";
-import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
+import { TemplatePageStack } from "@/components/templates/layout-primitives";
+import { MobileParentBackLink } from "@/components/navigation/mobile-parent-back-link";
 import { useIndustry } from "@/components/industry-context";
 import { useDemoRole } from "@/components/demo-role-context";
 import { withDemoQuery } from "@/lib/demo-query";
@@ -52,13 +49,7 @@ export function MessagesPageContent({
 
   return (
     <TemplatePageStack>
-      <TemplateMobileFlowSection>
-        <MobileFlowBar
-          backHref={back.href}
-          backLabel={back.label}
-          pageLabel="ワーカーメッセージ"
-        />
-      </TemplateMobileFlowSection>
+      <MobileParentBackLink href={back.href} label={back.label} />
       <div>
         <h1 className="text-2xl font-semibold text-primary-alt">
           ワーカーメッセージ

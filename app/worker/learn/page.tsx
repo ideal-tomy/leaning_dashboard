@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TemplateMobileFlowSection, TemplatePageStack } from "@/components/templates/layout-primitives";
-import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
+import { TemplatePageStack } from "@/components/templates/layout-primitives";
+import { MobileParentBackLink } from "@/components/navigation/mobile-parent-back-link";
 
 const modules = [
   { titleJa: "職場のあいさつ", titleSi: "කාර්ය ස්ථානයේ ආචාර", done: true },
@@ -13,15 +13,7 @@ const modules = [
 export default function WorkerLearnPage() {
   return (
     <TemplatePageStack className="space-y-4">
-      <TemplateMobileFlowSection>
-        <MobileFlowBar
-          backHref="/worker"
-          backLabel="マイホーム"
-          pageLabel="学習モジュール"
-          nextHref="/worker/progress"
-          nextLabel="次へ"
-        />
-      </TemplateMobileFlowSection>
+      <MobileParentBackLink href="/worker" label="マイホーム" />
       <div>
         <h1 className="text-xl font-semibold text-primary-alt">学習モジュール</h1>
         <p className="mt-1 text-xs text-muted">

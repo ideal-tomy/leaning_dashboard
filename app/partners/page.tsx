@@ -5,11 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageTagLinks } from "@/components/page-tag-links";
 import {
   TemplatePageHeader,
-  TemplateMobileFlowSection,
   TemplatePageStack,
 } from "@/components/templates/layout-primitives";
-import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
-import { NextActionCard } from "@/components/navigation/next-action-card";
 import {
   clients,
   constructionPartners,
@@ -84,36 +81,22 @@ export default async function PartnersPage({ searchParams }: PageProps) {
 
   return (
     <TemplatePageStack>
-      <TemplateMobileFlowSection>
-        <MobileFlowBar
-          backHref={withDemoQuery("/", industry, role)}
-          backLabel="ダッシュボード"
-          pageLabel="取引先"
-          nextHref={withDemoQuery("/clients", industry, role)}
-          nextLabel={profile.labels.client}
-        />
-      </TemplateMobileFlowSection>
-      <TemplatePageHeader
-        title="取引先（建設デモ）"
-        description={`${headerByTag} 全 ${constructionPartners.length} 社のデモデータです。`}
-      />
-      <NextActionCard
-        className="md:hidden"
-        title="次のアクション"
-        reasonTag="現場"
-        reasonTone="ai"
-        description="現場の参加条件とあわせて、欠員・配員を確認します。"
-        actionHref={withDemoQuery("/clients", industry, role)}
-        actionLabel={`${profile.labels.client}へ`}
-      />
       <PageTagLinks
         label="表示タグ"
         currentId={tag}
+        mobileScrollable
+        stickyOnMobile
+        mobileTopClassName="top-[7rem]"
         tags={[
           { id: "directory", label: "取引先一覧", href: tagHref("directory") },
           { id: "compliance", label: "登録・適格性", href: tagHref("compliance") },
           { id: "site_rules", label: "現場条件との照合", href: tagHref("site_rules") },
         ]}
+      />
+
+      <TemplatePageHeader
+        title="取引先（建設デモ）"
+        description={`${headerByTag} 全 ${constructionPartners.length} 社のデモデータです。`}
       />
 
       {tag === "directory" ? (

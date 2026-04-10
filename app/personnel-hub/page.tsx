@@ -6,11 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageTagLinks } from "@/components/page-tag-links";
 import {
   TemplatePageHeader,
-  TemplateMobileFlowSection,
   TemplatePageStack,
 } from "@/components/templates/layout-primitives";
-import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
-import { NextActionCard } from "@/components/navigation/next-action-card";
 import { getIndustryDemoData } from "@/lib/demo-data-selector";
 import {
   constructionEligibilityDemoRows,
@@ -59,37 +56,23 @@ export default async function PersonnelHubPage({ searchParams }: PageProps) {
 
   return (
     <TemplatePageStack>
-      <TemplateMobileFlowSection>
-        <MobileFlowBar
-          backHref={withDemoQuery("/", industry, role)}
-          backLabel="ダッシュボード"
-          pageLabel="人員・関係企業"
-          nextHref={withDemoQuery("/partners", industry, role)}
-          nextLabel="取引先"
-        />
-      </TemplateMobileFlowSection>
-      <TemplatePageHeader
-        title="人員・下請・関係企業（ハブ）"
-        description={`職人と協力会社を横断して確認する建設デモ専用の入口です。${headerByTag}`}
-      />
-      <NextActionCard
-        className="md:hidden"
-        title="次のアクション"
-        reasonTag="作業員"
-        reasonTone="warning"
-        description="個別の進捗・書類は作業員一覧から開きます。"
-        actionHref={withDemoQuery("/candidates", industry, role)}
-        actionLabel="作業員一覧へ"
-      />
       <PageTagLinks
         label="表示タグ"
         currentId={tag}
+        mobileScrollable
+        stickyOnMobile
+        mobileTopClassName="top-[7rem]"
         tags={[
           { id: "workers", label: "作業員一覧", href: tagHref("workers") },
           { id: "subs", label: "関係企業（下請）", href: tagHref("subs") },
           { id: "eligibility", label: "入場・参加適合", href: tagHref("eligibility") },
           { id: "documents", label: "安全書類・教育", href: tagHref("documents") },
         ]}
+      />
+
+      <TemplatePageHeader
+        title="人員・下請・関係企業（ハブ）"
+        description={`職人と協力会社を横断して確認する建設デモ専用の入口です。${headerByTag}`}
       />
 
       {tag === "workers" ? (

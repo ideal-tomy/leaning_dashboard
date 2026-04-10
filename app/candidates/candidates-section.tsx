@@ -12,10 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { TemplatePageHeader } from "@/components/templates/layout-primitives";
-import { TemplateMobileFlowSection } from "@/components/templates/layout-primitives";
 import { PageTagLinks } from "@/components/page-tag-links";
-import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
-import { NextActionCard } from "@/components/navigation/next-action-card";
 import { useMobile } from "@/hooks/use-mobile";
 import { getIndustryDemoData } from "@/lib/demo-data-selector";
 import { getIndustryPageHints } from "@/lib/industry-page-hints";
@@ -258,15 +255,15 @@ export function CandidatesSection() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [preview, setPreview] = useState<Candidate | null>(null);
   const [groupOpen, setGroupOpen] = useState<Record<CandidateGroupId, boolean>>({
-    pre_entry: true,
+    pre_entry: false,
     post_entry: false,
-    construction_docs: true,
+    construction_docs: false,
     construction_ops: false,
-    logistics_docs: true,
+    logistics_docs: false,
     logistics_ops: false,
-    medical_docs: true,
+    medical_docs: false,
     medical_ops: false,
-    professional_evidence: true,
+    professional_evidence: false,
     professional_matter: false,
   });
   const isMobile = useMobile();
@@ -447,63 +444,12 @@ export function CandidatesSection() {
 
   return (
     <div className="space-y-5">
-      <TemplateMobileFlowSection>
-        <MobileFlowBar
-          backHref={withDemoQuery("/", industry, role)}
-          backLabel="ダッシュボード"
-          pageLabel={profile.labels.candidate}
-          nextHref={withDemoQuery("/documents", industry, role)}
-          nextLabel="次へ"
-        />
-      </TemplateMobileFlowSection>
-      <TemplatePageHeader title={profile.labels.candidate} description={headerDescription} />
-      <NextActionCard
-        className="md:hidden"
-        title="次のアクション"
-        reasonTag={
-          isConstruction
-            ? "安全書類"
-            : isEducation
-              ? "提出確認"
-              : isLogistics
-                ? "入構書類"
-                : isMedical
-                  ? "記録書類"
-                  : isProfessional
-                    ? "申請書類"
-                    : "書類確認"
-        }
-        reasonTone="warning"
-        description={
-          isConstruction
-            ? "作業員確認後は安全書類へ進み、期限・不備を優先確認します。"
-            : isEducation
-              ? "受講者確認後は提出書類へ進み、期限・不備を優先確認します。"
-              : isLogistics
-                ? "作業員確認後は入構・配送書類へ進み、配車前の不備を潰します。"
-                : isMedical
-                  ? "スタッフ確認後は記録書類へ進み、同意・記録の不備を優先確認します。"
-                  : isProfessional
-                    ? "案件確認後は申請書類へ進み、証憑・差戻し・期限を優先確認します。"
-                    : "候補者確認後は書類管理へ進み、期限・不備を優先確認します。"
-        }
-        actionHref={withDemoQuery("/documents", industry, role)}
-        actionLabel={
-          isConstruction ||
-          isEducation ||
-          isLogistics ||
-          isMedical ||
-          isProfessional
-            ? `${profile.labels.documents}へ`
-            : "書類管理へ"
-        }
-      />
-
       <PageTagLinks
         label="表示タグ"
         currentId={focus}
         mobileScrollable
         stickyOnMobile
+        mobileTopClassName="top-[7rem]"
         tags={[
           {
             id: "overview",
@@ -553,7 +499,9 @@ export function CandidatesSection() {
         ]}
       />
 
-      <div className="sticky top-[7.25rem] z-20 -mx-1 rounded-lg bg-surface/95 px-1 py-2 backdrop-blur sm:static sm:mx-0 sm:bg-transparent sm:px-0 sm:py-0">
+      <TemplatePageHeader title={profile.labels.candidate} description={headerDescription} />
+
+      <div className="sticky top-[9.25rem] z-20 -mx-1 rounded-lg bg-surface/95 px-1 py-2 backdrop-blur sm:static sm:top-auto sm:mx-0 sm:bg-transparent sm:px-0 sm:py-0">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted" />

@@ -4,11 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageTagLinks } from "@/components/page-tag-links";
 import {
   TemplatePageHeader,
-  TemplateMobileFlowSection,
   TemplatePageStack,
 } from "@/components/templates/layout-primitives";
-import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
-import { NextActionCard } from "@/components/navigation/next-action-card";
 import { getIndustryProfile } from "@/lib/industry-profiles";
 import { parsePageTag } from "@/lib/page-tag";
 import {
@@ -67,15 +64,20 @@ export default async function FieldReportsPage({ searchParams }: PageProps) {
 
   return (
     <TemplatePageStack>
-      <TemplateMobileFlowSection>
-        <MobileFlowBar
-          backHref={withDemoQuery(isConstruction ? "/" : "/operations", industry, role)}
-          backLabel={isConstruction ? "ダッシュボード" : "実務へ戻る"}
-          pageLabel={isConstruction ? "報告管理" : "報告・写真ハブ"}
-          nextHref={withDemoQuery("/documents", industry, role)}
-          nextLabel="次へ"
-        />
-      </TemplateMobileFlowSection>
+      <PageTagLinks
+        label="表示タグ"
+        currentId={tag}
+        mobileScrollable
+        stickyOnMobile
+        mobileTopClassName="top-[7rem]"
+        tags={[
+          { id: "tasks", label: "提出タスク", href: tagHref("tasks") },
+          { id: "photos", label: "写真・証跡", href: tagHref("photos") },
+          { id: "rework", label: "差戻し・再提出", href: tagHref("rework") },
+          { id: "link_docs", label: "書類連携", href: tagHref("link_docs") },
+        ]}
+      />
+
       <TemplatePageHeader
         title={isConstruction ? "報告管理（デモ）" : "報告・写真ハブ（デモ）"}
         description={
@@ -83,26 +85,6 @@ export default async function FieldReportsPage({ searchParams }: PageProps) {
             ? `${profile.labels.client}単位の写真・KY・点検の提出状況を一覧する公式の確認場所（デモ）。`
             : `${profile.labels.client}や現場単位の提出タスクと証跡を一覧する想定です。送り忘れ・探索・取り違えを減らす「公式の確認場所」として使います。`
         }
-      />
-      <NextActionCard
-        className="md:hidden"
-        title="次のアクション"
-        reasonTag="書類連携"
-        reasonTone="success"
-        description="提出状況を確認後、書類管理で期限・保管を続けて確認できます。"
-        actionHref={withDemoQuery("/documents", industry, role)}
-        actionLabel="書類管理へ"
-      />
-
-      <PageTagLinks
-        label="表示タグ"
-        currentId={tag}
-        tags={[
-          { id: "tasks", label: "提出タスク", href: tagHref("tasks") },
-          { id: "photos", label: "写真・証跡", href: tagHref("photos") },
-          { id: "rework", label: "差戻し・再提出", href: tagHref("rework") },
-          { id: "link_docs", label: "書類連携", href: tagHref("link_docs") },
-        ]}
       />
 
       <div className="flex flex-wrap gap-2">

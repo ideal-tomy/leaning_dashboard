@@ -8,10 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TemplatePageHeader, TemplatePageStack } from "@/components/templates/layout-primitives";
-import { TemplateMobileFlowSection } from "@/components/templates/layout-primitives";
 import { PageTagLinks } from "@/components/page-tag-links";
-import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
-import { NextActionCard } from "@/components/navigation/next-action-card";
 import { useIndustry } from "@/components/industry-context";
 import { useDemoRole } from "@/components/demo-role-context";
 import { getIndustryDemoData } from "@/lib/demo-data-selector";
@@ -161,55 +158,12 @@ export default function DocumentsPage() {
 
   return (
     <TemplatePageStack>
-      <TemplateMobileFlowSection>
-        <MobileFlowBar
-          backHref={withDemoQuery("/", industry, role)}
-          backLabel="ダッシュボード"
-          pageLabel={`${profile.labels.documents}管理`}
-          nextHref={withDemoQuery("/documents/deficiencies", industry, role)}
-          nextLabel="次へ"
-        />
-      </TemplateMobileFlowSection>
-      <TemplatePageHeader
-        title={`${profile.labels.documents}管理`}
-        description={
-          isConstruction
-            ? `${docHints.pageIntentJa ? `${docHints.pageIntentJa} ` : ""}${
-                scope === "post-entry"
-                  ? "入場後の契約・保険・監理報告と、現場稼働中の提出物を確認します。"
-                  : scope === "deadlines"
-                    ? "特別教育・資格証の期限とアラートを優先順に対応します。"
-                    : "入場許可・本人確認・入場前の安全書類パックを確認し、差戻しを解消します。"
-              }`
-            : isLogistics
-              ? `${docHints.pageIntentJa ? `${docHints.pageIntentJa} ` : ""}${
-                  scope === "post-entry"
-                    ? "契約・配送関連・運行記録の提出状況を確認します。"
-                    : scope === "deadlines"
-                      ? "免許・資格・車検・教育記録の期限とアラートを優先順に対応します。"
-                      : "入構申請・誓約・本人確認を最優先し、配車前に止まる差戻しを解消します。"
-                }`
-              : scope === "post-entry"
-                ? "入国後・就労関連書類の状態を確認し、未完了を処理します。"
-                : scope === "deadlines"
-                  ? "期限・更新が必要な項目を確認し、優先順に対応します。"
-                  : "入国前手続きを確認し、差戻しや未提出を解消します。"
-        }
-      />
-
-      <NextActionCard
-        className="md:hidden"
-        title="次のアクション"
-        reasonTag="不備対応"
-        reasonTone="danger"
-        description="書類不備フォローに進むと、緊急度順で対応対象を把握できます。"
-        actionHref={withDemoQuery("/documents/deficiencies", industry, role)}
-        actionLabel="書類不備フォローへ"
-      />
-
       <PageTagLinks
         label="表示タグ"
         currentId={scope}
+        mobileScrollable
+        stickyOnMobile
+        mobileTopClassName="top-[7rem]"
         tags={[
           {
             id: "pre-entry",
@@ -239,6 +193,33 @@ export default function DocumentsPage() {
             href: scopeHref("deadlines"),
           },
         ]}
+      />
+
+      <TemplatePageHeader
+        title={`${profile.labels.documents}管理`}
+        description={
+          isConstruction
+            ? `${docHints.pageIntentJa ? `${docHints.pageIntentJa} ` : ""}${
+                scope === "post-entry"
+                  ? "入場後の契約・保険・監理報告と、現場稼働中の提出物を確認します。"
+                  : scope === "deadlines"
+                    ? "特別教育・資格証の期限とアラートを優先順に対応します。"
+                    : "入場許可・本人確認・入場前の安全書類パックを確認し、差戻しを解消します。"
+              }`
+            : isLogistics
+              ? `${docHints.pageIntentJa ? `${docHints.pageIntentJa} ` : ""}${
+                  scope === "post-entry"
+                    ? "契約・配送関連・運行記録の提出状況を確認します。"
+                    : scope === "deadlines"
+                      ? "免許・資格・車検・教育記録の期限とアラートを優先順に対応します。"
+                      : "入構申請・誓約・本人確認を最優先し、配車前に止まる差戻しを解消します。"
+                }`
+              : scope === "post-entry"
+                ? "入国後・就労関連書類の状態を確認し、未完了を処理します。"
+                : scope === "deadlines"
+                  ? "期限・更新が必要な項目を確認し、優先順に対応します。"
+                  : "入国前手続きを確認し、差戻しや未提出を解消します。"
+        }
       />
 
       <div className="flex flex-wrap items-center gap-2">

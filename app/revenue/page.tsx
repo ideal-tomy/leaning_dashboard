@@ -19,12 +19,10 @@ import {
 } from "@/components/revenue-charts";
 import {
   TemplateKpiGrid,
-  TemplateMobileFlowSection,
   TemplatePageHeader,
   TemplatePageStack,
   TemplateTwoColumnGrid,
 } from "@/components/templates/layout-primitives";
-import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
 import { getCacDemo, getBreakevenSeries, getReferralRecoveryDemo, getRefundRiskDemo, getRevenueSummaryKpis, getRevenueTrendForChart } from "@/lib/revenue-demo";
 import { getIndustryPageHints } from "@/lib/industry-page-hints";
 import { getIndustryProfile } from "@/lib/industry-profiles";
@@ -73,15 +71,6 @@ export default async function RevenuePage({ searchParams }: PageProps) {
 
   return (
     <TemplatePageStack>
-      <TemplateMobileFlowSection>
-        <MobileFlowBar
-          backHref={withDemoQuery("/operations", industry, role)}
-          backLabel="実務へ戻る"
-          pageLabel={profile.labels.revenue}
-          nextHref={withDemoQuery("/client-requests", industry, role)}
-          nextLabel="次へ"
-        />
-      </TemplateMobileFlowSection>
       <TemplatePageHeader
         title={profile.labels.revenue}
         description={revenueHeaderDesc}

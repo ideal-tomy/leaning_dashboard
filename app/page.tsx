@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, CircleHelp, Sparkles } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { DashboardKillerCards } from "@/components/dashboard-killer-cards";
@@ -79,6 +79,12 @@ export default async function DashboardPage({ searchParams }: PageProps) {
             >
               技術・DXデモ
             </Link>
+            <Link
+              href={withDemoQuery("/guide", industry, role)}
+              className="rounded-full border border-primary/40 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary whitespace-nowrap"
+            >
+              はじめてガイド
+            </Link>
           </div>
         </div>
 
@@ -139,6 +145,24 @@ export default async function DashboardPage({ searchParams }: PageProps) {
           <DashboardTopCardGrid cards={topCards} />
         </div>
 
+        <Link
+          href={withDemoQuery("/guide", industry, role)}
+          className="group block rounded-xl border border-primary/35 bg-primary/[0.05] p-5 transition-all hover:border-primary/55 hover:bg-primary/[0.08]"
+        >
+          <div className="flex items-center justify-between gap-4">
+            <div className="min-w-0">
+              <p className="text-base font-bold text-foreground">はじめてガイド</p>
+              <p className="mt-1 text-sm leading-relaxed text-muted">
+                90秒ほどで基本操作を案内します。画面の切り替えは自動でも手動でも進められます。
+              </p>
+            </div>
+            <span className="inline-flex shrink-0 items-center gap-1 rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground">
+              <CircleHelp className="size-4" aria-hidden />
+              開く
+            </span>
+          </div>
+        </Link>
+
         <section
           className="relative z-10 mt-10 border-t border-border pt-8"
           aria-labelledby="tech-dx-demo-heading"
@@ -187,18 +211,6 @@ export default async function DashboardPage({ searchParams }: PageProps) {
             </CardContent>
           </Card>
           <DashboardExtensionRegion industry={industry} role={role} />
-        </div>
-      </div>
-      
-      <div className="md:hidden">
-        <Separator />
-        <div className="pt-4">
-          <Link
-            href={withDemoQuery("/more", industry, role)}
-            className="inline-flex text-xs font-medium text-primary hover:underline"
-          >
-            その他の機能を見る
-          </Link>
         </div>
       </div>
     </div>

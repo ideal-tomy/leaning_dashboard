@@ -1,10 +1,8 @@
 import {
   TemplatePageHeader,
-  TemplateMobileFlowSection,
   TemplatePageStack,
 } from "@/components/templates/layout-primitives";
-import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
-import { NextActionCard } from "@/components/navigation/next-action-card";
+import { MobileParentBackLink } from "@/components/navigation/mobile-parent-back-link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getIndustryPageHints } from "@/lib/industry-page-hints";
 import { getIndustryProfile } from "@/lib/industry-profiles";
@@ -50,42 +48,13 @@ export function MatchingExperience({
 
   return (
     <TemplatePageStack>
-      <TemplateMobileFlowSection>
-        <MobileFlowBar
-          backHref={backHref}
-          backLabel={backLabel}
-          pageLabel={profile.labels.matching}
-          {...(!featureDemo
-            ? {
-                nextHref: withDemoQuery("/operations", industry, role),
-                nextLabel: "次へ",
-              }
-            : {})}
-        />
-      </TemplateMobileFlowSection>
+      {featureDemo ? (
+        <MobileParentBackLink href={backHref} label={backLabel} />
+      ) : null}
       <TemplatePageHeader
         title={profile.labels.matching}
         description={matchDesc}
       />
-      {!featureDemo ? (
-        <NextActionCard
-          className="md:hidden"
-          title="次のアクション"
-          reasonTag={industry === "education" ? "運営連携" : "実務連携"}
-          reasonTone="success"
-          description={
-            industry === "education"
-              ? "受講提案を確認したら、講座運営で開講準備・提出確認へ繋げます。"
-              : "提案候補を確認したら、運用画面で配属・定着の進捗へ繋げます。"
-          }
-          actionHref={withDemoQuery("/operations", industry, role)}
-          actionLabel={
-            industry === "education"
-              ? `${profile.labels.operations}へ`
-              : "実務画面へ"
-          }
-        />
-      ) : null}
       {industry === "staffing" && role === "client" ? (
         <>
           <Card className="border-primary/20 bg-primary/[0.04] shadow-sm">

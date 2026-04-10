@@ -14,7 +14,7 @@
 - [`lib/industry-profiles/index.ts`](../lib/industry-profiles/index.ts) の `dashboardTitle`、`labels.*`、`kpiLabels`、`statusLabels` を確認する
 - [`lib/industry-page-hints.ts`](../lib/industry-page-hints.ts) の `IndustryPageHints` で差し替え対象ページを確認する
 - [`lib/app-template-config.ts`](../lib/app-template-config.ts) の `topNav`、`bottomNav`、`extensionSlots` を確認する
-- [`components/navigation/mobile-flow-bar.tsx`](../components/navigation/mobile-flow-bar.tsx) と [`components/navigation/next-action-card.tsx`](../components/navigation/next-action-card.tsx) を見て、次アクション導線の粒度を把握する
+- [`components/navigation/mobile-parent-back-link.tsx`](../components/navigation/mobile-parent-back-link.tsx) と [`components/page-tag-links.tsx`](../components/page-tag-links.tsx)、[`components/app-shell.tsx`](../components/app-shell.tsx) を見て、モバイルの一覧／詳細の導線を把握する
 - [`lib/feature-demos-catalog.ts`](../lib/feature-demos-catalog.ts) を見て、その業種で使う技術デモの意味づけを決める
 - 先に [`industries/staffing-reference.md`](./industries/staffing-reference.md) を読み、何を守り、何を変えるかを明確にする
 

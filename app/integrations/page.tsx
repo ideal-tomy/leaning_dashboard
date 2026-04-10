@@ -2,11 +2,9 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  TemplateMobileFlowSection,
   TemplatePageHeader,
   TemplatePageStack,
 } from "@/components/templates/layout-primitives";
-import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
 import {
   getIndustryFromSearchParams,
   getRoleFromSearchParams,
@@ -30,13 +28,6 @@ export default async function IntegrationsPage({ searchParams }: PageProps) {
 
   return (
     <TemplatePageStack>
-      <TemplateMobileFlowSection>
-        <MobileFlowBar
-          backHref={withDemoQuery("/", industry, role)}
-          backLabel="ダッシュボード"
-          pageLabel="連携・アラート（デモ）"
-        />
-      </TemplateMobileFlowSection>
       <TemplatePageHeader
         title="連携・通知ダッシュ（デモ）"
         description="外部システム・承認キュー・任意 KPI を載せる想定の画面です。数値はダミーです。"

@@ -1,8 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { demoWorkers } from "@/lib/demo-workers";
-import { TemplateMobileFlowSection, TemplatePageStack } from "@/components/templates/layout-primitives";
-import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
+import { TemplatePageStack } from "@/components/templates/layout-primitives";
 
 const DEMO_WORKER_ID = "w-kasun";
 
@@ -11,13 +10,6 @@ export default function WorkerHomePage() {
 
   return (
     <TemplatePageStack className="space-y-4">
-      <TemplateMobileFlowSection>
-        <MobileFlowBar
-          backHref="/"
-          backLabel="ホーム"
-          pageLabel="マイホーム"
-        />
-      </TemplateMobileFlowSection>
       <div>
         <h1 className="text-xl font-semibold text-primary-alt">マイホーム</h1>
         <p className="mt-1 text-xs text-muted">

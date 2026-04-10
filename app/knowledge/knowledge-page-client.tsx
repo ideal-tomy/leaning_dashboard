@@ -5,7 +5,6 @@ import { MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  TemplateMobileFlowSection,
   TemplatePageHeader,
   TemplatePageStack,
 } from "@/components/templates/layout-primitives";
@@ -13,8 +12,7 @@ import { getIndustryPageHints } from "@/lib/industry-page-hints";
 import type { EnabledIndustryKey } from "@/lib/industry-profiles";
 import { withDemoQuery } from "@/lib/demo-query";
 import { useDemoRole } from "@/components/demo-role-context";
-import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
-import { NextActionCard } from "@/components/navigation/next-action-card";
+import { MobileParentBackLink } from "@/components/navigation/mobile-parent-back-link";
 import { FeatureDemoExplainSection } from "@/components/feature-demos/feature-demo-explain-section";
 import { FeatureDemoSiblingGrid } from "@/components/feature-demos/feature-demo-sibling-grid";
 import { KnowledgeMiniChat } from "@/components/knowledge/knowledge-mini-chat";
@@ -29,7 +27,7 @@ type Props = {
   industry: EnabledIndustryKey;
   /** 未指定時はメッセージへ戻る（従来どおり） */
   flowBack?: FlowBack;
-  /** 技術デモ下層: 次へ・NextActionCard を出さない */
+  /** 技術デモ下層（親の戻り先がデモ一覧になる想定） */
   featureDemo?: boolean;
 };
 
@@ -53,31 +51,8 @@ export function KnowledgePageClient({
 
   return (
     <TemplatePageStack>
-      <TemplateMobileFlowSection>
-        <MobileFlowBar
-          backHref={back.href}
-          backLabel={back.label}
-          pageLabel="ナレッジAI"
-          {...(!featureDemo
-            ? {
-                nextHref: withDemoQuery("/matching", industry, role),
-                nextLabel: "次へ",
-              }
-            : {})}
-        />
-      </TemplateMobileFlowSection>
+      <MobileParentBackLink href={back.href} label={back.label} />
       <TemplatePageHeader title="ナレッジ AI" description={hints.pageSubtitle} />
-      {!featureDemo ? (
-        <NextActionCard
-          className="md:hidden"
-          title="次のアクション"
-          reasonTag="提案理由"
-          reasonTone="ai"
-          description="回答確認後はマッチング理由の確認に進み、説明を一貫させます。"
-          actionHref={withDemoQuery("/matching", industry, role)}
-          actionLabel="マッチングへ"
-        />
-      ) : null}
 
       <div className="flex flex-wrap gap-2">
         <Button variant="secondary" size="sm" asChild>

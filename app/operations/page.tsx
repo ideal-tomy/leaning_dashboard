@@ -4,10 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   TemplatePageHeader,
-  TemplateMobileFlowSection,
   TemplatePageStack,
 } from "@/components/templates/layout-primitives";
-import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
 import { PageTagLinks } from "@/components/page-tag-links";
 import { getIndustryPageHints } from "@/lib/industry-page-hints";
 import { getIndustryProfile } from "@/lib/industry-profiles";
@@ -63,22 +61,12 @@ export default async function OperationsPage({ searchParams }: PageProps) {
 
   return (
     <TemplatePageStack>
-      <TemplateMobileFlowSection>
-        <MobileFlowBar
-          backHref={withDemoQuery("/", industry, role)}
-          backLabel="ダッシュボード"
-          pageLabel={profile.labels.operations}
-          nextHref={withDemoQuery("/client-requests", industry, role)}
-          nextLabel="次へ"
-        />
-      </TemplateMobileFlowSection>
-      <TemplatePageHeader
-        title={profile.labels.operations}
-        description={opsDesc}
-      />
       <PageTagLinks
         label="表示タグ"
         currentId={tag}
+        mobileScrollable
+        stickyOnMobile
+        mobileTopClassName="top-[7rem]"
         tags={[
           {
             id: "deploy",
@@ -97,6 +85,12 @@ export default async function OperationsPage({ searchParams }: PageProps) {
           },
         ]}
       />
+
+      <TemplatePageHeader
+        title={profile.labels.operations}
+        description={opsDesc}
+      />
+
       <div className="flex flex-wrap gap-2">
         <Link href={withDemoQuery("/candidates?focus=risk", industry, role)} className="inline-flex">
           <Badge variant="danger" className="px-3 py-1">要対応人材へ</Badge>

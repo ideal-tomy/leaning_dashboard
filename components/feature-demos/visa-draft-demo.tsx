@@ -11,11 +11,9 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   TemplatePageHeader,
-  TemplateMobileFlowSection,
   TemplatePageStack,
 } from "@/components/templates/layout-primitives";
-import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
-import { NextActionCard } from "@/components/navigation/next-action-card";
+import { MobileParentBackLink } from "@/components/navigation/mobile-parent-back-link";
 import { useIndustry } from "@/components/industry-context";
 import { useDemoRole } from "@/components/demo-role-context";
 import { getIndustryProfile } from "@/lib/industry-profiles";
@@ -100,44 +98,20 @@ export function VisaDraftDemo({ variant }: { variant: VisaDraftDemoVariant }) {
 
   return (
     <TemplatePageStack>
-      <TemplateMobileFlowSection>
-        <MobileFlowBar
-          backHref={backHref}
-          backLabel={backLabel}
-          pageLabel="申請書類下書き"
-          {...(!isFeature
-            ? {
-                nextHref: withDemoQuery("/documents/deficiencies", industry, role),
-                nextLabel: "次へ",
-              }
-            : {})}
-        />
-      </TemplateMobileFlowSection>
+      <MobileParentBackLink href={backHref} label={backLabel} />
 
       {!isFeature ? (
-        <>
-          <Button
-            variant="ghost"
-            size="sm"
-            asChild
-            className="-ml-2 hidden gap-1 self-start md:inline-flex"
-          >
-            <Link href={withDemoQuery("/documents", industry, role)}>
-              <ArrowLeft className="size-4" />
-              {profile.labels.documents}管理に戻る
-            </Link>
-          </Button>
-
-          <NextActionCard
-            className="md:hidden"
-            title="次のアクション"
-            reasonTag="不備確認"
-            reasonTone="warning"
-            description="下書き後は不備フォローを確認して、差戻しが必要な対象を把握します。"
-            actionHref={withDemoQuery("/documents/deficiencies", industry, role)}
-            actionLabel="書類不備フォローへ"
-          />
-        </>
+        <Button
+          variant="ghost"
+          size="sm"
+          asChild
+          className="-ml-2 hidden gap-1 self-start md:inline-flex"
+        >
+          <Link href={withDemoQuery("/documents", industry, role)}>
+            <ArrowLeft className="size-4" />
+            {profile.labels.documents}管理に戻る
+          </Link>
+        </Button>
       ) : null}
 
       <div className="flex flex-wrap items-start gap-3">

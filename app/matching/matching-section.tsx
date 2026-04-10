@@ -29,7 +29,6 @@ function ClientMatchingCard({
   top,
   emptyState,
   collapsible,
-  defaultOpen,
 }: {
   industry: EnabledIndustryKey;
   client: ClientCompany;
@@ -41,7 +40,6 @@ function ClientMatchingCard({
   }[];
   emptyState: string;
   collapsible: boolean;
-  defaultOpen: boolean;
 }) {
   const { role } = useDemoRole();
   const { id: clientId, tradeNameJa } = client;
@@ -152,7 +150,7 @@ function ClientMatchingCard({
 
   return (
     <Card className="overflow-hidden">
-      <Collapsible defaultOpen={defaultOpen} className="group">
+      <Collapsible defaultOpen={false} className="group">
         <CollapsibleTrigger
           className={cn(
             "flex w-full items-center justify-between gap-2 border-b border-border/80 bg-card px-6 py-4 text-left",
@@ -191,7 +189,7 @@ export function MatchingSection({ industry }: Props) {
 
   return (
     <div className="space-y-8">
-      {data.clients.map((cl, i) => {
+      {data.clients.map((cl) => {
         const top = data.getMatchesForClient(cl.id).slice(0, 3);
         return (
           <ClientMatchingCard
@@ -201,7 +199,6 @@ export function MatchingSection({ industry }: Props) {
             top={top}
             emptyState={emptyState}
             collapsible={isMobile}
-            defaultOpen={i === 0}
           />
         );
       })}

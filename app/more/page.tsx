@@ -11,8 +11,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TemplateMobileFlowSection, TemplatePageStack } from "@/components/templates/layout-primitives";
-import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
+import { TemplatePageStack } from "@/components/templates/layout-primitives";
 import { useIndustry } from "@/components/industry-context";
 import { useDemoRole } from "@/components/demo-role-context";
 import { withDemoQuery } from "@/lib/demo-query";
@@ -42,13 +41,6 @@ export default function MorePage() {
 
   return (
     <TemplatePageStack>
-      <TemplateMobileFlowSection>
-        <MobileFlowBar
-          backHref={withDemoQuery("/", industry, role)}
-          backLabel="ダッシュボード"
-          pageLabel="その他"
-        />
-      </TemplateMobileFlowSection>
       <div>
         <h1 className="text-2xl font-semibold text-primary-alt">その他</h1>
         <p className="mt-1 text-sm text-muted">モバイル用ショートカット</p>

@@ -6,11 +6,10 @@ import { FeatureDemoExplainSection } from "@/components/feature-demos/feature-de
 import { FeatureDemoSiblingGrid } from "@/components/feature-demos/feature-demo-sibling-grid";
 import { PassportOcrDemo } from "@/components/feature-demos/passport-ocr-demo";
 import {
-  TemplateMobileFlowSection,
   TemplatePageHeader,
   TemplatePageStack,
 } from "@/components/templates/layout-primitives";
-import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
+import { MobileParentBackLink } from "@/components/navigation/mobile-parent-back-link";
 import { getIndustryPageHints } from "@/lib/industry-page-hints";
 import {
   getIndustryFromSearchParams,
@@ -35,13 +34,10 @@ export default async function PassportOcrFeatureDemoPage({
 
   return (
     <TemplatePageStack>
-      <TemplateMobileFlowSection>
-        <MobileFlowBar
-          backHref={withDemoQuery("/feature-demos", industry, role)}
-          backLabel="技術デモ一覧"
-          pageLabel="パスポート OCR"
-        />
-      </TemplateMobileFlowSection>
+      <MobileParentBackLink
+        href={withDemoQuery("/feature-demos", industry, role)}
+        label="技術デモ一覧"
+      />
       <div className="space-y-2">
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant="ai" className="shrink-0">

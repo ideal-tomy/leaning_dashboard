@@ -7,11 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import {
   TemplatePageHeader,
-  TemplateMobileFlowSection,
   TemplatePageStack,
 } from "@/components/templates/layout-primitives";
-import { MobileFlowBar } from "@/components/navigation/mobile-flow-bar";
-import { NextActionCard } from "@/components/navigation/next-action-card";
+import { MobileParentBackLink } from "@/components/navigation/mobile-parent-back-link";
 import { DEMO_FACTORY_CLIENT_ID } from "@/lib/demo-factory-client";
 import { getFactoryPlacementsForClient } from "@/lib/demo-factory-placements";
 import { getIndustryDemoData } from "@/lib/demo-data-selector";
@@ -61,19 +59,13 @@ export default async function ClientDetailPage({ params, searchParams }: Props) 
     industry,
     role
   );
-  const nextHref = withDemoQuery("/matching", industry, role);
+  const backLabelMobile = isFactoryClientDetail
+    ? "ダッシュボード"
+    : `${profile.labels.client}一覧`;
 
   return (
     <TemplatePageStack>
-      <TemplateMobileFlowSection>
-        <MobileFlowBar
-          backHref={backHref}
-          backLabel={isFactoryClientDetail ? "ダッシュボード" : `${profile.labels.client}一覧`}
-          pageLabel={isSales ? `${profile.labels.client}詳細` : "派遣先詳細"}
-          nextHref={nextHref}
-          nextLabel="次へ"
-        />
-      </TemplateMobileFlowSection>
+      <MobileParentBackLink href={backHref} label={backLabelMobile} />
 
       <Button
         variant="ghost"
@@ -83,35 +75,9 @@ export default async function ClientDetailPage({ params, searchParams }: Props) 
       >
         <Link href={backHref}>
           <ArrowLeft className="size-4" />
-          {isFactoryClientDetail ? "ダッシュボード" : `${profile.labels.client}一覧`}
+          {backLabelMobile}
         </Link>
       </Button>
-
-      <NextActionCard
-        className="md:hidden"
-        title="次のアクション"
-        reasonTag={
-          isSales
-            ? client.operations.openSlots > 0
-              ? "並行商談"
-              : "提案フォロー"
-            : client.operations.openSlots > 0
-              ? "欠員対応"
-              : "提案候補"
-        }
-        reasonTone={client.operations.openSlots > 0 ? "warning" : "ai"}
-        description={
-          isSales
-            ? client.operations.openSlots > 0
-              ? "複数ラインの商談があります。提案優先度で次の一手を整理します。"
-              : "マッチングで見込み顧客との一致理由を確認します。"
-            : client.operations.openSlots > 0
-              ? "未充足枠を埋めるため、優先して候補者検索へ進みます。"
-              : "追加で提案候補を確認し、次の打診先を決めます。"
-        }
-        actionHref={nextHref}
-        actionLabel={isSales ? "提案優先度へ" : "マッチングへ"}
-      />
 
       <TemplatePageHeader
         title={client.legalNameJa}
