@@ -233,11 +233,11 @@ export default async function DashboardPage({ searchParams }: PageProps) {
           />
         </div>
 
-        <StoryBeatMark beatId="closing-future__cta" className="block rounded-xl">
+        <StoryBeatMark beatId="closing-future__cta" className="relative z-10 block rounded-xl">
           <Link
             href={withDemoQuery("/guide", industry, role)}
             className={cn(
-              "group block rounded-xl border-2 border-primary/35 bg-primary/[0.05] p-5 shadow-sm ring-1 ring-primary/15 transition-all hover:border-primary/55 hover:bg-primary/[0.08] hover:shadow-md hover:ring-2 hover:ring-primary/25",
+              "group block rounded-xl border-2 border-primary/35 bg-card p-5 shadow-sm ring-1 ring-primary/15 transition-all hover:border-primary/55 hover:bg-surface hover:shadow-md hover:ring-2 hover:ring-primary/25",
               storyDemo &&
                 storyDashboardFocus === "closing" &&
                 "story-demo-context-ring story-demo-tap-target ring-2 ring-primary/40 ring-offset-2 ring-offset-background"
@@ -295,19 +295,32 @@ export default async function DashboardPage({ searchParams }: PageProps) {
           </Link>
         </section>
 
-        <div className="space-y-4">
-          <Card className="border-dashed border-primary/30 bg-primary/[0.02]">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base font-semibold">
+        <section
+          className="space-y-5 pt-2 md:pt-4"
+          aria-labelledby="optional-extensions-heading"
+        >
+          <div className="flex gap-4 rounded-2xl border-2 border-dashed border-primary/40 bg-gradient-to-br from-primary/[0.08] via-surface to-background p-5 shadow-sm sm:gap-5 sm:p-6 md:p-8">
+            <div
+              className="w-1 shrink-0 rounded-full bg-primary/45 sm:w-1.5"
+              aria-hidden
+            />
+            <div className="min-w-0 flex-1 space-y-2 sm:space-y-3">
+              <p className="text-sm font-semibold leading-snug text-primary md:text-base">
+                ここから下は、メイン導線に加える追加機能です
+              </p>
+              <h2
+                id="optional-extensions-heading"
+                className="text-2xl font-bold leading-snug tracking-tight text-foreground md:text-3xl"
+              >
                 オプション機能（必要時に追加）
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0 text-sm text-muted">
-              トップは主要導線のみ表示しています。下記の拡張枠から、運用や説明に合わせて機能を追加できます。
-            </CardContent>
-          </Card>
+              </h2>
+              <p className="max-w-3xl text-base leading-relaxed text-muted md:text-lg">
+                トップは主要導線のみ表示しています。下記の拡張枠から、運用や説明に合わせて機能を追加できます。
+              </p>
+            </div>
+          </div>
           <DashboardExtensionRegion industry={industry} role={role} />
-        </div>
+        </section>
       </div>
     </div>
   );

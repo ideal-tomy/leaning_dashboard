@@ -39,7 +39,7 @@ export function DashboardTopCardGrid({
           key={card.id}
           href={card.href}
           className={cn(
-            "group block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2",
+            "group block overflow-hidden rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2",
             storyDemo && "story-demo-tap-target"
           )}
         >
