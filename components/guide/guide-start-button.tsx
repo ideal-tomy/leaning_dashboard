@@ -20,7 +20,7 @@ export function GuideStartButton({
       size="lg"
       className="h-12 w-full text-base sm:w-auto sm:min-w-[12rem]"
       onClick={() => {
-        router.push(withDemoQuery("/story", industry, role));
+        router.push(withDemoQuery("/sales-demo", industry, role));
       }}
     >
       デモを再生

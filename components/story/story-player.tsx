@@ -8,6 +8,10 @@ import { StoryStage } from "@/components/story/story-stage";
 import { withDemoQuery } from "@/lib/demo-query";
 import type { DemoRole } from "@/lib/demo-role";
 import type { EnabledIndustryKey } from "@/lib/industry-profiles";
+import {
+  SALES_DEMO_BEAT_MESSAGE_TYPE,
+  type SalesDemoBeatMessage,
+} from "@/lib/sales-demo-beat-protocol";
 import type { StorySlide } from "@/lib/story-slides.staffing";
 
 type StoryPlayerProps = {
@@ -17,6 +21,8 @@ type StoryPlayerProps = {
 };
 
 const TRANSITION_MS = 420;
+/** iframe 内の React が message リスナーを張るまでの余裕（最初のビートを落とさない） */
+const IFRAME_BEAT_START_DELAY_MS = 150;
 
 export function StoryPlayer({ industry, role, slides }: StoryPlayerProps) {
   const router = useRouter();
@@ -29,6 +35,12 @@ export function StoryPlayer({ industry, role, slides }: StoryPlayerProps) {
   const [previousIndex, setPreviousIndex] = useState<number | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const transitionTimeoutRef = useRef<number | null>(null);
+  const previewIframeRef = useRef<HTMLIFrameElement | null>(null);
+  const beatTimeoutsRef = useRef<number[]>([]);
+  const beatSeqRef = useRef(0);
+  /** `slideId:generation` — スライド変更で generation が進み、対応する iframe onLoad 後だけビートを張る */
+  const [beatScheduleKey, setBeatScheduleKey] = useState("");
+  const loadGenerationRef = useRef(0);
 
   const currentSlide = slides[index] ?? slides[0];
   const previousSlide =
@@ -48,6 +60,71 @@ export function StoryPlayer({ industry, role, slides }: StoryPlayerProps) {
       }
     };
   }, []);
+
+  const clearBeatTimeouts = useCallback(() => {
+    beatTimeoutsRef.current.forEach((id) => window.clearTimeout(id));
+    beatTimeoutsRef.current = [];
+  }, []);
+
+  const postBeatToPreview = useCallback(
+    (slideId: string, beatId: string) => {
+      const win = previewIframeRef.current?.contentWindow;
+      if (!win) return;
+      const payload: SalesDemoBeatMessage = {
+        type: SALES_DEMO_BEAT_MESSAGE_TYPE,
+        slideId,
+        beatId,
+        seq: ++beatSeqRef.current,
+      };
+      win.postMessage(payload, window.location.origin);
+    },
+    []
+  );
+
+  useEffect(() => {
+    clearBeatTimeouts();
+    postBeatToPreview(currentSlide?.id ?? "", "");
+    /** beatScheduleKey は空にしない（onLoad が先に走った場合に上書き消しするため）。次の onLoad で更新される */
+  }, [clearBeatTimeouts, currentSlide?.id, postBeatToPreview]);
+
+  useEffect(() => {
+    clearBeatTimeouts();
+    if (isPaused || !currentSlide?.demoBeats?.length) {
+      postBeatToPreview(currentSlide?.id ?? "", "");
+      return;
+    }
+    const prefix = `${currentSlide.id}:`;
+    if (!beatScheduleKey.startsWith(prefix)) {
+      return;
+    }
+
+    let t = IFRAME_BEAT_START_DELAY_MS;
+    for (const beat of currentSlide.demoBeats) {
+      const delay = t;
+      const { id: beatId } = beat;
+      const tid = window.setTimeout(() => {
+        postBeatToPreview(currentSlide.id, beatId);
+      }, delay);
+      beatTimeoutsRef.current.push(tid);
+      t += beat.durationMs;
+    }
+
+    return () => {
+      clearBeatTimeouts();
+    };
+  }, [
+    beatScheduleKey,
+    clearBeatTimeouts,
+    currentSlide?.demoBeats,
+    currentSlide?.id,
+    isPaused,
+    postBeatToPreview,
+  ]);
+
+  const handlePreviewIframeLoad = useCallback(() => {
+    loadGenerationRef.current += 1;
+    setBeatScheduleKey(`${currentSlide.id}:${loadGenerationRef.current}`);
+  }, [currentSlide.id]);
 
   const remainingMs = useMemo(() => {
     if (!currentSlide) return 0;
@@ -122,7 +199,7 @@ export function StoryPlayer({ industry, role, slides }: StoryPlayerProps) {
     >
       <div className="fixed inset-0 z-[60] overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(71,85,105,0.34),transparent_30%),radial-gradient(circle_at_80%_100%,rgba(14,165,233,0.18),transparent_30%)]" />
-        <div className="absolute inset-x-0 top-16 bottom-28 px-3 sm:top-20 sm:bottom-32 sm:px-5 lg:px-8">
+        <div className="absolute inset-x-0 top-[2.85rem] px-2 pb-[min(34vh,310px)] pt-0.5 sm:px-3 md:top-16 md:bottom-28 md:pb-0 md:px-5 lg:bottom-32 lg:px-8">
           <div className="mx-auto flex h-full w-full max-w-6xl items-center justify-center">
             <StoryStage
               industry={industry}
@@ -130,6 +207,8 @@ export function StoryPlayer({ industry, role, slides }: StoryPlayerProps) {
               currentSlide={currentSlide}
               previousSlide={previousSlide}
               isTransitioning={isTransitioning}
+              previewIframeRef={previewIframeRef}
+              onPreviewIframeLoad={handlePreviewIframeLoad}
             />
           </div>
         </div>

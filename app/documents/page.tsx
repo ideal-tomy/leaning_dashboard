@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,15 +21,23 @@ import { aggregateUpcomingDeadlines } from "@/lib/deadline-aggregator";
 import type { DeadlineRow } from "@/lib/deadline-aggregator";
 import { withDemoQuery } from "@/lib/demo-query";
 import { parsePageTag } from "@/lib/page-tag";
+import { StoryBeatMark, useSalesDemoBeatState } from "@/components/story-demo/sales-demo-beat-context";
+import {
+  isStoryEmbedUrlSearchParams,
+  STORY_EMBED_PAGE_STACK_CLASS,
+} from "@/lib/story-embed";
+import { cn } from "@/lib/utils";
 
 function DeadlineRowsList({
   rows,
   industry,
   role,
+  storyDemo,
 }: {
   rows: DeadlineRow[];
   industry: EnabledIndustryKey;
   role: DemoRole;
+  storyDemo?: boolean;
 }) {
   return (
     <ul className="space-y-2 text-sm">
@@ -42,7 +50,10 @@ function DeadlineRowsList({
               role,
               { tab: "docs" }
             )}
-            className="block rounded-lg border border-border p-3 hover:bg-surface"
+            className={cn(
+              "block rounded-lg border border-border p-3 hover:bg-surface",
+              storyDemo && "story-demo-tap-target"
+            )}
           >
             <span className="font-medium">{row.candidateName}</span>
             <span className="mx-2 text-muted">·</span>
@@ -64,7 +75,9 @@ function DeadlineRowsList({
 export default function DocumentsPage() {
   const { industry } = useIndustry();
   const { role } = useDemoRole();
+  const router = useRouter();
   const urlSearch = useSearchParams();
+  const { beatId: activeDemoBeatId } = useSalesDemoBeatState();
   const profile = getIndustryProfile(industry);
   const hints = getIndustryPageHints(industry);
   const docHints = hints.documents;
@@ -72,6 +85,9 @@ export default function DocumentsPage() {
   const alerts = data.countDocumentAlerts();
 
   const highlightDeadlines = urlSearch.get("highlight") === "deadlines";
+  const storyDemo = isStoryEmbedUrlSearchParams(urlSearch);
+  const storyFocus = urlSearch.get("storyFocus");
+  const storyStackClass = storyDemo ? STORY_EMBED_PAGE_STACK_CLASS : undefined;
   const scope = parsePageTag(
     urlSearch.get("scope"),
     ["pre-entry", "post-entry", "deadlines"] as const,
@@ -89,6 +105,32 @@ export default function DocumentsPage() {
     });
     return () => cancelAnimationFrame(id);
   }, [highlightDeadlines]);
+
+  useEffect(() => {
+    if (!storyDemo) return;
+    const targetId =
+      storyFocus === "risk"
+        ? "story-doc-alert-kpi"
+        : storyFocus === "list"
+          ? "story-doc-list-card"
+          : null;
+    if (!targetId) return;
+    const id = requestAnimationFrame(() => {
+      document
+        .getElementById(targetId)
+        ?.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+    return () => cancelAnimationFrame(id);
+  }, [storyDemo, storyFocus]);
+
+  useEffect(() => {
+    if (!storyDemo || activeDemoBeatId !== "document-risk__post") return;
+    router.replace(
+      withDemoQuery("/documents?scope=post-entry", industry, role, {
+        storyFocus: "risk",
+      })
+    );
+  }, [activeDemoBeatId, industry, role, router, storyDemo]);
 
   const blocked = data.candidates.filter(
     (c) => c.pipelineStatus === "document_blocked"
@@ -125,12 +167,21 @@ export default function DocumentsPage() {
     }))
   );
 
-  const scopeHref = (nextScope: string) =>
-    withDemoQuery(`/documents?scope=${nextScope}`, industry, role);
+  const scopeHref = (nextScope: string) => {
+    const extra: Record<string, string> = {};
+    if (storyFocus === "risk") extra.storyFocus = "risk";
+    if (storyFocus === "list") extra.storyFocus = "list";
+    return withDemoQuery(
+      `/documents?scope=${nextScope}`,
+      industry,
+      role,
+      Object.keys(extra).length ? extra : undefined
+    );
+  };
 
   if (isFactoryStaffing) {
     return (
-      <TemplatePageStack>
+      <TemplatePageStack className={storyStackClass}>
         <TemplatePageHeader
           title="書類管理（支援機関向け）"
           description="工場表示ではトップ導線から除外されています。必要時のみ支援機関へ連携してください。"
@@ -157,32 +208,36 @@ export default function DocumentsPage() {
   }
 
   return (
-    <TemplatePageStack>
-      <PageTagLinks
-        label="表示タグ"
-        currentId={scope}
-        mobileScrollable
-        stickyOnMobile
-        mobileTopClassName="top-[7rem]"
-        tags={[
-          {
-            id: "pre-entry",
-            label: isConstruction
-              ? "②-1 入場前"
-              : isLogistics
-                ? "②-1 入構前"
-                : "②-1 入国前",
-            href: scopeHref("pre-entry"),
-          },
-          {
-            id: "post-entry",
-            label: isConstruction
-              ? "②-2 入場後"
-              : isLogistics
-                ? "②-2 入構後"
-                : "②-2 入国後",
-            href: scopeHref("post-entry"),
-          },
+    <TemplatePageStack className={storyStackClass}>
+      <StoryBeatMark beatId="document-risk__pre" className="block rounded-lg">
+        <PageTagLinks
+          label="表示タグ"
+          currentId={scope}
+          mobileScrollable
+          stickyOnMobile={!storyDemo}
+          mobileTopClassName={storyDemo ? "top-0" : "top-[7rem]"}
+          demoLinkClassName={storyDemo ? "story-demo-tap-target rounded-md" : undefined}
+          tags={[
+            {
+              id: "pre-entry",
+              label: isConstruction
+                ? "②-1 入場前"
+                : isLogistics
+                  ? "②-1 入構前"
+                  : "②-1 入国前",
+              href: scopeHref("pre-entry"),
+              demoBeatId: "document-risk__pre",
+            },
+            {
+              id: "post-entry",
+              label: isConstruction
+                ? "②-2 入場後"
+                : isLogistics
+                  ? "②-2 入構後"
+                  : "②-2 入国後",
+              href: scopeHref("post-entry"),
+              demoBeatId: "document-risk__post",
+            },
           {
             id: "deadlines",
             label: isConstruction
@@ -193,7 +248,8 @@ export default function DocumentsPage() {
             href: scopeHref("deadlines"),
           },
         ]}
-      />
+        />
+      </StoryBeatMark>
 
       <TemplatePageHeader
         title={`${profile.labels.documents}管理`}
@@ -244,43 +300,52 @@ export default function DocumentsPage() {
         は一覧から体験できます。
       </p>
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted">生成完了</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold tabular-nums">{docHints.kpiComplete}</p>
-            <Badge variant="success" className="mt-2">
-              デモ値
-            </Badge>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted">要確認</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold tabular-nums">{docHints.kpiReview}</p>
-            <Badge variant="warning" className="mt-2">
-              レビュー待ち
-            </Badge>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted">
-              期限・アラート（要フォロー）
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold tabular-nums text-danger">{alerts}</p>
-            <Badge variant="danger" className="mt-2">
-              パイプライン連動
-            </Badge>
-          </CardContent>
-        </Card>
-      </div>
+      <StoryBeatMark beatId="document-risk__pre" className="block rounded-lg">
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted">生成完了</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold tabular-nums">{docHints.kpiComplete}</p>
+              <Badge variant="success" className="mt-2">
+                デモ値
+              </Badge>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted">要確認</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold tabular-nums">{docHints.kpiReview}</p>
+              <Badge variant="warning" className="mt-2">
+                レビュー待ち
+              </Badge>
+            </CardContent>
+          </Card>
+          <Card
+            id="story-doc-alert-kpi"
+            className={cn(
+              storyDemo &&
+                storyFocus === "risk" &&
+                "story-demo-tap-target ring-2 ring-primary/30"
+            )}
+          >
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted">
+                期限・アラート（要フォロー）
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold tabular-nums text-danger">{alerts}</p>
+              <Badge variant="danger" className="mt-2">
+                パイプライン連動
+              </Badge>
+            </CardContent>
+          </Card>
+        </div>
+      </StoryBeatMark>
 
       {scope === "pre-entry" && (
         <Card>
@@ -327,7 +392,20 @@ export default function DocumentsPage() {
       )}
 
       {scope === "post-entry" && (
-        <Card>
+        <StoryBeatMark
+          beatId={
+            storyFocus === "list" ? "document-connected__list" : "document-risk__post"
+          }
+          className="block rounded-lg"
+        >
+          <Card
+            id="story-doc-list-card"
+            className={cn(
+              storyDemo &&
+                storyFocus === "list" &&
+                "story-demo-tap-target ring-2 ring-primary/30"
+            )}
+          >
           <CardHeader>
             <CardTitle className="text-base">
               {isConstruction
@@ -365,6 +443,7 @@ export default function DocumentsPage() {
             )}
           </CardContent>
         </Card>
+        </StoryBeatMark>
       )}
 
       {scope === "deadlines" && (
@@ -399,6 +478,7 @@ export default function DocumentsPage() {
                     rows={documentDeadlines}
                     industry={industry}
                     role={role}
+                    storyDemo={storyDemo}
                   />
                 )}
               </div>

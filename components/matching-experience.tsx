@@ -13,17 +13,21 @@ import { FactoryMatchingSection } from "@/components/factory-matching-section";
 import { MatchingSection } from "@/app/matching/matching-section";
 import { FeatureDemoExplainSection } from "@/components/feature-demos/feature-demo-explain-section";
 import { FeatureDemoSiblingGrid } from "@/components/feature-demos/feature-demo-sibling-grid";
+import { cn } from "@/lib/utils";
+import { STORY_EMBED_PAGE_STACK_CLASS } from "@/lib/story-embed";
 
 type Props = {
   industry: EnabledIndustryKey;
   role: DemoRole;
   featureDemo?: boolean;
+  storyDemo?: boolean;
 };
 
 export function MatchingExperience({
   industry,
   role,
   featureDemo = false,
+  storyDemo = false,
 }: Props) {
   const profile = getIndustryProfile(industry);
   const hints = getIndustryPageHints(industry);
@@ -47,7 +51,9 @@ export function MatchingExperience({
       : "派遣先一覧";
 
   return (
-    <TemplatePageStack>
+    <TemplatePageStack
+      className={cn(storyDemo && STORY_EMBED_PAGE_STACK_CLASS)}
+    >
       {featureDemo ? (
         <MobileParentBackLink href={backHref} label={backLabel} />
       ) : null}
@@ -57,7 +63,12 @@ export function MatchingExperience({
       />
       {industry === "staffing" && role === "client" ? (
         <>
-          <Card className="border-primary/20 bg-primary/[0.04] shadow-sm">
+          <Card
+            className={cn(
+              "border-primary/20 bg-primary/[0.04] shadow-sm",
+              storyDemo && "story-demo-tap-target ring-2 ring-primary/25"
+            )}
+          >
             <CardHeader className="pb-2 pt-4">
               <CardTitle className="text-base font-semibold">
                 条件と通知（デモ）
@@ -70,7 +81,7 @@ export function MatchingExperience({
           <FactoryMatchingSection />
         </>
       ) : (
-        <MatchingSection industry={industry} />
+        <MatchingSection industry={industry} storyDemo={storyDemo} />
       )}
 
       {featureDemo ? (

@@ -21,6 +21,8 @@ import type { Candidate, ClientCompany, LearningComplianceSummary } from "@data/
 
 type Props = {
   industry: EnabledIndustryKey;
+  /** 営業ストーリー iframe：先頭カードを強調 */
+  storyDemo?: boolean;
 };
 
 function ClientMatchingCard({
@@ -29,6 +31,8 @@ function ClientMatchingCard({
   top,
   emptyState,
   collapsible,
+  demoHighlight,
+  defaultOpenCollapsible,
 }: {
   industry: EnabledIndustryKey;
   client: ClientCompany;
@@ -40,6 +44,9 @@ function ClientMatchingCard({
   }[];
   emptyState: string;
   collapsible: boolean;
+  demoHighlight?: boolean;
+  /** 営業デモ iframe：先頭カードを開いた状態で見せる */
+  defaultOpenCollapsible?: boolean;
 }) {
   const { role } = useDemoRole();
   const { id: clientId, tradeNameJa } = client;
@@ -149,8 +156,16 @@ function ClientMatchingCard({
   }
 
   return (
-    <Card className="overflow-hidden">
-      <Collapsible defaultOpen={false} className="group">
+    <Card
+      className={cn(
+        "overflow-hidden",
+        demoHighlight && "story-demo-tap-target ring-2 ring-primary/25"
+      )}
+    >
+      <Collapsible
+        defaultOpen={defaultOpenCollapsible ?? false}
+        className="group"
+      >
         <CollapsibleTrigger
           className={cn(
             "flex w-full items-center justify-between gap-2 border-b border-border/80 bg-card px-6 py-4 text-left",
@@ -182,14 +197,14 @@ function ClientMatchingCard({
   );
 }
 
-export function MatchingSection({ industry }: Props) {
+export function MatchingSection({ industry, storyDemo }: Props) {
   const isMobile = useMobile();
   const data = getIndustryDemoData(industry);
   const emptyState = getIndustryPageHints(industry).matching.emptyState;
 
   return (
     <div className="space-y-8">
-      {data.clients.map((cl) => {
+      {data.clients.map((cl, idx) => {
         const top = data.getMatchesForClient(cl.id).slice(0, 3);
         return (
           <ClientMatchingCard
@@ -199,6 +214,8 @@ export function MatchingSection({ industry }: Props) {
             top={top}
             emptyState={emptyState}
             collapsible={isMobile}
+            demoHighlight={Boolean(storyDemo && idx === 0)}
+            defaultOpenCollapsible={Boolean(storyDemo && idx === 0 && isMobile)}
           />
         );
       })}

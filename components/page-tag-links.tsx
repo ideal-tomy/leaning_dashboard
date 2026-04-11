@@ -1,10 +1,15 @@
+"use client";
+
 import Link from "next/link";
+import { useSalesDemoBeatClass } from "@/components/story-demo/sales-demo-beat-context";
 import { cn } from "@/lib/utils";
 
 export type PageTagLink = {
   id: string;
   label: string;
   href: string;
+  /** 営業デモ postMessage ビート id（アクティブ時に枠） */
+  demoBeatId?: string;
 };
 
 type Props = {
@@ -14,7 +19,42 @@ type Props = {
   mobileScrollable?: boolean;
   stickyOnMobile?: boolean;
   mobileTopClassName?: string;
+  /** 営業ストーリー iframe 用：各タブに追加するクラス */
+  demoLinkClassName?: string;
 };
+
+const NO_TAG_BEAT = "__no_sales_demo_tag_beat__";
+
+function TagLink({
+  tag,
+  active,
+  demoLinkClassName,
+}: {
+  tag: PageTagLink;
+  active: boolean;
+  demoLinkClassName?: string;
+}) {
+  const beatAccent = useSalesDemoBeatClass(
+    tag.demoBeatId ?? NO_TAG_BEAT
+  );
+  const beatClass = tag.demoBeatId ? beatAccent : "";
+  return (
+    <Link
+      href={tag.href}
+      scroll={false}
+      className={cn(
+        "shrink-0 border-b-2 px-0.5 py-1 text-sm font-medium transition-colors whitespace-nowrap",
+        active
+          ? "border-primary text-primary"
+          : "border-transparent text-muted hover:text-foreground",
+        demoLinkClassName,
+        beatClass
+      )}
+    >
+      {tag.label}
+    </Link>
+  );
+}
 
 export function PageTagLinks({
   label,
@@ -23,6 +63,7 @@ export function PageTagLinks({
   mobileScrollable = false,
   stickyOnMobile = false,
   mobileTopClassName = "top-14",
+  demoLinkClassName,
 }: Props) {
   return (
     <div
@@ -41,26 +82,15 @@ export function PageTagLinks({
             : "flex-wrap md:mt-0"
         )}
       >
-        {tags.map((tag) => {
-          const active = tag.id === currentId;
-          return (
-            <Link
-              key={tag.id}
-              href={tag.href}
-            scroll={false}
-              className={cn(
-                "shrink-0 border-b-2 px-0.5 py-1 text-sm font-medium transition-colors whitespace-nowrap",
-                active
-                  ? "border-primary text-primary"
-                  : "border-transparent text-muted hover:text-foreground"
-              )}
-            >
-              {tag.label}
-            </Link>
-          );
-        })}
+        {tags.map((tag) => (
+          <TagLink
+            key={tag.id}
+            tag={tag}
+            active={tag.id === currentId}
+            demoLinkClassName={demoLinkClassName}
+          />
+        ))}
       </div>
     </div>
   );
 }
-

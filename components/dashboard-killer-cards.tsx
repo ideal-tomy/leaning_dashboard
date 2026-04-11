@@ -15,11 +15,22 @@ import { withDemoQuery } from "@/lib/demo-query";
 import type { EnabledIndustryKey } from "@/lib/industry-profiles";
 import { getIndustryDemoData } from "@/lib/demo-data-selector";
 import { getDemoAlerts, getStalledWorkers } from "@/lib/demo-workers";
+import { useSalesDemoBeatClass } from "@/components/story-demo/sales-demo-beat-context";
+import type { StoryDashboardFocus } from "@/lib/story-embed";
+import { cn } from "@/lib/utils";
 
 type Props = {
   industry: EnabledIndustryKey;
   role: DemoRole;
+  /** 営業ストーリー iframe 内：キラーカードの境界をはっきり */
+  storyDemo?: boolean;
+  /** ストーリーで同じ `/` でも見せ場を切り替える */
+  storyDashboardFocus?: StoryDashboardFocus;
 };
+
+/** 折りたたみヘッダー: 操作できる領域であることが伝わるよう */
+const killerCollapsibleTriggerClass =
+  "flex w-full items-center justify-between gap-2 text-left rounded-lg border border-transparent transition hover:border-primary/30 hover:bg-primary/[0.04] hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35 active:scale-[0.995]";
 
 function constructionFollowUpCandidates(industry: EnabledIndustryKey) {
   return getIndustryDemoData(industry).candidates.filter(
@@ -63,7 +74,16 @@ function medicalFollowUpCandidates() {
   );
 }
 
-export function DashboardKillerCards({ industry, role }: Props) {
+export function DashboardKillerCards({
+  industry,
+  role,
+  storyDemo,
+  storyDashboardFocus,
+}: Props) {
+  const beatK0 = useSalesDemoBeatClass("today-priorities__killer-0");
+  const beatK1 = useSalesDemoBeatClass("today-priorities__killer-1");
+  const beatK2 = useSalesDemoBeatClass("today-priorities__killer-2");
+
   if (role === "worker") return null;
 
   if (industry === "construction") {
@@ -83,7 +103,7 @@ export function DashboardKillerCards({ industry, role }: Props) {
             <Collapsible>
               <CardHeader className="pb-2">
                 <CollapsibleTrigger asChild>
-                  <button className="flex w-full items-center justify-between gap-2 text-left">
+                  <button className={killerCollapsibleTriggerClass}>
                     <CardTitle className="flex items-center gap-2 text-sm font-semibold">
                       <AlertTriangle className="size-5 text-amber-600" />
                       要フォロー作業員
@@ -131,7 +151,7 @@ export function DashboardKillerCards({ industry, role }: Props) {
             <Collapsible>
               <CardHeader className="pb-2">
                 <CollapsibleTrigger asChild>
-                  <button className="flex w-full items-center justify-between gap-2 text-left">
+                  <button className={killerCollapsibleTriggerClass}>
                     <CardTitle className="flex items-center gap-2 text-sm font-semibold">
                       <CalendarClock className="size-5 text-primary" />
                       安全書類・入場確認
@@ -181,7 +201,7 @@ export function DashboardKillerCards({ industry, role }: Props) {
             <Collapsible>
               <CardHeader className="pb-2">
                 <CollapsibleTrigger asChild>
-                  <button className="flex w-full items-center justify-between gap-2 text-left">
+                  <button className={killerCollapsibleTriggerClass}>
                     <CardTitle className="flex items-center gap-2 text-sm font-semibold">
                       <MessageSquareWarning className="size-5 text-warning" />
                       未充足現場
@@ -242,7 +262,7 @@ export function DashboardKillerCards({ industry, role }: Props) {
             <Collapsible>
               <CardHeader className="pb-2">
                 <CollapsibleTrigger asChild>
-                  <button className="flex w-full items-center justify-between gap-2 text-left">
+                  <button className={killerCollapsibleTriggerClass}>
                     <CardTitle className="flex items-center gap-2 text-sm font-semibold">
                       <AlertTriangle className="size-5 text-amber-600" />
                       要フォロースタッフ
@@ -290,7 +310,7 @@ export function DashboardKillerCards({ industry, role }: Props) {
             <Collapsible>
               <CardHeader className="pb-2">
                 <CollapsibleTrigger asChild>
-                  <button className="flex w-full items-center justify-between gap-2 text-left">
+                  <button className={killerCollapsibleTriggerClass}>
                     <CardTitle className="flex items-center gap-2 text-sm font-semibold">
                       <CalendarClock className="size-5 text-primary" />
                       記録・同意の要確認
@@ -340,7 +360,7 @@ export function DashboardKillerCards({ industry, role }: Props) {
             <Collapsible>
               <CardHeader className="pb-2">
                 <CollapsibleTrigger asChild>
-                  <button className="flex w-full items-center justify-between gap-2 text-left">
+                  <button className={killerCollapsibleTriggerClass}>
                     <CardTitle className="flex items-center gap-2 text-sm font-semibold">
                       <MessageSquareWarning className="size-5 text-warning" />
                       不足シフトの拠点
@@ -402,7 +422,7 @@ export function DashboardKillerCards({ industry, role }: Props) {
             <Collapsible>
               <CardHeader className="pb-2">
                 <CollapsibleTrigger asChild>
-                  <button className="flex w-full items-center justify-between gap-2 text-left">
+                  <button className={killerCollapsibleTriggerClass}>
                     <CardTitle className="flex items-center gap-2 text-sm font-semibold">
                       <AlertTriangle className="size-5 text-amber-600" />
                       本日フォロー対象
@@ -450,7 +470,7 @@ export function DashboardKillerCards({ industry, role }: Props) {
             <Collapsible>
               <CardHeader className="pb-2">
                 <CollapsibleTrigger asChild>
-                  <button className="flex w-full items-center justify-between gap-2 text-left">
+                  <button className={killerCollapsibleTriggerClass}>
                     <CardTitle className="flex items-center gap-2 text-sm font-semibold">
                       <CalendarClock className="size-5 text-primary" />
                       未提出・要確認
@@ -500,7 +520,7 @@ export function DashboardKillerCards({ industry, role }: Props) {
             <Collapsible>
               <CardHeader className="pb-2">
                 <CollapsibleTrigger asChild>
-                  <button className="flex w-full items-center justify-between gap-2 text-left">
+                  <button className={killerCollapsibleTriggerClass}>
                     <CardTitle className="flex items-center gap-2 text-sm font-semibold">
                       <MessageSquareWarning className="size-5 text-warning" />
                       空席のある講座 / 問い合わせ
@@ -564,7 +584,7 @@ export function DashboardKillerCards({ industry, role }: Props) {
             <Collapsible>
               <CardHeader className="pb-2">
                 <CollapsibleTrigger asChild>
-                  <button className="flex w-full items-center justify-between gap-2 text-left">
+                  <button className={killerCollapsibleTriggerClass}>
                     <CardTitle className="flex items-center gap-2 text-sm font-semibold">
                       <AlertTriangle className="size-5 text-amber-600" />
                       要フォロー作業員
@@ -612,7 +632,7 @@ export function DashboardKillerCards({ industry, role }: Props) {
             <Collapsible>
               <CardHeader className="pb-2">
                 <CollapsibleTrigger asChild>
-                  <button className="flex w-full items-center justify-between gap-2 text-left">
+                  <button className={killerCollapsibleTriggerClass}>
                     <CardTitle className="flex items-center gap-2 text-sm font-semibold">
                       <CalendarClock className="size-5 text-primary" />
                       入構・配送書類
@@ -662,7 +682,7 @@ export function DashboardKillerCards({ industry, role }: Props) {
             <Collapsible>
               <CardHeader className="pb-2">
                 <CollapsibleTrigger asChild>
-                  <button className="flex w-full items-center justify-between gap-2 text-left">
+                  <button className={killerCollapsibleTriggerClass}>
                     <CardTitle className="flex items-center gap-2 text-sm font-semibold">
                       <MessageSquareWarning className="size-5 text-warning" />
                       未配車枠・拠点
@@ -731,7 +751,7 @@ export function DashboardKillerCards({ industry, role }: Props) {
             <Collapsible>
               <CardHeader className="pb-2">
                 <CollapsibleTrigger asChild>
-                  <button className="flex w-full items-center justify-between gap-2 text-left">
+                  <button className={killerCollapsibleTriggerClass}>
                     <CardTitle className="flex items-center gap-2 text-sm font-semibold">
                       <AlertTriangle className="size-5 text-amber-600" />
                       証憑不足・要フォロー案件
@@ -779,7 +799,7 @@ export function DashboardKillerCards({ industry, role }: Props) {
             <Collapsible>
               <CardHeader className="pb-2">
                 <CollapsibleTrigger asChild>
-                  <button className="flex w-full items-center justify-between gap-2 text-left">
+                  <button className={killerCollapsibleTriggerClass}>
                     <CardTitle className="flex items-center gap-2 text-sm font-semibold">
                       <CalendarClock className="size-5 text-primary" />
                       対応期限・手続ステータス
@@ -827,7 +847,7 @@ export function DashboardKillerCards({ industry, role }: Props) {
             <Collapsible>
               <CardHeader className="pb-2">
                 <CollapsibleTrigger asChild>
-                  <button className="flex w-full items-center justify-between gap-2 text-left">
+                  <button className={killerCollapsibleTriggerClass}>
                     <CardTitle className="flex items-center gap-2 text-sm font-semibold">
                       <MessageSquareWarning className="size-5 text-warning" />
                       顧問先の未着手枠
@@ -898,7 +918,7 @@ export function DashboardKillerCards({ industry, role }: Props) {
             <Collapsible>
               <CardHeader className="pb-2">
                 <CollapsibleTrigger asChild>
-                  <button className="flex w-full items-center justify-between gap-2 text-left">
+                  <button className={killerCollapsibleTriggerClass}>
                     <CardTitle className="flex items-center gap-2 text-sm font-semibold">
                       <AlertTriangle className="size-5 text-amber-600" />
                       今日接触すべき顧客
@@ -944,7 +964,7 @@ export function DashboardKillerCards({ industry, role }: Props) {
             <Collapsible>
               <CardHeader className="pb-2">
                 <CollapsibleTrigger asChild>
-                  <button className="flex w-full items-center justify-between gap-2 text-left">
+                  <button className={killerCollapsibleTriggerClass}>
                     <CardTitle className="flex items-center gap-2 text-sm font-semibold">
                       <CalendarClock className="size-5 text-primary" />
                       提案資料・要確認
@@ -994,7 +1014,7 @@ export function DashboardKillerCards({ industry, role }: Props) {
             <Collapsible>
               <CardHeader className="pb-2">
                 <CollapsibleTrigger asChild>
-                  <button className="flex w-full items-center justify-between gap-2 text-left">
+                  <button className={killerCollapsibleTriggerClass}>
                     <CardTitle className="flex items-center gap-2 text-sm font-semibold">
                       <MessageSquareWarning className="size-5 text-warning" />
                       停滞・要フォロー案件
@@ -1049,14 +1069,38 @@ export function DashboardKillerCards({ industry, role }: Props) {
     .slice(0, 3);
   const requestCount = clients.reduce((sum, c) => sum + c.operations.openSlots, 0);
 
+  const ringStandard =
+    "ring-2 ring-primary/35 ring-offset-2 ring-offset-background";
+  const ringPriorityFirst =
+    "ring-2 ring-primary/45 ring-offset-2 ring-offset-background";
+  const killerCardRing = (i: 0 | 1 | 2) => {
+    if (!storyDemo) return "";
+    if (storyDashboardFocus === "overview") return "";
+    if (storyDashboardFocus === "closing") return "";
+    if (storyDashboardFocus === "priority") return i === 0 ? ringPriorityFirst : "";
+    return ringStandard;
+  };
+  const closingMute =
+    storyDemo && storyDashboardFocus === "closing" ? "opacity-[0.55]" : "";
+  const overviewShell =
+    storyDemo && storyDashboardFocus === "overview"
+      ? "rounded-xl p-1 ring-2 ring-primary/30 ring-offset-2 ring-offset-background"
+      : "";
+
   return (
-    <div className="space-y-2">
+    <div className={cn("space-y-2", closingMute, overviewShell)}>
       <div className="grid min-w-0 gap-2.5 md:grid-cols-3">
-        <Card className="min-w-0 border-amber-500/25 bg-amber-500/[0.04]">
+        <Card
+          className={cn(
+            "min-w-0 border-amber-500/25 bg-amber-500/[0.04]",
+            killerCardRing(0),
+            storyDemo && storyDashboardFocus === "priority" && beatK0
+          )}
+        >
           <Collapsible>
             <CardHeader className="pb-2">
               <CollapsibleTrigger asChild>
-                <button className="flex w-full items-center justify-between gap-2 text-left">
+                <button className={killerCollapsibleTriggerClass}>
                   <CardTitle className="flex items-center gap-2 text-sm font-semibold">
                     <AlertTriangle className="size-5 text-amber-600" />
                     今日フォローする人を確認
@@ -1096,11 +1140,17 @@ export function DashboardKillerCards({ industry, role }: Props) {
           </Collapsible>
         </Card>
 
-        <Card className="min-w-0 border-primary/20">
+        <Card
+          className={cn(
+            "min-w-0 border-primary/20",
+            killerCardRing(1),
+            storyDemo && storyDashboardFocus === "priority" && beatK1
+          )}
+        >
           <Collapsible>
             <CardHeader className="pb-2">
               <CollapsibleTrigger asChild>
-                <button className="flex w-full items-center justify-between gap-2 text-left">
+                <button className={killerCollapsibleTriggerClass}>
                   <CardTitle className="flex items-center gap-2 text-sm font-semibold">
                     <CalendarClock className="size-5 text-primary" />
                     要対応手続き・書類
@@ -1143,11 +1193,17 @@ export function DashboardKillerCards({ industry, role }: Props) {
           </Collapsible>
         </Card>
 
-        <Card className="min-w-0 border-warning/35 bg-warning/[0.05]">
+        <Card
+          className={cn(
+            "min-w-0 border-warning/35 bg-warning/[0.05]",
+            killerCardRing(2),
+            storyDemo && storyDashboardFocus === "priority" && beatK2
+          )}
+        >
           <Collapsible>
             <CardHeader className="pb-2">
               <CollapsibleTrigger asChild>
-                <button className="flex w-full items-center justify-between gap-2 text-left">
+                <button className={killerCollapsibleTriggerClass}>
                   <CardTitle className="flex items-center gap-2 text-sm font-semibold">
                     <MessageSquareWarning className="size-5 text-warning" />
                     未対応クライアント要望

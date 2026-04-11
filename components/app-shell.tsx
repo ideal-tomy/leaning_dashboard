@@ -228,7 +228,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       : adminBottomNavItemsBase;
 
   const bypassShell =
-    pathname.startsWith("/story") || searchParams.get("storyEmbed") === "1";
+    pathname.startsWith("/sales-demo") ||
+    pathname.startsWith("/story") ||
+    searchParams.get("storyEmbed") === "1";
 
   if (bypassShell) {
     return <>{children}</>;

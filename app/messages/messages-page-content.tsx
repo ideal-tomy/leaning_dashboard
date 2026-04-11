@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Languages } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,11 @@ import { withDemoQuery } from "@/lib/demo-query";
 import type { DemoMessage } from "@/lib/demo-messages";
 import { demoMessages } from "@/lib/demo-messages";
 import { cn } from "@/lib/utils";
+import { StoryBeatMark } from "@/components/story-demo/sales-demo-beat-context";
+import {
+  isStoryEmbedUrlSearchParams,
+  STORY_EMBED_PAGE_STACK_CLASS,
+} from "@/lib/story-embed";
 import { FeatureDemoExplainSection } from "@/components/feature-demos/feature-demo-explain-section";
 import { FeatureDemoSiblingGrid } from "@/components/feature-demos/feature-demo-sibling-grid";
 
@@ -36,6 +42,8 @@ export function MessagesPageContent({
 }: Props) {
   const { industry } = useIndustry();
   const { role } = useDemoRole();
+  const urlSearch = useSearchParams();
+  const storyDemo = isStoryEmbedUrlSearchParams(urlSearch);
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
 
   const back = flowBack ?? {
@@ -48,7 +56,9 @@ export function MessagesPageContent({
   }
 
   return (
-    <TemplatePageStack>
+    <TemplatePageStack
+      className={cn(storyDemo && STORY_EMBED_PAGE_STACK_CLASS)}
+    >
       <MobileParentBackLink href={back.href} label={back.label} />
       <div>
         <h1 className="text-2xl font-semibold text-primary-alt">
@@ -64,12 +74,24 @@ export function MessagesPageContent({
         className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 [-webkit-overflow-scrolling:touch] overscroll-x-contain md:grid md:snap-none md:grid-cols-2 md:overflow-visible md:pb-0 lg:grid-cols-4"
         role="list"
       >
-        {demoMessages.map((m) => (
-          <li
-            key={m.id}
-            className="w-[min(88vw,20rem)] shrink-0 snap-start md:w-auto md:min-w-0"
-          >
-            <Card className="flex h-full flex-col">
+        {demoMessages.map((m) => {
+          const isFirst = m.id === demoMessages[0]?.id;
+          const translateBtn = (
+            <Button
+              variant="secondary"
+              size="sm"
+              className={cn(
+                "mt-auto gap-2 self-start",
+                storyDemo && "story-demo-tap-target"
+              )}
+              onClick={() => toggle(m.id)}
+            >
+              <Languages className="size-4" />
+              {revealed[m.id] ? "訳を隠す" : "AI 翻訳を表示（デモ）"}
+            </Button>
+          );
+          const cardInner = (
+            <>
               <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2 pb-2">
                 <CardTitle className="text-sm font-medium text-muted">
                   {m.category ?? "メッセージ"}
@@ -92,24 +114,61 @@ export function MessagesPageContent({
                   </div>
                   <div className="rounded-lg border border-border p-3 text-sm">
                     <p className="text-xs text-muted">日本語</p>
-                    <p className={cn("mt-1", !revealed[m.id] && "blur-sm select-none")}>
+                    <p
+                      className={cn(
+                        "mt-1",
+                        !storyDemo && !revealed[m.id] && "blur-sm select-none"
+                      )}
+                    >
                       {m.ja}
                     </p>
                   </div>
                 </div>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="mt-auto gap-2 self-start"
-                  onClick={() => toggle(m.id)}
-                >
-                  <Languages className="size-4" />
-                  {revealed[m.id] ? "訳を隠す" : "AI 翻訳を表示（デモ）"}
-                </Button>
+                {isFirst ? (
+                  <StoryBeatMark
+                    beatId="communication-history__translate"
+                    className="inline-flex rounded-md"
+                  >
+                    {translateBtn}
+                  </StoryBeatMark>
+                ) : (
+                  translateBtn
+                )}
               </CardContent>
-            </Card>
-          </li>
-        ))}
+            </>
+          );
+          return (
+            <li
+              key={m.id}
+              className="w-[min(88vw,20rem)] shrink-0 snap-start md:w-auto md:min-w-0"
+            >
+              {isFirst ? (
+                <StoryBeatMark
+                  beatId="communication-history__thread"
+                  className="block h-full rounded-lg"
+                >
+                  <Card
+                    className={cn(
+                      "flex h-full flex-col",
+                      storyDemo && "story-demo-tap-target"
+                    )}
+                  >
+                    {cardInner}
+                  </Card>
+                </StoryBeatMark>
+              ) : (
+                <Card
+                  className={cn(
+                    "flex h-full flex-col",
+                    storyDemo && "story-demo-tap-target"
+                  )}
+                >
+                  {cardInner}
+                </Card>
+              )}
+            </li>
+          );
+        })}
       </ul>
 
       {featureDemoExplain ? (

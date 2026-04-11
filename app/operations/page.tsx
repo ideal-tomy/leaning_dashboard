@@ -15,6 +15,12 @@ import {
   getRoleFromSearchParams,
   withDemoQuery,
 } from "@/lib/industry-selection";
+import { StoryBeatMark } from "@/components/story-demo/sales-demo-beat-context";
+import {
+  isStoryEmbedFromSearchParams,
+  STORY_EMBED_PAGE_STACK_CLASS,
+} from "@/lib/story-embed";
+import { cn } from "@/lib/utils";
 
 type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
@@ -38,6 +44,7 @@ export default async function OperationsPage({ searchParams }: PageProps) {
     "deploy"
   );
   const profile = getIndustryProfile(industry);
+  const storyDemo = isStoryEmbedFromSearchParams(resolvedSearchParams);
   const hints = getIndustryPageHints(industry).operations;
   const opsDesc =
     tag === "settle"
@@ -60,23 +67,28 @@ export default async function OperationsPage({ searchParams }: PageProps) {
         : hints.timeline;
 
   return (
-    <TemplatePageStack>
+    <TemplatePageStack
+      className={cn(storyDemo && STORY_EMBED_PAGE_STACK_CLASS)}
+    >
       <PageTagLinks
         label="表示タグ"
         currentId={tag}
         mobileScrollable
-        stickyOnMobile
-        mobileTopClassName="top-[7rem]"
+        stickyOnMobile={!storyDemo}
+        mobileTopClassName={storyDemo ? "top-0" : "top-[7rem]"}
+        demoLinkClassName={storyDemo ? "story-demo-tap-target rounded-md" : undefined}
         tags={[
           {
             id: "deploy",
             label: "⑤-1 配属状況",
             href: withDemoQuery("/operations?tag=deploy", industry, role),
+            demoBeatId: "company-operations__priority-0",
           },
           {
             id: "settle",
             label: "⑤-2 定着30日",
             href: withDemoQuery("/operations?tag=settle", industry, role),
+            demoBeatId: "company-operations__priority-1",
           },
           {
             id: "growth",
@@ -92,12 +104,28 @@ export default async function OperationsPage({ searchParams }: PageProps) {
       />
 
       <div className="flex flex-wrap gap-2">
-        <Link href={withDemoQuery("/candidates?focus=risk", industry, role)} className="inline-flex">
-          <Badge variant="danger" className="px-3 py-1">要対応人材へ</Badge>
-        </Link>
-        <Link href={withDemoQuery("/clients?tag=conditions", industry, role)} className="inline-flex">
-          <Badge variant="warning" className="px-3 py-1">受入条件を確認</Badge>
-        </Link>
+        <StoryBeatMark
+          beatId="company-operations__priority-0"
+          className="inline-flex rounded-md"
+        >
+          <Link
+            href={withDemoQuery("/candidates?focus=risk", industry, role)}
+            className={cn("inline-flex", storyDemo && "story-demo-tap-target rounded-md")}
+          >
+            <Badge variant="danger" className="px-3 py-1">要対応人材へ</Badge>
+          </Link>
+        </StoryBeatMark>
+        <StoryBeatMark
+          beatId="company-operations__priority-1"
+          className="inline-flex rounded-md"
+        >
+          <Link
+            href={withDemoQuery("/clients?tag=conditions", industry, role)}
+            className={cn("inline-flex", storyDemo && "story-demo-tap-target rounded-md")}
+          >
+            <Badge variant="warning" className="px-3 py-1">受入条件を確認</Badge>
+          </Link>
+        </StoryBeatMark>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

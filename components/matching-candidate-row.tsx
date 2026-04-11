@@ -10,7 +10,10 @@ import type { DemoRole } from "@/lib/demo-role";
 import { withDemoQuery } from "@/lib/demo-query";
 import { LearningComplianceBadge } from "@/components/learning-compliance-badge";
 import { MatchingWorkerCredentials } from "@/components/matching-in-person-mini";
+import { useSalesDemoBeatClass } from "@/components/story-demo/sales-demo-beat-context";
 import { cn } from "@/lib/utils";
+
+const NO_ROW_BEAT = "__no_matching_row_beat__";
 
 type Props = {
   left: ReactNode;
@@ -35,6 +38,12 @@ export function MatchingCandidateRow({
   rowIndex,
 }: Props) {
   const stripeEven = rowIndex % 2 === 0;
+  const aiBeat = useSalesDemoBeatClass(
+    rowIndex === 0 ? "candidate-to-client__ai-reason" : NO_ROW_BEAT
+  );
+  const candidateBeat = useSalesDemoBeatClass(
+    rowIndex === 0 ? "candidate-to-client__candidate-panel" : NO_ROW_BEAT
+  );
 
   return (
     <li className="rounded-lg border border-border bg-card/30 p-3 text-sm">
@@ -44,7 +53,8 @@ export function MatchingCandidateRow({
         <div
           className={cn(
             "flex min-w-0 flex-col gap-2 rounded-lg border border-transparent px-2 py-2 md:border-l md:border-border md:px-4 md:py-3",
-            stripeEven ? "bg-primary/[0.06]" : "bg-muted/50"
+            stripeEven ? "bg-primary/[0.06]" : "bg-muted/50",
+            rowIndex === 0 && aiBeat
           )}
         >
           <div className="flex items-baseline gap-2">
@@ -60,7 +70,12 @@ export function MatchingCandidateRow({
           </p>
         </div>
 
-        <div className="min-w-0 space-y-2 md:border-l md:border-border md:pl-4">
+        <div
+          className={cn(
+            "min-w-0 space-y-2 md:border-l md:border-border md:pl-4",
+            rowIndex === 0 && candidateBeat
+          )}
+        >
           <div className="flex items-start gap-3">
             <Image
               src={candidate.photoUrl}

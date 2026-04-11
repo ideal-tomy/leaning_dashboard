@@ -47,3 +47,29 @@ body {
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
+
+/* 営業ストーリー iframe 内：明示的に付けた操作系だけ強調（動画で境界が分かる） */
+.story-demo-tap-target {
+  outline: 2px solid color-mix(in srgb, var(--primary) 50%, transparent);
+  outline-offset: 2px;
+}
+
+/* 親ウィンドウからの postMessage ビート同期で付与（tap-target より太めで区別） */
+.story-demo-beat-active {
+  position: relative;
+  z-index: 1;
+  outline: 3px solid color-mix(in srgb, var(--primary) 72%, transparent);
+  outline-offset: 4px;
+  border-radius: 0.5rem;
+  animation: storyDemoBeatPulse 1.4s ease-in-out infinite;
+}
+
+@keyframes storyDemoBeatPulse {
+  0%,
+  100% {
+    outline-color: color-mix(in srgb, var(--primary) 55%, transparent);
+  }
+  50% {
+    outline-color: color-mix(in srgb, var(--primary) 80%, transparent);
+  }
+}

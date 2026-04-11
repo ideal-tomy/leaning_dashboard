@@ -18,6 +18,13 @@ import { getDemoFactoryClient } from "@/lib/demo-factory-client";
 import { getIndustryDemoData } from "@/lib/demo-data-selector";
 import { buildDashboardTopCards } from "@/lib/dashboard-top-cards";
 import { resolveDashboardViewMode } from "@/lib/dashboard-view-mode";
+import { StoryBeatMark } from "@/components/story-demo/sales-demo-beat-context";
+import {
+  getStoryDashboardFocusFromSearchParams,
+  isStoryEmbedFromSearchParams,
+  STORY_EMBED_PAGE_STACK_CLASS,
+} from "@/lib/story-embed";
+import { cn } from "@/lib/utils";
 
 type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
@@ -70,22 +77,45 @@ export default async function DashboardPage({ searchParams }: PageProps) {
     pipelineStalledSales: pipeline.document_blocked + pipeline.document_prep,
   });
   const { dashboard } = appTemplateConfig;
+  const storyDemo = isStoryEmbedFromSearchParams(resolvedSearchParams);
+  const storyDashboardFocus = getStoryDashboardFocusFromSearchParams(
+    resolvedSearchParams
+  );
 
   return (
-    <div className="space-y-6 sm:space-y-8">
-      <TemplateDashboardHeader
-        title={profile.dashboardTitle || dashboard.pageTitle}
-        subtitle={profile.dashboardSubtitle || dashboard.pageSubtitle}
-      />
+    <div
+      data-story-demo={storyDemo ? "true" : undefined}
+      className={cn(
+        "space-y-6 sm:space-y-8",
+        storyDemo && STORY_EMBED_PAGE_STACK_CLASS
+      )}
+    >
+      <StoryBeatMark beatId="intro-dashboard__header" className="block rounded-lg">
+        <TemplateDashboardHeader
+          title={profile.dashboardTitle || dashboard.pageTitle}
+          subtitle={profile.dashboardSubtitle || dashboard.pageSubtitle}
+        />
+      </StoryBeatMark>
 
       <div className="md:hidden space-y-4">
-        <div className="-mx-1 overflow-x-auto pb-1">
-          <div className="flex min-w-max gap-2 px-1">
+        <div
+          className={cn(
+            "overflow-x-auto pb-1",
+            storyDemo ? "px-0" : "-mx-1",
+            storyDemo &&
+              storyDashboardFocus === "priority" &&
+              "rounded-lg ring-2 ring-primary/35 ring-offset-2 ring-offset-background"
+          )}
+        >
+          <div className={cn("flex min-w-max gap-2", storyDemo ? "px-0" : "px-1")}>
             {topCards.map((card) => (
               <Link
                 key={card.id}
                 href={withDemoQuery(card.href, industry, role)}
-                className="rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium text-foreground whitespace-nowrap"
+                className={cn(
+                  "rounded-full border-2 border-primary/25 bg-background px-3 py-1.5 text-xs font-medium text-foreground whitespace-nowrap shadow-sm ring-1 ring-primary/15 transition hover:border-primary/45 hover:bg-primary/[0.04] hover:ring-2 hover:ring-primary/25 active:scale-[0.98]",
+                  storyDemo && "story-demo-tap-target"
+                )}
               >
                 {card.title}
               </Link>
@@ -93,25 +123,46 @@ export default async function DashboardPage({ searchParams }: PageProps) {
             <Link
               href={withDemoQuery("/feature-demos", industry, role)}
               data-guide-target="guide-tech-dx-demo"
-              className="rounded-full border border-primary/30 bg-primary/[0.06] px-3 py-1.5 text-xs font-medium text-primary whitespace-nowrap"
+              className={cn(
+                "rounded-full border-2 border-primary/40 bg-primary/[0.08] px-3 py-1.5 text-xs font-medium text-primary whitespace-nowrap shadow-sm ring-1 ring-primary/25 transition hover:border-primary/55 hover:bg-primary/[0.12] hover:ring-2 hover:ring-primary/35 active:scale-[0.98]",
+                storyDemo && "story-demo-tap-target"
+              )}
             >
               技術・DXデモ
             </Link>
-            <Link
-              href={withDemoQuery("/guide", industry, role)}
-              className="rounded-full border border-primary/40 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary whitespace-nowrap"
-            >
-              営業デモ
-            </Link>
+            <StoryBeatMark beatId="closing-future__cta" className="inline-flex rounded-full">
+              <Link
+                href={withDemoQuery("/guide", industry, role)}
+                className={cn(
+                  "rounded-full border-2 border-primary/45 bg-primary/12 px-3 py-1.5 text-xs font-semibold text-primary whitespace-nowrap shadow-sm ring-1 ring-primary/30 transition hover:border-primary/60 hover:bg-primary/18 hover:ring-2 hover:ring-primary/40 active:scale-[0.98]",
+                  storyDemo && "story-demo-tap-target",
+                  storyDemo &&
+                    storyDashboardFocus === "closing" &&
+                    "ring-2 ring-primary/45 ring-offset-2 ring-offset-background"
+                )}
+              >
+                営業デモ
+              </Link>
+            </StoryBeatMark>
           </div>
         </div>
 
-        <DashboardKillerCards industry={industry} role={role} />
+        <StoryBeatMark beatId="intro-dashboard__killers" className="block rounded-xl">
+          <DashboardKillerCards
+            industry={industry}
+            role={role}
+            storyDemo={storyDemo}
+            storyDashboardFocus={storyDashboardFocus}
+          />
+        </StoryBeatMark>
 
         <Link
           href={withDemoQuery("/feature-demos", industry, role)}
           data-guide-target="guide-tech-dx-demo"
-          className="group block rounded-xl border-2 border-primary/35 bg-gradient-to-br from-primary/[0.09] to-background p-4 shadow-sm transition-all hover:border-primary/55 hover:shadow-md"
+          className={cn(
+            "group block rounded-xl border-2 border-primary/40 bg-gradient-to-br from-primary/[0.09] to-background p-4 shadow-md ring-1 ring-primary/20 transition-all hover:border-primary/60 hover:shadow-lg hover:ring-2 hover:ring-primary/30 active:scale-[0.99]",
+            storyDemo && "story-demo-tap-target"
+          )}
         >
           <div className="flex items-start gap-3">
             <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
@@ -158,29 +209,54 @@ export default async function DashboardPage({ searchParams }: PageProps) {
       </div>
 
       <div className="hidden space-y-4 md:block">
-        <DashboardKillerCards industry={industry} role={role} />
+        <StoryBeatMark beatId="intro-dashboard__killers" className="block rounded-xl">
+          <DashboardKillerCards
+            industry={industry}
+            role={role}
+            storyDemo={storyDemo}
+            storyDashboardFocus={storyDashboardFocus}
+          />
+        </StoryBeatMark>
         <Separator />
-        <div className="space-y-4">
-          <DashboardTopCardGrid cards={topCards} />
+        <div
+          className={cn(
+            "space-y-4",
+            storyDemo &&
+              storyDashboardFocus === "priority" &&
+              "rounded-xl p-1 ring-2 ring-primary/35 ring-offset-2 ring-offset-background"
+          )}
+        >
+          <DashboardTopCardGrid
+            cards={topCards}
+            storyDemo={storyDemo}
+            storyDashboardFocus={storyDashboardFocus}
+          />
         </div>
 
-        <Link
-          href={withDemoQuery("/guide", industry, role)}
-          className="group block rounded-xl border border-primary/35 bg-primary/[0.05] p-5 transition-all hover:border-primary/55 hover:bg-primary/[0.08]"
-        >
-          <div className="flex items-center justify-between gap-4">
-            <div className="min-w-0">
-              <p className="text-base font-bold text-foreground">営業デモ</p>
-              <p className="mt-1 text-sm leading-relaxed text-muted">
-                120秒で、業務が整った先にある未来を伝える専用ストーリーを再生します。
-              </p>
+        <StoryBeatMark beatId="closing-future__cta" className="block rounded-xl">
+          <Link
+            href={withDemoQuery("/guide", industry, role)}
+            className={cn(
+              "group block rounded-xl border-2 border-primary/35 bg-primary/[0.05] p-5 shadow-sm ring-1 ring-primary/15 transition-all hover:border-primary/55 hover:bg-primary/[0.08] hover:shadow-md hover:ring-2 hover:ring-primary/25",
+              storyDemo &&
+                storyDashboardFocus === "closing" &&
+                "story-demo-tap-target ring-2 ring-primary/40 ring-offset-2 ring-offset-background"
+            )}
+          >
+            <div className="flex items-center justify-between gap-4">
+              <div className="min-w-0">
+                <p className="text-base font-bold text-foreground">営業デモ</p>
+                <p className="mt-1 text-sm leading-relaxed text-muted">
+                  120秒で、業務が整った先にある未来を伝える専用ストーリーを再生します。
+                </p>
+              </div>
+              <span className="inline-flex shrink-0 items-center gap-1 rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground">
+                <CircleHelp className="size-4" aria-hidden />
+                開く
+              </span>
             </div>
-            <span className="inline-flex shrink-0 items-center gap-1 rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground">
-              <CircleHelp className="size-4" aria-hidden />
-              開く
-            </span>
-          </div>
-        </Link>
+          </Link>
+        </StoryBeatMark>
 
         <section
           className="relative z-10 mt-10 border-t border-border pt-8"
@@ -189,7 +265,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
           <Link
             href={withDemoQuery("/feature-demos", industry, role)}
             data-guide-target="guide-tech-dx-demo"
-            className="group block rounded-xl border-2 border-primary/35 bg-gradient-to-br from-primary/[0.09] via-background to-primary/[0.04] p-5 shadow-sm transition-all hover:border-primary/55 hover:shadow-md md:p-6"
+            className="group block rounded-xl border-2 border-primary/40 bg-gradient-to-br from-primary/[0.09] via-background to-primary/[0.04] p-5 shadow-md ring-1 ring-primary/20 transition-all hover:border-primary/60 hover:shadow-lg hover:ring-2 hover:ring-primary/30 md:p-6"
           >
             <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between md:gap-8">
               <div className="min-w-0 space-y-2">
