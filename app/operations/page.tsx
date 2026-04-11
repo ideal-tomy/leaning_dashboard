@@ -1,4 +1,8 @@
+"use client";
+
+import { useEffect } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { CalendarClock, FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,21 +14,18 @@ import { PageTagLinks } from "@/components/page-tag-links";
 import { getIndustryPageHints } from "@/lib/industry-page-hints";
 import { getIndustryProfile } from "@/lib/industry-profiles";
 import { parsePageTag } from "@/lib/page-tag";
+import { withDemoQuery } from "@/lib/demo-query";
 import {
-  getIndustryFromSearchParams,
-  getRoleFromSearchParams,
-  withDemoQuery,
-} from "@/lib/industry-selection";
-import { StoryBeatMark } from "@/components/story-demo/sales-demo-beat-context";
+  StoryBeatMark,
+  useSalesDemoBeatState,
+} from "@/components/story-demo/sales-demo-beat-context";
 import {
-  isStoryEmbedFromSearchParams,
+  isStoryEmbedUrlSearchParams,
   STORY_EMBED_PAGE_STACK_CLASS,
 } from "@/lib/story-embed";
 import { cn } from "@/lib/utils";
-
-type PageProps = {
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;
-};
+import { useIndustry } from "@/components/industry-context";
+import { useDemoRole } from "@/components/demo-role-context";
 
 function opsBadgeVariant(label?: string): "danger" | "warning" | "default" | "success" {
   if (!label) return "default";
@@ -34,24 +35,26 @@ function opsBadgeVariant(label?: string): "danger" | "warning" | "default" | "su
   return "default";
 }
 
-export default async function OperationsPage({ searchParams }: PageProps) {
-  const resolvedSearchParams = searchParams ? await searchParams : undefined;
-  const industry = getIndustryFromSearchParams(resolvedSearchParams);
-  const role = getRoleFromSearchParams(resolvedSearchParams);
+export default function OperationsPage() {
+  const router = useRouter();
+  const urlSearch = useSearchParams();
+  const { industry } = useIndustry();
+  const { role } = useDemoRole();
+  const { beatId: activeDemoBeatId } = useSalesDemoBeatState();
   const tag = parsePageTag(
-    typeof resolvedSearchParams?.tag === "string" ? resolvedSearchParams.tag : null,
+    urlSearch.get("tag"),
     ["deploy", "settle", "growth"] as const,
     "deploy"
   );
   const profile = getIndustryProfile(industry);
-  const storyDemo = isStoryEmbedFromSearchParams(resolvedSearchParams);
+  const storyDemo = isStoryEmbedUrlSearchParams(urlSearch);
   const hints = getIndustryPageHints(industry).operations;
   const opsDesc =
     tag === "settle"
-      ? "初期定着の未対応タスクを確認し、フォロー順を決めます。"
+      ? "定着30日に向けて、未対応タスクと次のフォロー先を確認します。"
       : tag === "growth"
         ? "成長確認に必要な運用情報と書類を中心に確認します。収益の詳細は収益ダッシュで見てください。"
-        : "配属・稼働の運用状況を確認し、今日の優先対応を決めます。";
+        : "配属状況を見ながら、今日どこを優先して動くかを判断します。";
 
   const kpiTiles =
     tag === "growth"
@@ -65,6 +68,19 @@ export default async function OperationsPage({ searchParams }: PageProps) {
       : tag === "settle"
         ? hints.timeline.slice(0, 2)
         : hints.timeline;
+
+  useEffect(() => {
+    if (!storyDemo) return;
+    const targetTag =
+      activeDemoBeatId === "company-operations__deploy"
+        ? "deploy"
+        : activeDemoBeatId === "company-operations__settle" ||
+            activeDemoBeatId === "company-operations__timeline"
+          ? "settle"
+          : null;
+    if (!targetTag || targetTag === tag) return;
+    router.replace(withDemoQuery(`/operations?tag=${targetTag}`, industry, role));
+  }, [activeDemoBeatId, industry, role, router, storyDemo, tag]);
 
   return (
     <TemplatePageStack
@@ -82,13 +98,13 @@ export default async function OperationsPage({ searchParams }: PageProps) {
             id: "deploy",
             label: "⑤-1 配属状況",
             href: withDemoQuery("/operations?tag=deploy", industry, role),
-            demoBeatId: "company-operations__priority-0",
+            demoBeatId: "company-operations__deploy",
           },
           {
             id: "settle",
             label: "⑤-2 定着30日",
             href: withDemoQuery("/operations?tag=settle", industry, role),
-            demoBeatId: "company-operations__priority-1",
+            demoBeatId: "company-operations__settle",
           },
           {
             id: "growth",
@@ -104,28 +120,18 @@ export default async function OperationsPage({ searchParams }: PageProps) {
       />
 
       <div className="flex flex-wrap gap-2">
-        <StoryBeatMark
-          beatId="company-operations__priority-0"
-          className="inline-flex rounded-md"
+        <Link
+          href={withDemoQuery("/candidates?focus=risk", industry, role)}
+          className={cn("inline-flex", storyDemo && "story-demo-tap-target rounded-md")}
         >
-          <Link
-            href={withDemoQuery("/candidates?focus=risk", industry, role)}
-            className={cn("inline-flex", storyDemo && "story-demo-tap-target rounded-md")}
-          >
-            <Badge variant="danger" className="px-3 py-1">要対応人材へ</Badge>
-          </Link>
-        </StoryBeatMark>
-        <StoryBeatMark
-          beatId="company-operations__priority-1"
-          className="inline-flex rounded-md"
+          <Badge variant="danger" className="px-3 py-1">要対応人材へ</Badge>
+        </Link>
+        <Link
+          href={withDemoQuery("/clients?tag=conditions", industry, role)}
+          className={cn("inline-flex", storyDemo && "story-demo-tap-target rounded-md")}
         >
-          <Link
-            href={withDemoQuery("/clients?tag=conditions", industry, role)}
-            className={cn("inline-flex", storyDemo && "story-demo-tap-target rounded-md")}
-          >
-            <Badge variant="warning" className="px-3 py-1">受入条件を確認</Badge>
-          </Link>
-        </StoryBeatMark>
+          <Badge variant="warning" className="px-3 py-1">受入条件を確認</Badge>
+        </Link>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -145,11 +151,17 @@ export default async function OperationsPage({ searchParams }: PageProps) {
       </div>
 
       {(tag === "deploy" || tag === "settle") && (
-      <Card>
+      <StoryBeatMark beatId="company-operations__timeline" className="block rounded-xl">
+      <Card
+        className={cn(
+          storyDemo &&
+            "story-demo-context-ring"
+        )}
+      >
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <CalendarClock className="size-5 text-primary" />
-            直近のオペレーション（デモ）
+            {tag === "settle" ? "定着フォローの優先タスク" : "直近のオペレーション（デモ）"}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -172,6 +184,7 @@ export default async function OperationsPage({ searchParams }: PageProps) {
           <p className="text-xs text-muted">{hints.csvHint}</p>
         </CardContent>
       </Card>
+      </StoryBeatMark>
       )}
 
       {(tag === "settle" || tag === "growth") && (

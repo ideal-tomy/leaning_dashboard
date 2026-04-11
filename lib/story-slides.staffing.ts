@@ -34,16 +34,16 @@ export const STAFFING_STORY_SLIDES: StorySlide[] = [
     chapter: "導入",
     title: "一つの画面から、仕事の流れが始まる",
     message:
-      "派遣や人材紹介の現場で散らばりがちな情報を、一つの流れで見られるダッシュボードです。",
+      "派遣や人材紹介の現場で散らばりがちな情報を、まず一つの入口から見渡せます。",
     supportingCopy:
-      "まずは細かい操作ではなく、会社全体の運用が整う未来をイメージしてもらうための入口です。",
-    durationMs: 15000,
+      "今日の優先事項、書類、連絡、候補者の流れを同じ画面で見られることが、このデモの出発点です。",
+    durationMs: 12000,
     previewPath: "/?storyFocus=overview",
     transition: "crossfade",
     stageLabel: "ダッシュボード全景",
     demoBeats: [
-      { id: "intro-dashboard__header", durationMs: 5000 },
-      { id: "intro-dashboard__killers", durationMs: 10000 },
+      { id: "intro-dashboard__header", durationMs: 4000 },
+      { id: "intro-dashboard__killers", durationMs: 8000 },
     ],
   },
   {
@@ -54,15 +54,15 @@ export const STAFFING_STORY_SLIDES: StorySlide[] = [
       "遅れそうなことや足りないことを、探し回らずに優先順で把握できます。",
     supportingCopy:
       "後追いではなく先回りで動けるので、担当者が人に向き合う時間をつくりやすくなります。",
-    durationMs: 15000,
+    durationMs: 12000,
     previewPath: "/?storyFocus=priority",
     transition: "crossfade",
     ctaHint: "まずは、今日やることを見る",
     stageLabel: "優先事項の見える化",
     demoBeats: [
-      { id: "today-priorities__killer-0", durationMs: 5000 },
-      { id: "today-priorities__killer-1", durationMs: 5000 },
-      { id: "today-priorities__killer-2", durationMs: 5000 },
+      { id: "today-priorities__killer-0", durationMs: 4000 },
+      { id: "today-priorities__killer-1", durationMs: 4000 },
+      { id: "today-priorities__killer-2", durationMs: 4000 },
     ],
   },
   {
@@ -70,17 +70,18 @@ export const STAFFING_STORY_SLIDES: StorySlide[] = [
     chapter: "第1章",
     title: "書類の抜けや遅れを、早く見つける",
     message:
-      "海外人材の採用で負担になりやすい書類や手続きも、一覧で追える状態をつくります。",
+      "どこで止まりやすいかを、まずタブと数字で把握し、そのまま対象者まで追える状態をつくります。",
     supportingCopy:
-      "詰まりが早く見えることで、現場の安心と会社のリスク抑制につながります。",
+      "気づくのが早いほど、現場の安心と会社のリスク抑制につながります。",
     durationMs: 12000,
-    previewPath: "/documents?storyFocus=risk",
+    previewPath: "/documents?scope=pre-entry&storyFocus=risk",
     transition: "crossfade",
     ctaHint: "次に、止まりやすい所を見る",
     stageLabel: "書類・手続きの見える化",
     demoBeats: [
-      { id: "document-risk__pre", durationMs: 6000 },
-      { id: "document-risk__post", durationMs: 6000 },
+      { id: "document-risk__tab", durationMs: 3500 },
+      { id: "document-risk__alert-kpi", durationMs: 4000 },
+      { id: "document-risk__blocked-list", durationMs: 4500 },
     ],
   },
   {
@@ -91,14 +92,14 @@ export const STAFFING_STORY_SLIDES: StorySlide[] = [
       "誰を、どの案件に、どんな理由で進めるかを、同じ流れの中で見られます。",
     supportingCopy:
       "候補者、案件、提案理由が分断されないことで、説明しやすく納得感のある判断につながります。",
-    durationMs: 13000,
+    durationMs: 12000,
     previewPath: "/matching",
     transition: "crossfade",
     ctaHint: "候補者と案件の関係を見る",
     stageLabel: "候補者と案件の接続",
     demoBeats: [
-      { id: "candidate-to-client__ai-reason", durationMs: 6500 },
-      { id: "candidate-to-client__candidate-panel", durationMs: 6500 },
+      { id: "candidate-to-client__ai-reason", durationMs: 6000 },
+      { id: "candidate-to-client__candidate-panel", durationMs: 6000 },
     ],
   },
   {
@@ -106,49 +107,55 @@ export const STAFFING_STORY_SLIDES: StorySlide[] = [
     chapter: "第2章",
     title: "書類の状況も、一覧で追える",
     message:
-      "入国前後の書類や更新も、担当の頭の中だけに置かず、同じ一覧で状況を共有できます。",
+      "入国後の更新や提出状況も、一覧の一行で進捗と不足を共有できます。",
     supportingCopy:
-      "候補者・案件の判断と、書類の進捗がつながることで、説明とフォローがしやすくなります。",
+      "候補者の判断と、就労後の書類フォローを同じ運用の流れで説明しやすくなります。",
     durationMs: 12000,
     previewPath: "/documents?scope=post-entry&storyFocus=list",
     transition: "crossfade",
     ctaHint: "書類の流れを一覧で見る",
     stageLabel: "書類状況の共有",
-    demoBeats: [{ id: "document-connected__list", durationMs: 12000 }],
+    demoBeats: [
+      { id: "document-connected__tab", durationMs: 3000 },
+      { id: "document-connected__row-0", durationMs: 5000 },
+      { id: "document-connected__status", durationMs: 4000 },
+    ],
   },
   {
     id: "communication-history",
     chapter: "第2章",
     title: "連絡も履歴として残り、引き継ぎしやすい",
     message:
-      "書類や連絡が履歴として残るので、担当者個人の頭の中だけに運用を置かずに済みます。",
+      "連絡内容、翻訳、未読や注意の印が同じカードに残るので、担当が変わっても状況を引き継ぎやすくなります。",
     supportingCopy:
-      "属人的だった仕事が、会社として回る仕事に変わっていくことが重要です。",
-    durationMs: 13000,
+      "言語の壁があっても、履歴として残せることが属人化を減らす土台になります。",
+    durationMs: 12000,
     previewPath: "/messages",
     transition: "crossfade",
     ctaHint: "連絡の流れを見る",
     stageLabel: "履歴が残るコミュニケーション",
     demoBeats: [
-      { id: "communication-history__thread", durationMs: 6500 },
-      { id: "communication-history__translate", durationMs: 6500 },
+      { id: "communication-history__thread", durationMs: 4000 },
+      { id: "communication-history__translation-open", durationMs: 4000 },
+      { id: "communication-history__meta", durationMs: 4000 },
     ],
   },
   {
     id: "company-operations",
     chapter: "第2章",
-    title: "担当者の頑張りではなく、会社として回る運用へ",
+    title: "配属から定着まで、今日の運用判断を迷わない",
     message:
-      "候補者、案件、書類、連絡が一本でつながることで、担当が変わっても回る土台をつくれます。",
+      "配属状況と定着フォローを切り替えながら、今日どこを見るべきかを同じ画面で判断できます。",
     supportingCopy:
-      "日々の業務が整理されることで、増え続ける負担を抑えながら運用の質を上げやすくなります。",
-    durationMs: 13000,
-    previewPath: "/operations",
+      "担当者の勘だけに頼らず、次の行動先まで迷わずつながることが運用の強さになります。",
+    durationMs: 12000,
+    previewPath: "/operations?tag=deploy",
     transition: "crossfade",
-    stageLabel: "会社として回る運用",
+    stageLabel: "日々の運用判断",
     demoBeats: [
-      { id: "company-operations__priority-0", durationMs: 6500 },
-      { id: "company-operations__priority-1", durationMs: 6500 },
+      { id: "company-operations__deploy", durationMs: 4000 },
+      { id: "company-operations__settle", durationMs: 4000 },
+      { id: "company-operations__timeline", durationMs: 4000 },
     ],
   },
   {
@@ -156,16 +163,20 @@ export const STAFFING_STORY_SLIDES: StorySlide[] = [
     chapter: "第3章",
     title: "人に向き合う時間を、支援の質に変えていく",
     message:
-      "日本語の学習や倫理の学習を続けやすい運用は、より良い人材支援とより良い受け入れ環境につながります。",
+      "学習タブの中で、日本語の進行と倫理の確認を続けられると、支援の質を日々積み上げやすくなります。",
     supportingCopy:
-      "派遣元と受け入れ先の両方にとって、前向きな循環をつくることがこの仕組みの価値です。",
-    durationMs: 14000,
+      "派遣元と受け入れ先の両方にとって、学習の継続が前向きな循環をつくる土台になります。",
+    durationMs: 12000,
     previewPath: "/worker/learn",
     previewRole: "worker",
     transition: "crossfade",
     ctaHint: "支援の未来を見る",
     stageLabel: "学習と支援の未来",
-    demoBeats: [{ id: "learning-and-support__card", durationMs: 14000 }],
+    demoBeats: [
+      { id: "learning-and-support__tab", durationMs: 3000 },
+      { id: "learning-and-support__jp-module", durationMs: 5000 },
+      { id: "learning-and-support__ethics-status", durationMs: 4000 },
+    ],
   },
   {
     id: "closing-future",
@@ -175,12 +186,12 @@ export const STAFFING_STORY_SLIDES: StorySlide[] = [
       "派遣コックピットは、作業を減らすためだけでなく、より良い人材支援と受け入れ環境を無理なく続ける土台です。",
     supportingCopy:
       "まずは御社の現場に合うか、一緒に見ていくところから始められます。",
-    durationMs: 12000,
+    durationMs: 10000,
     previewPath: "/?storyFocus=closing",
     transition: "crossfade",
     ctaHint: "この先の可能性を見る",
     stageLabel: "未来への着地",
-    demoBeats: [{ id: "closing-future__cta", durationMs: 12000 }],
+    demoBeats: [{ id: "closing-future__cta", durationMs: 10000 }],
   },
 ];
 

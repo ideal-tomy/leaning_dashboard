@@ -108,29 +108,20 @@ export default function DocumentsPage() {
 
   useEffect(() => {
     if (!storyDemo) return;
-    const targetId =
-      storyFocus === "risk"
-        ? "story-doc-alert-kpi"
-        : storyFocus === "list"
-          ? "story-doc-list-card"
+    const target =
+      activeDemoBeatId?.startsWith("document-risk__")
+        ? { scope: "pre-entry", focus: "risk" }
+        : activeDemoBeatId?.startsWith("document-connected__")
+          ? { scope: "post-entry", focus: "list" }
           : null;
-    if (!targetId) return;
-    const id = requestAnimationFrame(() => {
-      document
-        .getElementById(targetId)
-        ?.scrollIntoView({ behavior: "smooth", block: "center" });
-    });
-    return () => cancelAnimationFrame(id);
-  }, [storyDemo, storyFocus]);
-
-  useEffect(() => {
-    if (!storyDemo || activeDemoBeatId !== "document-risk__post") return;
+    if (!target) return;
+    if (scope === target.scope && storyFocus === target.focus) return;
     router.replace(
-      withDemoQuery("/documents?scope=post-entry", industry, role, {
-        storyFocus: "risk",
+      withDemoQuery(`/documents?scope=${target.scope}`, industry, role, {
+        storyFocus: target.focus,
       })
     );
-  }, [activeDemoBeatId, industry, role, router, storyDemo]);
+  }, [activeDemoBeatId, industry, role, router, scope, storyDemo, storyFocus]);
 
   const blocked = data.candidates.filter(
     (c) => c.pipelineStatus === "document_blocked"
@@ -154,6 +145,15 @@ export default function DocumentsPage() {
   const preEntryCandidates = data.candidates.filter((c) =>
     preEntryStatuses.includes(c.pipelineStatus)
   );
+  const prioritizedPreEntryCandidates = [...preEntryCandidates].sort((a, b) => {
+    if (a.pipelineStatus === "document_blocked" && b.pipelineStatus !== "document_blocked") {
+      return -1;
+    }
+    if (a.pipelineStatus !== "document_blocked" && b.pipelineStatus === "document_blocked") {
+      return 1;
+    }
+    return a.displayName.localeCompare(b.displayName, "ja");
+  });
   const postEntryCandidates = data.candidates.filter(
     (c) =>
       c.pipelineStatus === "training" ||
@@ -209,47 +209,45 @@ export default function DocumentsPage() {
 
   return (
     <TemplatePageStack className={storyStackClass}>
-      <StoryBeatMark beatId="document-risk__pre" className="block rounded-lg">
-        <PageTagLinks
-          label="表示タグ"
-          currentId={scope}
-          mobileScrollable
-          stickyOnMobile={!storyDemo}
-          mobileTopClassName={storyDemo ? "top-0" : "top-[7rem]"}
-          demoLinkClassName={storyDemo ? "story-demo-tap-target rounded-md" : undefined}
-          tags={[
-            {
-              id: "pre-entry",
-              label: isConstruction
-                ? "②-1 入場前"
-                : isLogistics
-                  ? "②-1 入構前"
-                  : "②-1 入国前",
-              href: scopeHref("pre-entry"),
-              demoBeatId: "document-risk__pre",
-            },
-            {
-              id: "post-entry",
-              label: isConstruction
-                ? "②-2 入場後"
-                : isLogistics
-                  ? "②-2 入構後"
-                  : "②-2 入国後",
-              href: scopeHref("post-entry"),
-              demoBeatId: "document-risk__post",
-            },
-            {
-              id: "deadlines",
-              label: isConstruction
-                ? "②-3 期限・特別教育"
-                : isLogistics
-                  ? "②-3 期限・免許・教育"
-                  : "②-3 期限・保管",
-              href: scopeHref("deadlines"),
-            },
-          ]}
-        />
-
+      <PageTagLinks
+        label="表示タグ"
+        currentId={scope}
+        mobileScrollable
+        stickyOnMobile={!storyDemo}
+        mobileTopClassName={storyDemo ? "top-0" : "top-[7rem]"}
+        demoLinkClassName={storyDemo ? "story-demo-tap-target rounded-md" : undefined}
+        tags={[
+          {
+            id: "pre-entry",
+            label: isConstruction
+              ? "②-1 入場前"
+              : isLogistics
+                ? "②-1 入構前"
+                : "②-1 入国前",
+            href: scopeHref("pre-entry"),
+            demoBeatId: "document-risk__tab",
+          },
+          {
+            id: "post-entry",
+            label: isConstruction
+              ? "②-2 入場後"
+              : isLogistics
+                ? "②-2 入構後"
+                : "②-2 入国後",
+            href: scopeHref("post-entry"),
+            demoBeatId: "document-connected__tab",
+          },
+          {
+            id: "deadlines",
+            label: isConstruction
+              ? "②-3 期限・特別教育"
+              : isLogistics
+                ? "②-3 期限・免許・教育"
+                : "②-3 期限・保管",
+            href: scopeHref("deadlines"),
+          },
+        ]}
+      />
       <TemplatePageHeader
         title={`${profile.labels.documents}管理`}
         description={
@@ -299,34 +297,34 @@ export default function DocumentsPage() {
         は一覧から体験できます。
       </p>
 
-        <div className="grid gap-4 sm:grid-cols-3">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted">生成完了</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-bold tabular-nums">{docHints.kpiComplete}</p>
-              <Badge variant="success" className="mt-2">
-                デモ値
-              </Badge>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted">要確認</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-bold tabular-nums">{docHints.kpiReview}</p>
-              <Badge variant="warning" className="mt-2">
-                レビュー待ち
-              </Badge>
-            </CardContent>
-          </Card>
+      <div className="grid gap-4 sm:grid-cols-3">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted">生成完了</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold tabular-nums">{docHints.kpiComplete}</p>
+            <Badge variant="success" className="mt-2">
+              デモ値
+            </Badge>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted">要確認</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold tabular-nums">{docHints.kpiReview}</p>
+            <Badge variant="warning" className="mt-2">
+              レビュー待ち
+            </Badge>
+          </CardContent>
+        </Card>
+        <StoryBeatMark beatId="document-risk__alert-kpi" className="block rounded-lg">
           <Card
             id="story-doc-alert-kpi"
             className={cn(
               storyDemo &&
-                storyFocus === "risk" &&
                 "story-demo-context-ring story-demo-tap-target ring-2 ring-primary/30"
             )}
           >
@@ -342,11 +340,17 @@ export default function DocumentsPage() {
               </Badge>
             </CardContent>
           </Card>
-        </div>
-      </StoryBeatMark>
+        </StoryBeatMark>
+      </div>
 
       {scope === "pre-entry" && (
-        <Card>
+        <StoryBeatMark beatId="document-risk__blocked-list" className="block rounded-lg">
+        <Card
+          className={cn(
+            storyDemo &&
+              "story-demo-context-ring"
+          )}
+        >
           <CardHeader>
             <CardTitle className="text-base">
               {isConstruction
@@ -364,16 +368,19 @@ export default function DocumentsPage() {
             </p>
           </CardHeader>
           <CardContent className="space-y-2">
-            {preEntryCandidates.length === 0 ? (
+            {prioritizedPreEntryCandidates.length === 0 ? (
               <p className="text-sm text-muted">該当者はいません。</p>
             ) : (
-              preEntryCandidates.slice(0, 8).map((c) => (
+              prioritizedPreEntryCandidates.slice(0, 8).map((c, index) => (
                 <Link
                   key={c.id}
                   href={withDemoQuery(`/candidates/${c.id}`, industry, role, {
                     tab: "docs",
                   })}
-                  className="block rounded-lg border border-border p-3 text-sm hover:bg-surface"
+                  className={cn(
+                    "block rounded-lg border border-border p-3 text-sm hover:bg-surface",
+                    index === 0 && storyDemo && "story-demo-tap-target"
+                  )}
                 >
                   <p className="font-medium">{c.displayName}</p>
                   <p className="text-xs text-muted">
@@ -387,23 +394,11 @@ export default function DocumentsPage() {
             )}
           </CardContent>
         </Card>
+        </StoryBeatMark>
       )}
 
       {scope === "post-entry" && (
-        <StoryBeatMark
-          beatId={
-            storyFocus === "list" ? "document-connected__list" : "document-risk__post"
-          }
-          className="block rounded-lg"
-        >
-          <Card
-            id="story-doc-list-card"
-            className={cn(
-              storyDemo &&
-                storyFocus === "list" &&
-                "story-demo-context-ring story-demo-tap-target ring-2 ring-primary/30"
-            )}
-          >
+          <Card id="story-doc-list-card">
           <CardHeader>
             <CardTitle className="text-base">
               {isConstruction
@@ -424,24 +419,56 @@ export default function DocumentsPage() {
             {postEntryCandidates.length === 0 ? (
               <p className="text-sm text-muted">該当者はいません。</p>
             ) : (
-              postEntryCandidates.slice(0, 8).map((c) => (
-                <Link
-                  key={c.id}
-                  href={withDemoQuery(`/candidates/${c.id}`, industry, role, {
-                    tab: "docs",
-                  })}
-                  className="block rounded-lg border border-border p-3 text-sm hover:bg-surface"
-                >
-                  <p className="font-medium">{c.displayName}</p>
-                  <p className="text-xs text-muted">
-                    {c.pipelineStatusLabelJa} / COE {c.coeStatusJa}
-                  </p>
-                </Link>
+              postEntryCandidates.slice(0, 8).map((c, index) => (
+                <div key={c.id}>
+                  {index === 0 ? (
+                    <StoryBeatMark beatId="document-connected__row-0" className="block rounded-lg">
+                      <Link
+                        href={withDemoQuery(`/candidates/${c.id}`, industry, role, {
+                          tab: "docs",
+                        })}
+                        className={cn(
+                          "block rounded-lg border border-border p-3 text-sm hover:bg-surface",
+                          storyDemo &&
+                            "story-demo-context-ring story-demo-tap-target ring-2 ring-primary/30"
+                        )}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="font-medium">{c.displayName}</p>
+                            <p className="text-xs text-muted">
+                              {c.pipelineStatusLabelJa} / COE {c.coeStatusJa}
+                            </p>
+                          </div>
+                          <StoryBeatMark
+                            beatId="document-connected__status"
+                            className="inline-flex rounded-md"
+                          >
+                            <Badge variant={c.documentAlertJa ? "warning" : "success"}>
+                              {c.documentAlertJa ? "更新確認" : "共有済み"}
+                            </Badge>
+                          </StoryBeatMark>
+                        </div>
+                      </Link>
+                    </StoryBeatMark>
+                  ) : (
+                    <Link
+                      href={withDemoQuery(`/candidates/${c.id}`, industry, role, {
+                        tab: "docs",
+                      })}
+                      className="block rounded-lg border border-border p-3 text-sm hover:bg-surface"
+                    >
+                      <p className="font-medium">{c.displayName}</p>
+                      <p className="text-xs text-muted">
+                        {c.pipelineStatusLabelJa} / COE {c.coeStatusJa}
+                      </p>
+                    </Link>
+                  )}
+                </div>
               ))
             )}
           </CardContent>
         </Card>
-        </StoryBeatMark>
       )}
 
       {scope === "deadlines" && (

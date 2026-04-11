@@ -42,6 +42,7 @@ function TagLink({
     <Link
       href={tag.href}
       scroll={false}
+      data-demo-beat-id={tag.demoBeatId}
       className={cn(
         "shrink-0 border-b-2 px-0.5 py-1 text-sm font-medium transition-colors whitespace-nowrap",
         active

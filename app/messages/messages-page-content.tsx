@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Languages } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +14,10 @@ import { withDemoQuery } from "@/lib/demo-query";
 import type { DemoMessage } from "@/lib/demo-messages";
 import { demoMessages } from "@/lib/demo-messages";
 import { cn } from "@/lib/utils";
-import { StoryBeatMark } from "@/components/story-demo/sales-demo-beat-context";
+import {
+  StoryBeatMark,
+  useSalesDemoBeatState,
+} from "@/components/story-demo/sales-demo-beat-context";
 import {
   isStoryEmbedUrlSearchParams,
   STORY_EMBED_PAGE_STACK_CLASS,
@@ -44,6 +47,7 @@ export function MessagesPageContent({
   const { role } = useDemoRole();
   const urlSearch = useSearchParams();
   const storyDemo = isStoryEmbedUrlSearchParams(urlSearch);
+  const { beatId: activeDemoBeatId, slideId } = useSalesDemoBeatState();
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
 
   const back = flowBack ?? {
@@ -55,6 +59,28 @@ export function MessagesPageContent({
     setRevealed((r) => ({ ...r, [id]: !r[id] }));
   }
 
+  const orderedMessages = useMemo(() => {
+    if (!storyDemo) return demoMessages;
+    const storyOrder = ["msg-2", "msg-3", "msg-4", "msg-1", "msg-5"];
+    return [...demoMessages].sort(
+      (a, b) => storyOrder.indexOf(a.id) - storyOrder.indexOf(b.id)
+    );
+  }, [storyDemo]);
+
+  const firstStoryMessageId = orderedMessages[0]?.id;
+
+  useEffect(() => {
+    if (!storyDemo || !firstStoryMessageId) return;
+    if (
+      activeDemoBeatId === "communication-history__translation-open" ||
+      activeDemoBeatId === "communication-history__meta"
+    ) {
+      setRevealed((prev) => ({ ...prev, [firstStoryMessageId]: true }));
+      return;
+    }
+    setRevealed((prev) => ({ ...prev, [firstStoryMessageId]: false }));
+  }, [activeDemoBeatId, firstStoryMessageId, slideId, storyDemo]);
+
   return (
     <TemplatePageStack
       className={cn(storyDemo && STORY_EMBED_PAGE_STACK_CLASS)}
@@ -65,17 +91,21 @@ export function MessagesPageContent({
           ワーカーメッセージ
         </h1>
         <p className="mt-1 text-sm text-muted">
-          シンハラ語原文と日本語（デモ）。50 件は{" "}
-          <code className="rounded bg-surface px-1 text-xs">lib/demo-messages.ts</code>{" "}
-          に追記してください。
+          {storyDemo
+            ? "会話の履歴、翻訳、未読や要注意の印を同じ画面で確認できます。"
+            : <>
+                シンハラ語原文と日本語（デモ）。50 件は{" "}
+                <code className="rounded bg-surface px-1 text-xs">lib/demo-messages.ts</code>{" "}
+                に追記してください。
+              </>}
         </p>
       </div>
       <ul
         className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 [-webkit-overflow-scrolling:touch] overscroll-x-contain md:grid md:snap-none md:grid-cols-2 md:overflow-visible md:pb-0 lg:grid-cols-4"
         role="list"
       >
-        {demoMessages.map((m) => {
-          const isFirst = m.id === demoMessages[0]?.id;
+        {orderedMessages.map((m) => {
+          const isFirst = m.id === firstStoryMessageId;
           const translateBtn = (
             <Button
               variant="secondary"
@@ -117,7 +147,7 @@ export function MessagesPageContent({
                     <p
                       className={cn(
                         "mt-1",
-                        !storyDemo && !revealed[m.id] && "blur-sm select-none"
+                        !revealed[m.id] && "blur-sm select-none"
                       )}
                     >
                       {m.ja}
@@ -126,7 +156,7 @@ export function MessagesPageContent({
                 </div>
                 {isFirst ? (
                   <StoryBeatMark
-                    beatId="communication-history__translate"
+                    beatId="communication-history__translation-open"
                     className="inline-flex rounded-md"
                   >
                     {translateBtn}
@@ -153,7 +183,50 @@ export function MessagesPageContent({
                       storyDemo && "story-demo-tap-target"
                     )}
                   >
-                    {cardInner}
+                    <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2 pb-2">
+                      <CardTitle className="text-sm font-medium text-muted">
+                        {m.category ?? "メッセージ"}
+                      </CardTitle>
+                      <StoryBeatMark
+                        beatId="communication-history__meta"
+                        className="inline-flex rounded-md"
+                      >
+                        <div className="flex flex-wrap items-center justify-end gap-2">
+                          {sentimentBadge(m.sentiment)}
+                          {m.unread && <Badge variant="primary">未読</Badge>}
+                        </div>
+                      </StoryBeatMark>
+                    </CardHeader>
+                    <CardContent className="flex flex-1 flex-col space-y-3">
+                      <div className="grid flex-1 grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-1 2xl:grid-cols-2">
+                        <div className="rounded-lg bg-surface p-3 text-sm">
+                          <p className="text-xs text-muted">シンハラ語</p>
+                          <p className="mt-1 font-medium">{m.si}</p>
+                          {m.readingJa && (
+                            <p className="mt-1 text-xs text-muted">
+                              読み: {m.readingJa}
+                            </p>
+                          )}
+                        </div>
+                        <div className="rounded-lg border border-border p-3 text-sm">
+                          <p className="text-xs text-muted">日本語</p>
+                          <p
+                            className={cn(
+                              "mt-1",
+                              !revealed[m.id] && "blur-sm select-none"
+                            )}
+                          >
+                            {m.ja}
+                          </p>
+                        </div>
+                      </div>
+                      <StoryBeatMark
+                        beatId="communication-history__translation-open"
+                        className="inline-flex rounded-md"
+                      >
+                        {translateBtn}
+                      </StoryBeatMark>
+                    </CardContent>
                   </Card>
                 </StoryBeatMark>
               ) : (

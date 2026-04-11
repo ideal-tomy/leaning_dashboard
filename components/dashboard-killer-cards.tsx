@@ -1091,6 +1091,7 @@ export function DashboardKillerCards({
     <div className={cn("space-y-2", closingMute, overviewShell)}>
       <div className="grid min-w-0 gap-2.5 md:grid-cols-3">
         <Card
+          data-demo-beat-id="today-priorities__killer-0"
           className={cn(
             "min-w-0 border-amber-500/25 bg-amber-500/[0.04]",
             killerCardRing(0),
@@ -1141,6 +1142,7 @@ export function DashboardKillerCards({
         </Card>
 
         <Card
+          data-demo-beat-id="today-priorities__killer-1"
           className={cn(
             "min-w-0 border-primary/20",
             killerCardRing(1),
@@ -1194,6 +1196,7 @@ export function DashboardKillerCards({
         </Card>
 
         <Card
+          data-demo-beat-id="today-priorities__killer-2"
           className={cn(
             "min-w-0 border-warning/35 bg-warning/[0.05]",
             killerCardRing(2),
