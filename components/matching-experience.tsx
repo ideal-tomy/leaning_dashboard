@@ -66,7 +66,8 @@ export function MatchingExperience({
           <Card
             className={cn(
               "border-primary/20 bg-primary/[0.04] shadow-sm",
-              storyDemo && "story-demo-tap-target ring-2 ring-primary/25"
+              storyDemo &&
+                "story-demo-context-ring story-demo-tap-target ring-2 ring-primary/25"
             )}
           >
             <CardHeader className="pb-2 pt-4">

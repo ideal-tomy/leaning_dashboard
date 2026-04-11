@@ -20,8 +20,11 @@ type StoryPlayerProps = {
   slides: StorySlide[];
 };
 
-const TRANSITION_MS = 420;
-/** iframe 内の React が message リスナーを張るまでの余裕（最初のビートを落とさない） */
+/** How long the old frame fades out (matches CSS duration-800) */
+const CROSSFADE_MS = 800;
+/** Extra delay before declaring transition "done" so both frames overlap */
+const CROSSFADE_SETTLE_MS = 200;
+/** Wait for iframe React to mount before first beat postMessage */
 const IFRAME_BEAT_START_DELAY_MS = 150;
 
 export function StoryPlayer({ industry, role, slides }: StoryPlayerProps) {
@@ -34,11 +37,11 @@ export function StoryPlayer({ industry, role, slides }: StoryPlayerProps) {
   const [nowMs, setNowMs] = useState(() => Date.now());
   const [previousIndex, setPreviousIndex] = useState<number | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isNewFrameReady, setIsNewFrameReady] = useState(true);
   const transitionTimeoutRef = useRef<number | null>(null);
   const previewIframeRef = useRef<HTMLIFrameElement | null>(null);
   const beatTimeoutsRef = useRef<number[]>([]);
   const beatSeqRef = useRef(0);
-  /** `slideId:generation` — スライド変更で generation が進み、対応する iframe onLoad 後だけビートを張る */
   const [beatScheduleKey, setBeatScheduleKey] = useState("");
   const loadGenerationRef = useRef(0);
 
@@ -84,7 +87,6 @@ export function StoryPlayer({ industry, role, slides }: StoryPlayerProps) {
   useEffect(() => {
     clearBeatTimeouts();
     postBeatToPreview(currentSlide?.id ?? "", "");
-    /** beatScheduleKey は空にしない（onLoad が先に走った場合に上書き消しするため）。次の onLoad で更新される */
   }, [clearBeatTimeouts, currentSlide?.id, postBeatToPreview]);
 
   useEffect(() => {
@@ -123,6 +125,7 @@ export function StoryPlayer({ industry, role, slides }: StoryPlayerProps) {
 
   const handlePreviewIframeLoad = useCallback(() => {
     loadGenerationRef.current += 1;
+    setIsNewFrameReady(true);
     setBeatScheduleKey(`${currentSlide.id}:${loadGenerationRef.current}`);
   }, [currentSlide.id]);
 
@@ -147,6 +150,7 @@ export function StoryPlayer({ industry, role, slides }: StoryPlayerProps) {
       }
       setPreviousIndex(index);
       setIsTransitioning(true);
+      setIsNewFrameReady(false);
       setElapsedMs(0);
       setStartedAt(Date.now());
       setIndex(clamped);
@@ -154,7 +158,7 @@ export function StoryPlayer({ industry, role, slides }: StoryPlayerProps) {
         setPreviousIndex(null);
         setIsTransitioning(false);
         transitionTimeoutRef.current = null;
-      }, TRANSITION_MS);
+      }, CROSSFADE_MS + CROSSFADE_SETTLE_MS);
     },
     [index, slides.length]
   );
@@ -199,14 +203,15 @@ export function StoryPlayer({ industry, role, slides }: StoryPlayerProps) {
     >
       <div className="fixed inset-0 z-[60] overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(71,85,105,0.34),transparent_30%),radial-gradient(circle_at_80%_100%,rgba(14,165,233,0.18),transparent_30%)]" />
-        <div className="absolute inset-x-0 top-[2.85rem] px-2 pb-[min(34vh,310px)] pt-0.5 sm:px-3 md:top-16 md:bottom-28 md:pb-0 md:px-5 lg:bottom-32 lg:px-8">
-          <div className="mx-auto flex h-full w-full max-w-6xl items-center justify-center">
+        <div className="absolute inset-x-0 top-[2.85rem] bottom-0 flex flex-col px-4 pb-[min(30vh,280px)] pt-1 sm:px-5 md:top-16 md:bottom-28 md:pb-0 md:px-5 lg:bottom-32 lg:px-8">
+          <div className="mx-auto flex h-full min-h-0 w-full max-w-6xl items-center justify-center">
             <StoryStage
               industry={industry}
               defaultRole={previewBaseRole}
               currentSlide={currentSlide}
               previousSlide={previousSlide}
               isTransitioning={isTransitioning}
+              isNewFrameReady={isNewFrameReady}
               previewIframeRef={previewIframeRef}
               onPreviewIframeLoad={handlePreviewIframeLoad}
             />

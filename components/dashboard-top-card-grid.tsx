@@ -49,7 +49,7 @@ export function DashboardTopCardGrid({
               storyDemo && "border-primary/25",
               storyDemo &&
                 storyDashboardFocus === "priority" &&
-                "border-primary/35 shadow-md ring-2 ring-primary/25"
+                "story-demo-context-ring border-primary/35 shadow-md ring-2 ring-primary/25"
             )}
           >
             <CardHeader className="space-y-2 pb-2">

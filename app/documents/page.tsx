@@ -238,18 +238,17 @@ export default function DocumentsPage() {
               href: scopeHref("post-entry"),
               demoBeatId: "document-risk__post",
             },
-          {
-            id: "deadlines",
-            label: isConstruction
-              ? "②-3 期限・特別教育"
-              : isLogistics
-                ? "②-3 期限・免許・教育"
-                : "②-3 期限・保管",
-            href: scopeHref("deadlines"),
-          },
-        ]}
+            {
+              id: "deadlines",
+              label: isConstruction
+                ? "②-3 期限・特別教育"
+                : isLogistics
+                  ? "②-3 期限・免許・教育"
+                  : "②-3 期限・保管",
+              href: scopeHref("deadlines"),
+            },
+          ]}
         />
-      </StoryBeatMark>
 
       <TemplatePageHeader
         title={`${profile.labels.documents}管理`}
@@ -300,7 +299,6 @@ export default function DocumentsPage() {
         は一覧から体験できます。
       </p>
 
-      <StoryBeatMark beatId="document-risk__pre" className="block rounded-lg">
         <div className="grid gap-4 sm:grid-cols-3">
           <Card>
             <CardHeader className="pb-2">
@@ -329,7 +327,7 @@ export default function DocumentsPage() {
             className={cn(
               storyDemo &&
                 storyFocus === "risk" &&
-                "story-demo-tap-target ring-2 ring-primary/30"
+                "story-demo-context-ring story-demo-tap-target ring-2 ring-primary/30"
             )}
           >
             <CardHeader className="pb-2">
@@ -403,7 +401,7 @@ export default function DocumentsPage() {
             className={cn(
               storyDemo &&
                 storyFocus === "list" &&
-                "story-demo-tap-target ring-2 ring-primary/30"
+                "story-demo-context-ring story-demo-tap-target ring-2 ring-primary/30"
             )}
           >
           <CardHeader>

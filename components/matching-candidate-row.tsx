@@ -51,6 +51,9 @@ export function MatchingCandidateRow({
         <div className="min-w-0 space-y-1.5 md:pr-1">{left}</div>
 
         <div
+          data-demo-beat-id={
+            rowIndex === 0 ? "candidate-to-client__ai-reason" : undefined
+          }
           className={cn(
             "flex min-w-0 flex-col gap-2 rounded-lg border border-transparent px-2 py-2 md:border-l md:border-border md:px-4 md:py-3",
             stripeEven ? "bg-primary/[0.06]" : "bg-muted/50",
@@ -71,6 +74,9 @@ export function MatchingCandidateRow({
         </div>
 
         <div
+          data-demo-beat-id={
+            rowIndex === 0 ? "candidate-to-client__candidate-panel" : undefined
+          }
           className={cn(
             "min-w-0 space-y-2 md:border-l md:border-border md:pl-4",
             rowIndex === 0 && candidateBeat

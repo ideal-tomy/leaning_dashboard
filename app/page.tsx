@@ -104,7 +104,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
             storyDemo ? "px-0" : "-mx-1",
             storyDemo &&
               storyDashboardFocus === "priority" &&
-              "rounded-lg ring-2 ring-primary/35 ring-offset-2 ring-offset-background"
+              "story-demo-context-ring rounded-lg ring-2 ring-primary/35 ring-offset-2 ring-offset-background"
           )}
         >
           <div className={cn("flex min-w-max gap-2", storyDemo ? "px-0" : "px-1")}>
@@ -138,7 +138,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
                   storyDemo && "story-demo-tap-target",
                   storyDemo &&
                     storyDashboardFocus === "closing" &&
-                    "ring-2 ring-primary/45 ring-offset-2 ring-offset-background"
+                    "story-demo-context-ring ring-2 ring-primary/45 ring-offset-2 ring-offset-background"
                 )}
               >
                 営業デモ
@@ -223,7 +223,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
             "space-y-4",
             storyDemo &&
               storyDashboardFocus === "priority" &&
-              "rounded-xl p-1 ring-2 ring-primary/35 ring-offset-2 ring-offset-background"
+              "story-demo-context-ring rounded-xl p-1 ring-2 ring-primary/35 ring-offset-2 ring-offset-background"
           )}
         >
           <DashboardTopCardGrid
@@ -240,7 +240,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
               "group block rounded-xl border-2 border-primary/35 bg-primary/[0.05] p-5 shadow-sm ring-1 ring-primary/15 transition-all hover:border-primary/55 hover:bg-primary/[0.08] hover:shadow-md hover:ring-2 hover:ring-primary/25",
               storyDemo &&
                 storyDashboardFocus === "closing" &&
-                "story-demo-tap-target ring-2 ring-primary/40 ring-offset-2 ring-offset-background"
+                "story-demo-context-ring story-demo-tap-target ring-2 ring-primary/40 ring-offset-2 ring-offset-background"
             )}
           >
             <div className="flex items-center justify-between gap-4">

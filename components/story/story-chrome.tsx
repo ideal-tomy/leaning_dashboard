@@ -77,7 +77,7 @@ export function StoryChrome({
         className={cn(
           "pointer-events-none fixed inset-x-0 bottom-0 z-[61]",
           "flex justify-center px-3 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-1",
-          "md:block md:px-5 md:pb-5 md:pt-2 lg:px-8"
+          "md:flex md:px-5 md:pb-5 md:pt-2 lg:px-8"
         )}
       >
         <div
@@ -96,8 +96,8 @@ export function StoryChrome({
             />
           </div>
 
-          <div className="grid gap-2 md:grid-cols-[minmax(0,1fr)_auto] md:gap-3 md:items-end">
-            <div className="min-w-0 space-y-0.5 md:space-y-1">
+          <div className="grid gap-2 md:grid-cols-1 md:gap-4">
+            <div className="min-w-0 space-y-0.5 text-left md:space-y-1.5 md:text-center">
               <p className="text-sm font-semibold leading-snug line-clamp-4 md:line-clamp-none md:text-xl">
                 {slide.message}
               </p>
@@ -111,7 +111,7 @@ export function StoryChrome({
               ) : null}
             </div>
 
-            <div className="grid grid-cols-4 gap-1 md:gap-2">
+            <div className="grid grid-cols-4 gap-1 md:mx-auto md:max-w-md md:gap-2">
               <Button
                 type="button"
                 variant="secondary"

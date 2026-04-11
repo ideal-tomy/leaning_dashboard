@@ -1070,9 +1070,9 @@ export function DashboardKillerCards({
   const requestCount = clients.reduce((sum, c) => sum + c.operations.openSlots, 0);
 
   const ringStandard =
-    "ring-2 ring-primary/35 ring-offset-2 ring-offset-background";
+    "story-demo-context-ring ring-2 ring-primary/35 ring-offset-2 ring-offset-background";
   const ringPriorityFirst =
-    "ring-2 ring-primary/45 ring-offset-2 ring-offset-background";
+    "story-demo-context-ring ring-2 ring-primary/45 ring-offset-2 ring-offset-background";
   const killerCardRing = (i: 0 | 1 | 2) => {
     if (!storyDemo) return "";
     if (storyDashboardFocus === "overview") return "";
@@ -1084,7 +1084,7 @@ export function DashboardKillerCards({
     storyDemo && storyDashboardFocus === "closing" ? "opacity-[0.55]" : "";
   const overviewShell =
     storyDemo && storyDashboardFocus === "overview"
-      ? "rounded-xl p-1 ring-2 ring-primary/30 ring-offset-2 ring-offset-background"
+      ? "story-demo-context-ring rounded-xl p-1 ring-2 ring-primary/30 ring-offset-2 ring-offset-background"
       : "";
 
   return (

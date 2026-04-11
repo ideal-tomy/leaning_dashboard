@@ -30,6 +30,6 @@ export function getStoryDashboardFocusFromSearchParams(
   return undefined;
 }
 
-/** iframe 埋め込み時のページ縦横余白（全 preview 先で統一） */
+/** iframe 埋め込み時のページ縦横余白・密度（全 preview 先で統一） */
 export const STORY_EMBED_PAGE_STACK_CLASS =
-  "box-border px-3 pb-4 pt-3 sm:px-4 sm:pt-4";
+  "box-border px-2.5 pb-3 pt-2.5 sm:px-4 sm:pb-4 sm:pt-3.5";

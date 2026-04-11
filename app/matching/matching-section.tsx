@@ -159,7 +159,8 @@ function ClientMatchingCard({
     <Card
       className={cn(
         "overflow-hidden",
-        demoHighlight && "story-demo-tap-target ring-2 ring-primary/25"
+        demoHighlight &&
+          "story-demo-context-ring story-demo-tap-target ring-2 ring-primary/25"
       )}
     >
       <Collapsible

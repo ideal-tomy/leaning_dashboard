@@ -45,7 +45,8 @@ export default async function WorkerLearnPage({ searchParams }: PageProps) {
               >
                 <Card
                   className={cn(
-                    storyDemo && "story-demo-tap-target ring-2 ring-primary/25"
+                    storyDemo &&
+                      "story-demo-context-ring story-demo-tap-target ring-2 ring-primary/25"
                   )}
                 >
                   <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
