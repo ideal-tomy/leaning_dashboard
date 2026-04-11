@@ -20,10 +20,10 @@ export function GuideStartButton({
       size="lg"
       className="h-12 w-full text-base sm:w-auto sm:min-w-[12rem]"
       onClick={() => {
-        router.push(withDemoQuery("/", industry, role, { guide: "1" }));
+        router.push(withDemoQuery("/story", industry, role));
       }}
     >
-      はじめる
+      デモを再生
     </Button>
   );
 }

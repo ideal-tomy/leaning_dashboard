@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useRef, useState } from "react";
 import {
   Bell,
@@ -27,12 +27,32 @@ import { getIndustryProfile } from "@/lib/industry-profiles";
 import { useIndustry } from "@/components/industry-context";
 import { useDemoRole } from "@/components/demo-role-context";
 import { IndustrySecretModal } from "@/components/industry-secret-modal";
-import { GuideShellOverlay } from "@/components/guide/guide-shell-overlay";
 import { withDemoQuery } from "@/lib/demo-query";
 import { demoRoleLabelJa, demoRoles, type DemoRole } from "@/lib/demo-role";
 
 const SECRET_TAP_WINDOW_MS = 2000;
 const SECRET_TAP_COUNT = 5;
+
+/** はじめてガイドのスポットライト用（`data-guide-target` と一致） */
+const ADMIN_NAV_GUIDE_TARGETS: Record<string, string> = {
+  "/": "guide-nav-home",
+  "/candidates": "guide-nav-candidates",
+  "/clients": "guide-nav-clients",
+  "/operations": "guide-nav-operations",
+  "/revenue": "guide-nav-revenue",
+  "/knowledge": "guide-nav-knowledge",
+  "/messages": "guide-nav-messages",
+  "/matching": "guide-nav-matching",
+  "/documents": "guide-nav-documents",
+};
+
+const WORKER_NAV_GUIDE_TARGETS: Record<string, string> = {
+  "/worker": "guide-worker-home",
+  "/worker/learn": "guide-worker-learn",
+  "/worker/progress": "guide-worker-progress",
+  "/worker/alerts": "guide-worker-alerts",
+  "/worker/support": "guide-worker-support",
+};
 
 const workerNavItems: { href: string; label: string; Icon: LucideIcon }[] = [
   { href: "/worker", label: "ホーム", Icon: Home },
@@ -48,12 +68,14 @@ function AdminMobileNavRow({
   industry,
   role,
   labelByHref,
+  guideTargetByHref,
 }: {
   items: readonly TemplateNavItem[];
   pathname: string;
   industry: EnabledIndustryKey;
   role: DemoRole;
   labelByHref: Record<string, string>;
+  guideTargetByHref?: Record<string, string>;
 }) {
   return (
     <div className="mx-auto flex max-w-7xl items-stretch overflow-x-auto overscroll-x-contain">
@@ -67,6 +89,7 @@ function AdminMobileNavRow({
           <Link
             key={href}
             href={withDemoQuery(href, industry, role)}
+            data-guide-target={guideTargetByHref?.[href]}
             className={cn(
               "flex min-w-[4.25rem] shrink-0 flex-col items-center gap-0.5 px-1 py-2 text-[10px] font-medium leading-tight sm:min-w-[4.5rem]",
               active ? "text-primary" : "text-muted"
@@ -87,10 +110,12 @@ function WorkerMobileNavRow({
   pathname,
   industry,
   role,
+  guideTargetByHref,
 }: {
   pathname: string;
   industry: EnabledIndustryKey;
   role: DemoRole;
+  guideTargetByHref?: Record<string, string>;
 }) {
   return (
     <div className="mx-auto flex max-w-lg items-stretch justify-around">
@@ -104,6 +129,7 @@ function WorkerMobileNavRow({
           <Link
             key={href}
             href={withDemoQuery(href, industry, role)}
+            data-guide-target={guideTargetByHref?.[href]}
             className={cn(
               "flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-medium",
               active ? "text-primary" : "text-muted"
@@ -120,6 +146,7 @@ function WorkerMobileNavRow({
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const unread = unreadDemoMessageCount();
   const { industry } = useIndustry();
   const { role, setRole } = useDemoRole();
@@ -200,6 +227,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         ]
       : adminBottomNavItemsBase;
 
+  const bypassShell =
+    pathname.startsWith("/story") || searchParams.get("storyEmbed") === "1";
+
+  if (bypassShell) {
+    return <>{children}</>;
+  }
+
   return (
     <div className="flex min-h-full flex-col">
       <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
@@ -243,10 +277,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <Link
               href={withDemoQuery("/guide", industry, role)}
               className="inline-flex items-center gap-1 rounded-md border border-primary/30 bg-primary/[0.06] px-2.5 py-1.5 text-xs font-semibold text-primary hover:bg-primary/[0.1] md:text-sm"
-              aria-label="はじめてガイド"
+              aria-label="営業デモ"
             >
               <CircleHelp className="size-4" />
-              ガイド
+              営業デモ
             </Link>
           </div>
 
@@ -262,7 +296,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     <Link
                       key={href}
                       href={withDemoQuery(href, industry, role)}
-                      data-guide-target={href === "/candidates" ? "top-nav-candidates" : undefined}
+                      data-guide-target={WORKER_NAV_GUIDE_TARGETS[href]}
                       className={cn(
                         "flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors",
                         active
@@ -285,6 +319,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     <Link
                       key={href}
                       href={withDemoQuery(href, industry, role)}
+                      data-guide-target={ADMIN_NAV_GUIDE_TARGETS[href]}
                       className={cn(
                         "flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors",
                         active
@@ -305,7 +340,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 industry,
                 role
               )}
-              data-guide-target="messages-link"
+              data-guide-target="guide-messages"
               className="relative flex items-center gap-1 rounded-lg p-2 text-muted hover:bg-surface hover:text-foreground shrink-0"
               aria-label="メッセージ"
             >
@@ -330,6 +365,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               pathname={pathname}
               industry={industry}
               role={role}
+              guideTargetByHref={WORKER_NAV_GUIDE_TARGETS}
             />
           </nav>
         ) : (
@@ -343,6 +379,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               industry={industry}
               role={role}
               labelByHref={bottomNavLabelByHref}
+              guideTargetByHref={ADMIN_NAV_GUIDE_TARGETS}
             />
           </nav>
         )}
@@ -361,6 +398,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             pathname={pathname}
             industry={industry}
             role={role}
+            guideTargetByHref={WORKER_NAV_GUIDE_TARGETS}
           />
         ) : (
           <AdminMobileNavRow
@@ -369,13 +407,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             industry={industry}
             role={role}
             labelByHref={bottomNavLabelByHref}
+            guideTargetByHref={ADMIN_NAV_GUIDE_TARGETS}
           />
         )}
       </nav>
 
       {shell.showDemoFab ? <DemoFab /> : null}
-
-      <GuideShellOverlay />
 
       <IndustrySecretModal
         key={secretModalKey}

@@ -23,12 +23,29 @@ type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
+function guideQueryExtra(
+  resolved: Record<string, string | string[] | undefined> | undefined
+): { guide: string } | undefined {
+  if (!resolved) return undefined;
+  const raw = resolved.guide;
+  const v = Array.isArray(raw) ? raw[0] : raw;
+  if (v === "1") return { guide: "1" };
+  return undefined;
+}
+
 export default async function DashboardPage({ searchParams }: PageProps) {
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const industry = getIndustryFromSearchParams(resolvedSearchParams);
   const role = getRoleFromSearchParams(resolvedSearchParams);
   if (role === "worker") {
-    redirect(withDemoQuery("/worker", industry, role));
+    redirect(
+      withDemoQuery(
+        "/worker",
+        industry,
+        role,
+        guideQueryExtra(resolvedSearchParams)
+      )
+    );
   }
   const profile = getIndustryProfile(industry);
   const isFactoryStaffing = industry === "staffing" && role === "client";
@@ -75,6 +92,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
             ))}
             <Link
               href={withDemoQuery("/feature-demos", industry, role)}
+              data-guide-target="guide-tech-dx-demo"
               className="rounded-full border border-primary/30 bg-primary/[0.06] px-3 py-1.5 text-xs font-medium text-primary whitespace-nowrap"
             >
               技術・DXデモ
@@ -83,7 +101,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
               href={withDemoQuery("/guide", industry, role)}
               className="rounded-full border border-primary/40 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary whitespace-nowrap"
             >
-              はじめてガイド
+              営業デモ
             </Link>
           </div>
         </div>
@@ -92,6 +110,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
 
         <Link
           href={withDemoQuery("/feature-demos", industry, role)}
+          data-guide-target="guide-tech-dx-demo"
           className="group block rounded-xl border-2 border-primary/35 bg-gradient-to-br from-primary/[0.09] to-background p-4 shadow-sm transition-all hover:border-primary/55 hover:shadow-md"
         >
           <div className="flex items-start gap-3">
@@ -151,9 +170,9 @@ export default async function DashboardPage({ searchParams }: PageProps) {
         >
           <div className="flex items-center justify-between gap-4">
             <div className="min-w-0">
-              <p className="text-base font-bold text-foreground">はじめてガイド</p>
+              <p className="text-base font-bold text-foreground">営業デモ</p>
               <p className="mt-1 text-sm leading-relaxed text-muted">
-                90秒ほどで基本操作を案内します。画面の切り替えは自動でも手動でも進められます。
+                120秒で、業務が整った先にある未来を伝える専用ストーリーを再生します。
               </p>
             </div>
             <span className="inline-flex shrink-0 items-center gap-1 rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground">
@@ -169,6 +188,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
         >
           <Link
             href={withDemoQuery("/feature-demos", industry, role)}
+            data-guide-target="guide-tech-dx-demo"
             className="group block rounded-xl border-2 border-primary/35 bg-gradient-to-br from-primary/[0.09] via-background to-primary/[0.04] p-5 shadow-sm transition-all hover:border-primary/55 hover:shadow-md md:p-6"
           >
             <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between md:gap-8">
